@@ -45,5 +45,5 @@ jobs:
         env:
           CENTRAL_PUBLISHER_USERNAME: ${{ secrets.CENTRAL_PUBLISHER_USERNAME }}
           CENTRAL_PUBLISHER_PASSWORD: ${{ secrets.CENTRAL_PUBLISHER_PASSWORD }}
-#          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
-        run: ./gradlew clean publishJsPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository --stacktrace
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+        run: ./gradlew clean publishMavenJavaPublicationToSonatypeRepositor closeAndReleaseSonatypeStagingRepository --stacktrace
