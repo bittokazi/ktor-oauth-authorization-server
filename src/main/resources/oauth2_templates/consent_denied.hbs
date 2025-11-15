@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Access Denied</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9fafb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .error-container {
+            background-color: #fff;
+            padding: 2rem 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            width: 380px;
+            text-align: center;
+        }
+        h1 {
+            color: #d32f2f;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        p {
+            color: #555;
+            margin-bottom: 1.5rem;
+        }
+        .details {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 2rem;
+        }
+        a.button {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+        a.button:hover {
+            background-color: #0069d9;
+        }
+    </style>
+</head>
+<body>
+<div class="error-container">
+    <h1>Access Denied</h1>
+    <p>You denied the request for access.</p>
+    {{#error_description}}
+        <div class="details">{{error_description}}</div>
+    {{/error_description}}
+    <a href="/" class="button">Return Home</a>
+</div>
+</body>
+</html>

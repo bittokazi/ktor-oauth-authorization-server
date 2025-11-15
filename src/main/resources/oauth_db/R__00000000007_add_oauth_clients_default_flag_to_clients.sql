@@ -1,0 +1,5 @@
+ALTER TABLE oauth_clients
+ADD COLUMN is_default BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE oauth_clients
+ADD COLUMN consent_required BOOLEAN NOT NULL DEFAULT FALSE;

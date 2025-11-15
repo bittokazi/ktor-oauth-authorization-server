@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Consent</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9fafb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .consent-container {
+            background-color: #ffffff;
+            padding: 2rem 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            width: 380px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        p {
+            text-align: center;
+            color: #555;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 1.5rem;
+        }
+        li {
+            background-color: #f3f4f6;
+            margin: 0.4rem 0;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            color: #333;
+            font-size: 0.9rem;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+        button {
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            width: 48%;
+        }
+        .approve {
+            background-color: #007BFF;
+            color: #fff;
+        }
+        .approve:hover {
+            background-color: #0069d9;
+        }
+        .deny {
+            background-color: #e5e7eb;
+            color: #333;
+        }
+        .deny:hover {
+            background-color: #d1d5db;
+        }
+    </style>
+</head>
+<body>
+<div class="consent-container">
+    <h2>Authorize {{clientName}}</h2>
+    <p>The application <strong>{{clientName}}</strong> is requesting access to your account with the following permissions:</p>
+
+    <ul>
+        {{#scopes}}
+            <li>{{.}}</li>
+        {{/scopes}}
+    </ul>
+
+    <form method="POST" action="/oauth/consent">
+        <input type="hidden" name="client_id" value="{{clientId}}">
+        <div class="buttons">
+            <button class="approve" name="action" value="approve" type="submit">Approve</button>
+            <button class="deny" name="action" value="deny" type="submit">Deny</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
