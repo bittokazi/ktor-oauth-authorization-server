@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.bittokazi.ktor.auth"
-version = "0.0.1"
+version = "0.0.1.RC1"
 
 application {
     mainClass = "io.ktor.server.netty.EngineMain"
