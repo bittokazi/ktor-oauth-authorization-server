@@ -1,0 +1,49 @@
+name: 'Release: Maven Central'
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: "Build and Publish to Maven Central"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+
+      - name: Get project version
+        id: version
+        run: |
+          VERSION=$(grep 'version =' build.gradle.kts | head -1 | awk -F'"' '{print $2}')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Check if version exists in Maven Central
+        id: check_version
+        run: |
+          GROUP_ID=com.bittokazi.sonartype
+          ARTIFACT_ID=ktor-oauth-authorization-server
+          URL="https://repo1.maven.org/maven2/${GROUP_ID//./\/}/$ARTIFACT_ID/$VERSION/"
+          echo "Checking $URL"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+          if [ "$STATUS" = "200" ]; then
+            echo "Version $VERSION already exists"
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish to Maven Central
+        if: steps.check_version.outputs.exists != 'true'
+        env:
+          CENTRAL_PUBLISHER_USERNAME: ${{ secrets.CENTRAL_PUBLISHER_USERNAME }}
+          CENTRAL_PUBLISHER_PASSWORD: ${{ secrets.CENTRAL_PUBLISHER_PASSWORD }}
+#          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+        run: ./gradlew clean publishJsPublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository --stacktrace
