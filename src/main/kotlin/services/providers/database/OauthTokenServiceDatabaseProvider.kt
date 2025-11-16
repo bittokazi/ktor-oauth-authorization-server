@@ -15,8 +15,8 @@ import java.util.*
 object OAuthAccessTokens : Table("oauth_access_tokens") {
     val id = uuid("id")
     val token = text("token").uniqueIndex()
-    val clientId = uuid("client_id") references OAuthClients.id
-    val userId = (varchar("user_id", 255) references OAuthUsers.id).nullable()
+    val clientId = uuid("client_id")
+    val userId = varchar("user_id", 255).nullable()
     val scopes = text("scopes")
     val issuedAt = timestamp("issued_at")
     val expiresAt = timestamp("expires_at")
@@ -26,8 +26,8 @@ object OAuthAccessTokens : Table("oauth_access_tokens") {
 object OAuthRefreshTokens : Table("oauth_refresh_tokens") {
     val id = uuid("id")
     val token = text("token").uniqueIndex()
-    val clientId = uuid("client_id") references OAuthClients.id
-    val userId = (varchar("user_id", 255) references OAuthUsers.id).nullable()
+    val clientId = uuid("client_id")
+    val userId = varchar("user_id", 255).nullable()
     val scopes = text("scopes")
     val expiresAt = timestamp("expires_at")
     val revoked = bool("revoked").default(false)

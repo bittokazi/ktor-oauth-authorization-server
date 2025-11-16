@@ -1,7 +1,7 @@
 CREATE TABLE oauth_authorization_codes (
     code VARCHAR(255) PRIMARY KEY,
-    client_id UUID NOT NULL REFERENCES oauth_clients (id) ON DELETE CASCADE,
-    user_id VARCHAR(255) NOT NULL REFERENCES oauth_users (id) ON DELETE CASCADE,
+    client_id UUID NOT NULL,
+    user_id VARCHAR(255),
     redirect_uri TEXT NOT NULL,
     scopes TEXT NOT NULL,
     code_challenge VARCHAR(255),
