@@ -25,8 +25,8 @@ class OauthUserServiceDatabaseProvider(
     val oauthDatabaseConfiguration: OauthDatabaseConfiguration
 ): OauthUserService {
 
-    fun createUser(username: String, password: String, email: String?, firstName: String?, lastName: String?): OAuthUserDTO =
-        oauthDatabaseConfiguration.dbQuery {
+    fun createUser(username: String, password: String, email: String?, firstName: String?, lastName: String?, call: ApplicationCall): OAuthUserDTO =
+        oauthDatabaseConfiguration.dbQuery(call) {
             val id = UUID.randomUUID().toString()
             OAuthUsers.insert {
                 it[OAuthUsers.id] = id
@@ -39,7 +39,7 @@ class OauthUserServiceDatabaseProvider(
             OAuthUserDTO(id, username, email, firstName, lastName, true)
         }
 
-    override fun findByUsername(username: String, call: ApplicationCall): OAuthUserDTO? = oauthDatabaseConfiguration.dbQuery {
+    override fun findByUsername(username: String, call: ApplicationCall): OAuthUserDTO? = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthUsers.selectAll().where { OAuthUsers.username eq username }
             .map {
                 OAuthUserDTO(
@@ -54,7 +54,7 @@ class OauthUserServiceDatabaseProvider(
             }.singleOrNull()
     }
 
-    override fun findById(id: String, call: ApplicationCall): OAuthUserDTO? = oauthDatabaseConfiguration.dbQuery {
+    override fun findById(id: String, call: ApplicationCall): OAuthUserDTO? = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthUsers.selectAll().where { OAuthUsers.id eq id }
             .map {
                 OAuthUserDTO(
@@ -69,8 +69,8 @@ class OauthUserServiceDatabaseProvider(
             }.singleOrNull()
     }
 
-    fun updateUser(userId: String, username: String, email: String?, firstName: String?, lastName: String?): Boolean =
-        oauthDatabaseConfiguration.dbQuery {
+    fun updateUser(userId: String, username: String, email: String?, firstName: String?, lastName: String?, call: ApplicationCall): Boolean =
+        oauthDatabaseConfiguration.dbQuery(call) {
             OAuthUsers.update({ OAuthUsers.id eq userId }) {
                 it[OAuthUsers.username] = username
                 it[OAuthUsers.email] = email
@@ -79,15 +79,15 @@ class OauthUserServiceDatabaseProvider(
             } > 0
         }
 
-    fun updateUserPassword(userId: String, password: String): Boolean =
-        oauthDatabaseConfiguration.dbQuery {
+    fun updateUserPassword(userId: String, password: String, call: ApplicationCall): Boolean =
+        oauthDatabaseConfiguration.dbQuery(call) {
             OAuthUsers.update({ OAuthUsers.id eq userId }) {
                 it[OAuthUsers.passwordHash] = BCrypt.withDefaults().hashToString(12, password.toCharArray())
             } > 0
         }
 
-    fun <T> runQuery(query: (OAuthUsers) -> T): T {
-        return oauthDatabaseConfiguration.dbQuery {
+    fun <T> runQuery(call: ApplicationCall, query: (OAuthUsers) -> T): T {
+        return oauthDatabaseConfiguration.dbQuery(call) {
             query(OAuthUsers)
         }
     }

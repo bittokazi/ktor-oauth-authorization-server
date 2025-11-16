@@ -36,7 +36,7 @@ class OauthAuthorizationCodeServiceDatabaseProvider(
         challenge: String?,
         challengeMethod: String?,
         call: ApplicationCall
-    ): Boolean = oauthDatabaseConfiguration.dbQuery {
+    ): Boolean = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthAuthorizationCodes.insert {
             it[OAuthAuthorizationCodes.code] = code
             it[OAuthAuthorizationCodes.clientId] = clientId
@@ -49,7 +49,7 @@ class OauthAuthorizationCodeServiceDatabaseProvider(
         }.insertedCount > 0
     }
 
-    override fun findByCode(code: String, call: ApplicationCall): AuthorizationCodeDTO? = oauthDatabaseConfiguration.dbQuery {
+    override fun findByCode(code: String, call: ApplicationCall): AuthorizationCodeDTO? = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthAuthorizationCodes
             .selectAll()
             .where { OAuthAuthorizationCodes.code eq code }
@@ -68,14 +68,14 @@ class OauthAuthorizationCodeServiceDatabaseProvider(
             }.singleOrNull()
     }
 
-    override fun consumeCode(code: String, call: ApplicationCall): Boolean = oauthDatabaseConfiguration.dbQuery {
+    override fun consumeCode(code: String, call: ApplicationCall): Boolean = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthAuthorizationCodes.update({ OAuthAuthorizationCodes.code eq code }) {
             it[consumed] = true
         } > 0
     }
 
     override fun logoutAction(userId: String, call: ApplicationCall) {
-        oauthDatabaseConfiguration.dbQuery {
+        oauthDatabaseConfiguration.dbQuery(call) {
             OAuthAuthorizationCodes.deleteWhere { OAuthAuthorizationCodes.userId eq userId }
         }
     }

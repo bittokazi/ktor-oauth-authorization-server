@@ -50,7 +50,7 @@ fun Application.consentRoute() {
                 ?: return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid client_id"))
 
             if (client.consentRequired) {
-                when (val consents = oauthConsentService.getConsent(userId = session.userId, clientId = client.id)) {
+                when (val consents = oauthConsentService.getConsent(userId = session.userId, clientId = client.id, call)) {
                     null -> {
                         call.respond(MustacheContent("consent.hbs", mapOf(
                             "clientName" to client.clientName,
@@ -107,7 +107,8 @@ fun Application.consentRoute() {
                     oauthConsentService.grantConsent(
                         userId = session.userId,
                         clientId = client.id,
-                        scopes = client.scopes
+                        scopes = client.scopes,
+                        call
                     )
 
                     // Redirect back to original URL (authorization endpoint)
