@@ -2,6 +2,7 @@ package com.bittokazi.ktor.auth
 
 import com.auth0.jwk.JwkProviderBuilder
 import com.bittokazi.ktor.auth.services.SessionCustomizer
+import com.bittokazi.ktor.auth.services.SessionExtender
 import com.bittokazi.ktor.auth.utils.getBaseUrl
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
@@ -22,6 +23,7 @@ data class OauthUserSession(val userId: String, val username: String, val expire
 fun Application.configureSecurity() {
 
     val sessionCustomizer: SessionCustomizer by dependencies
+    val sessionExtender: SessionExtender? by dependencies
 
     var secretEncryptKey = hex(Random.nextBytes(16).joinToString("") { "%02x".format(it) }) // 16 bytes = AES128
     var secretSignKey = hex(Random.nextBytes(16).joinToString("") { "%02x".format(it) })   // 16 bytes
@@ -42,6 +44,8 @@ fun Application.configureSecurity() {
             cookie.httpOnly = true
             cookie.secure = false // set true in production (HTTPS only)
         }
+
+        sessionExtender?.extent(this)
     }
 }
 

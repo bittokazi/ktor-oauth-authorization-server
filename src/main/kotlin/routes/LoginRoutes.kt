@@ -83,6 +83,7 @@ fun Application.loginRoutes() {
                 call.sessions.set(userSession)
 
                 // Retrieve saved original request URL
+                oauthLoginOptionService.onSuccessfulLogin(userSession, call)
                 if (oauthLoginOptionService.isAfterLoginCheckCompleted(userSession, call)) {
                     oauthLoginOptionService.completeLogin(call)
                 } else {
