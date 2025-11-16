@@ -9,8 +9,8 @@ import java.util.*
 
 object OAuthConsents : Table("oauth_consents") {
     val id = uuid("id")
-    val userId = varchar("user_id", 255) references OAuthUsers.id
-    val clientId = uuid("client_id") references OAuthClients.id
+    val userId = varchar("user_id", 255)
+    val clientId = uuid("client_id")
     val scopes = text("scopes")
 }
 

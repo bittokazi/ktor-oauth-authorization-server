@@ -12,8 +12,8 @@ import java.util.*
 
 object OAuthAuthorizationCodes : Table("oauth_authorization_codes") {
     val code = varchar("code", 255)
-    val clientId = uuid("client_id") references OAuthClients.id
-    val userId = varchar("user_id", 255) references OAuthUsers.id
+    val clientId = uuid("client_id")
+    val userId = varchar("user_id", 255)
     val redirectUri = text("redirect_uri")
     val scopes = text("scopes")
     val codeChallenge = varchar("code_challenge", 255).nullable()

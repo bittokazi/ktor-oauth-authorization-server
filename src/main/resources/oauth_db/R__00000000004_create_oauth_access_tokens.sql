@@ -1,8 +1,8 @@
 CREATE TABLE oauth_access_tokens (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     token TEXT NOT NULL UNIQUE,
-    client_id UUID NOT NULL REFERENCES oauth_clients (id) ON DELETE CASCADE,
-    user_id VARCHAR(255) REFERENCES oauth_users (id) ON DELETE CASCADE,
+    client_id UUID NOT NULL,
+    user_id VARCHAR(255),
     scopes TEXT NOT NULL,
     expires_at TIMESTAMPTZ NOT NULL,
     revoked BOOLEAN DEFAULT FALSE,
