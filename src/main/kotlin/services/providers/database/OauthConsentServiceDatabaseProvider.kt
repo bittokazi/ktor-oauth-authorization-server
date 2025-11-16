@@ -2,6 +2,7 @@ package com.bittokazi.ktor.auth.services.providers.database
 
 import com.bittokazi.ktor.auth.database.OauthDatabaseConfiguration
 import com.bittokazi.ktor.auth.services.providers.OauthConsentService
+import io.ktor.server.application.ApplicationCall
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.util.*
@@ -17,7 +18,7 @@ class OauthConsentServiceDatabaseProvider(
     val oauthDatabaseConfiguration: OauthDatabaseConfiguration
 ): OauthConsentService {
 
-    override fun grantConsent(userId: String, clientId: UUID, scopes: List<String>) = oauthDatabaseConfiguration.dbQuery {
+    override fun grantConsent(userId: String, clientId: UUID, scopes: List<String>, call: ApplicationCall) = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthConsents.deleteWhere { (OAuthConsents.userId eq userId).and(OAuthConsents.clientId eq clientId) }
         OAuthConsents.insert {
             it[OAuthConsents.id] = UUID.randomUUID()
@@ -28,7 +29,7 @@ class OauthConsentServiceDatabaseProvider(
         return@dbQuery true
     }
 
-    override fun getConsent(userId: String, clientId: UUID): List<String>? = oauthDatabaseConfiguration.dbQuery {
+    override fun getConsent(userId: String, clientId: UUID, call: ApplicationCall): List<String>? = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthConsents.selectAll().where { (OAuthConsents.userId eq userId) and (OAuthConsents.clientId eq clientId) }
             .map { it[OAuthConsents.scopes].split(",").map(String::trim) }
             .singleOrNull()

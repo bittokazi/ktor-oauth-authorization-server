@@ -39,8 +39,9 @@ class OauthClientServiceDatabaseProvider(
         grantTypes: List<String>,
         accessTokenValidity: Long = 300,
         refreshTokenValidity: Long = 7200,
-        consentRequired: Boolean = true
-    ): OAuthClientDTO = oauthDatabaseConfiguration.dbQuery {
+        consentRequired: Boolean = true,
+        call: ApplicationCall
+    ): OAuthClientDTO = oauthDatabaseConfiguration.dbQuery(call) {
         val id = UUID.randomUUID()
         OAuthClients.insert {
             it[OAuthClients.id] = id
@@ -60,7 +61,7 @@ class OauthClientServiceDatabaseProvider(
         OAuthClientDTO(id, clientId, name, type, redirectUris, scopes, grantTypes)
     }
 
-    override fun findByClientId(clientId: String, call: ApplicationCall): OAuthClientDTO? = oauthDatabaseConfiguration.dbQuery {
+    override fun findByClientId(clientId: String, call: ApplicationCall): OAuthClientDTO? = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthClients.selectAll().where { OAuthClients.clientId eq clientId }
             .map {
                 OAuthClientDTO(
@@ -80,7 +81,7 @@ class OauthClientServiceDatabaseProvider(
             }.singleOrNull()
     }
 
-    override fun findDefaultClient(call: ApplicationCall): OAuthClientDTO?  = oauthDatabaseConfiguration.dbQuery {
+    override fun findDefaultClient(call: ApplicationCall): OAuthClientDTO?  = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthClients.selectAll().where { OAuthClients.isDefault eq true }
             .map {
                 OAuthClientDTO(
@@ -109,8 +110,9 @@ class OauthClientServiceDatabaseProvider(
         grantTypes: List<String>,
         accessTokenValidity: Long = 300,
         refreshTokenValidity: Long = 7200,
-        consentRequired: Boolean = true
-    ): Boolean = oauthDatabaseConfiguration.dbQuery {
+        consentRequired: Boolean = true,
+        call: ApplicationCall
+    ): Boolean = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthClients.update({ OAuthClients.clientId eq clientId }) {
             it[OAuthClients.clientName] = name
             it[OAuthClients.clientType] = type
@@ -127,14 +129,15 @@ class OauthClientServiceDatabaseProvider(
     fun updateClientSecret(
         clientId: String,
         clientSecret: String?,
-    ): Boolean = oauthDatabaseConfiguration.dbQuery {
+        call: ApplicationCall
+    ): Boolean = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthClients.update({ OAuthClients.clientId eq clientId }) {
             it[OAuthClients.clientSecret] = clientSecret
         } > 0
     }
 
-    fun <T> runQuery(query: (OAuthClients) -> T): T {
-        return oauthDatabaseConfiguration.dbQuery {
+    fun <T> runQuery(call: ApplicationCall, query: (OAuthClients) -> T): T {
+        return oauthDatabaseConfiguration.dbQuery(call) {
             query(OAuthClients)
         }
     }

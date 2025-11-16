@@ -46,7 +46,7 @@ class OauthTokenServiceDatabaseProvider(
         expiresAt: Instant,
         call: ApplicationCall
     ): Boolean =
-        oauthDatabaseConfiguration.dbQuery {
+        oauthDatabaseConfiguration.dbQuery(call) {
             OAuthAccessTokens.insert {
                 it[OAuthAccessTokens.id] = UUID.randomUUID()
                 it[OAuthAccessTokens.token] = token
@@ -58,7 +58,7 @@ class OauthTokenServiceDatabaseProvider(
             }.insertedCount > 0
         }
 
-    override fun revokeAccessToken(token: String, call: ApplicationCall): Boolean = oauthDatabaseConfiguration.dbQuery {
+    override fun revokeAccessToken(token: String, call: ApplicationCall): Boolean = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthAccessTokens.update({ OAuthAccessTokens.token eq token }) {
             it[revoked] = true
         } > 0
@@ -71,7 +71,7 @@ class OauthTokenServiceDatabaseProvider(
         scopes: List<String>,
         expiresAt: Instant,
         call: ApplicationCall
-    ): UUID = oauthDatabaseConfiguration.dbQuery {
+    ): UUID = oauthDatabaseConfiguration.dbQuery(call) {
         val id = UUID.randomUUID()
         OAuthRefreshTokens.insert {
             it[OAuthRefreshTokens.id] = id
@@ -85,7 +85,7 @@ class OauthTokenServiceDatabaseProvider(
         id
     }
 
-    override fun findByAccessToken(token: String, call: ApplicationCall): AccessTokenDTO? = oauthDatabaseConfiguration.dbQuery {
+    override fun findByAccessToken(token: String, call: ApplicationCall): AccessTokenDTO? = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthAccessTokens
             .selectAll()
             .where { OAuthAccessTokens.token eq token }
@@ -102,7 +102,7 @@ class OauthTokenServiceDatabaseProvider(
             }.singleOrNull()
     }
 
-    override fun findByRefreshToken(token: String, call: ApplicationCall): RefreshTokenDTO? = oauthDatabaseConfiguration.dbQuery {
+    override fun findByRefreshToken(token: String, call: ApplicationCall): RefreshTokenDTO? = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthRefreshTokens
             .selectAll()
             .where { OAuthRefreshTokens.token eq token }
@@ -120,7 +120,7 @@ class OauthTokenServiceDatabaseProvider(
             }.singleOrNull()
     }
 
-    override fun revokeRefreshToken(token: String, call: ApplicationCall): Boolean = oauthDatabaseConfiguration.dbQuery {
+    override fun revokeRefreshToken(token: String, call: ApplicationCall): Boolean = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthRefreshTokens.update({ OAuthRefreshTokens.token eq token }) {
             it[revoked] = true
         } > 0
@@ -131,7 +131,7 @@ class OauthTokenServiceDatabaseProvider(
         newToken: String,
         expiresAt: Instant,
         call: ApplicationCall
-    ): Boolean = oauthDatabaseConfiguration.dbQuery {
+    ): Boolean = oauthDatabaseConfiguration.dbQuery(call) {
         val old = OAuthRefreshTokens.selectAll().where { OAuthRefreshTokens.token eq oldToken }.singleOrNull()
             ?: return@dbQuery false
 
@@ -155,7 +155,7 @@ class OauthTokenServiceDatabaseProvider(
     }
 
     override fun logoutAction(userId: String, call: ApplicationCall) {
-        oauthDatabaseConfiguration.dbQuery {
+        oauthDatabaseConfiguration.dbQuery(call) {
             OAuthAccessTokens.deleteWhere { OAuthAccessTokens.userId eq userId }
             OAuthRefreshTokens.deleteWhere { OAuthRefreshTokens.userId eq userId }
         }

@@ -85,7 +85,7 @@ fun Application.authorizeRoute() {
             }
 
             if (client.consentRequired) {
-                when (val consents = oauthConsentService.getConsent(userId = session.userId, clientId = client.id)) {
+                when (val consents = oauthConsentService.getConsent(userId = session.userId, clientId = client.id, call)) {
                    null -> {
                        val authRequestUrl = call.request.uri
                        call.sessions.set("OAUTH_ORIGINAL_URL", authRequestUrl)
