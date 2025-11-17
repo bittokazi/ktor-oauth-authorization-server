@@ -84,18 +84,48 @@ This library provides core features you'd expect from an OAuth / OIDC server: cl
 Add in `build.gradle.kts`:
 
 ```kotlin
+// =========================
+// 🚀 Ktor Server & Client
+// =========================
 implementation("io.ktor:ktor-server-core:<ktor_version>")
 implementation("io.ktor:ktor-server-netty:<ktor_version>")
-implementation("io.ktor:ktor-server-sessions:<ktor_version>")
+implementation("io.ktor:ktor-server-content-negotiation:<ktor_version>")
+implementation("io.ktor:ktor-serialization-kotlinx-json:<ktor_version>")
+implementation("io.ktor:ktor-serialization-gson:<ktor_version>")
+implementation("io.ktor:ktor-server-auth:<ktor_version>")
+implementation("io.ktor:ktor-server-auth-jwt:<ktor_version>")
 implementation("io.ktor:ktor-server-mustache:<ktor_version>")
+implementation("io.ktor:ktor-server-config-yaml:<ktor_version>")
+implementation("io.ktor:ktor-server-di:<ktor_version>")
+
+// Ktor Client
+implementation("io.ktor:ktor-client-core:<ktor_version>")
+implementation("io.ktor:ktor-client-apache:<ktor_version>")
+
+// Logging
+implementation("ch.qos.logback:logback-classic:<logback_version>")
+
+// =========================
+// 🗄️ Database & Migrations
+// =========================
 implementation("org.jetbrains.exposed:exposed-core:<exposed_version>")
-implementation("org.jetbrains.exposed:exposed-dao:<exposed_version>")
 implementation("org.jetbrains.exposed:exposed-jdbc:<exposed_version>")
-implementation("org.jetbrains.exposed:exposed-java-time:<exposed_version>")
-implementation("org.postgresql:postgresql:<pg_version>")
-implementation("com.zaxxer:HikariCP:<hikari_version>")
-implementation("org.flywaydb:flyway-core:<flyway_version>")
-implementation("com.nimbusds:nimbus-jose-jwt:9.32")
+implementation("org.jetbrains.exposed:exposed-java-time:0.61.0")
+
+implementation("org.postgresql:postgresql:<postgres_version>")
+implementation("com.zaxxer:HikariCP:4.0.3")
+implementation("org.flywaydb:flyway-core:9.22.3")
+
+// =========================
+// 🔐 Security & Utilities
+// =========================
+implementation("at.favre.lib:bcrypt:0.10.2")
+implementation("com.nimbusds:nimbus-jose-jwt:10.6")
+
+// =========================
+// ⭐ OAuth / OpenID Server Library
+// =========================
+implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.0.4")
 ```
 
 Replace `<...>` with concrete versions used in your project.
@@ -246,16 +276,16 @@ Example `consent.hbs` (already included in templates `oauth2_templates` under `r
 <html>
 <head> ... styles ... </head>
 <body>
-  <h2>Authorize {{clientName}}</h2>
-  <ul>
+<h2>Authorize {{clientName}}</h2>
+<ul>
     {{#scopes}}<li>{{.}}</li>{{/scopes}}
-  </ul>
-  <form method="POST" action="/oauth/consent">
+</ul>
+<form method="POST" action="/oauth/consent">
     <input type="hidden" name="client_id" value="{{clientId}}">
     <input type="hidden" name="redirect" value="{{redirect}}">
     <button name="action" value="approve">Approve</button>
     <button name="action" value="deny">Deny</button>
-  </form>
+</form>
 </body>
 </html>
 ```
@@ -298,7 +328,7 @@ Also included `consent_denied.hbs` seen in the repo.
 If you want to use yours just create a folder `oauth2_templates` under `resouces`
 and create files `login.hbs`, `consent.hbs`, `consent_denied.hbs` as needed.
 
-Reference here: https://github.com/bittokazi/ktor-oauth-authorization-server/tree/main/src/main/resources/oauth2_templates  
+Reference here: https://github.com/bittokazi/ktor-oauth-authorization-server/tree/main/src/main/resources/oauth2_templates
 
 ---
 
