@@ -35,7 +35,7 @@ fun Application.loginRoutes() {
             get("/login") {
                 val session = call.sessions.get<OauthUserSession>()
                 if (session == null) {
-                    call.respond(MustacheContent("login.hbs", mapOf<String, Any>()))
+                    call.respond(MustacheContent("oauth_templates/login.hbs", mapOf<String, Any>()))
                     return@get
                 }
 
@@ -66,7 +66,7 @@ fun Application.loginRoutes() {
 
                 if (user == null || !BCrypt.verifyer().verify(password.toCharArray(), user.passwordHash).verified) {
                     // Invalid login
-                    call.respond(MustacheContent("login.hbs", mapOf<String, Any>(
+                    call.respond(MustacheContent("oauth_templates/login.hbs", mapOf<String, Any>(
                         "error" to "invalidLogin",
                         "errorMessage" to "Login credentials do not match"
                     )))
