@@ -238,7 +238,10 @@ jwk:
 
 ## Login and Consent UI templates (Mustache)
 
-Example `consent.hbs` (already included in templates `oauth2_templates` under `resouces`):
+Ktor Mustache plugin is installed by the library automatically.
+All mustache template much remain under `templates` folder in `resources`
+
+Example `consent.hbs` (already included in templates `templates/oauth_templates` under `resources`):
 
 ```html
 <!-- consent.hbs -->
@@ -260,7 +263,7 @@ Example `consent.hbs` (already included in templates `oauth2_templates` under `r
 </html>
 ```
 
-Example `login.hbs` (already included in templates `oauth2_templates` under `resouces`):
+Example `login.hbs` (already included in templates `oauth_templates/templates` under `resources`):
 
 ```html
 <!-- login.hbs -->
@@ -295,7 +298,7 @@ Example `login.hbs` (already included in templates `oauth2_templates` under `res
 
 Also included `consent_denied.hbs` seen in the repo.
 
-If you want to use yours just create a folder `oauth2_templates` under `resouces`
+If you want to use your custom template then just create a folder `templates/oauth_templates` under `resources`
 and create files `login.hbs`, `consent.hbs`, `consent_denied.hbs` as needed.
 
 Reference here: https://github.com/bittokazi/ktor-oauth-authorization-server/tree/main/src/main/resources/oauth2_templates  
