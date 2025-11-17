@@ -52,7 +52,7 @@ fun Application.consentRoute() {
             if (client.consentRequired) {
                 when (val consents = oauthConsentService.getConsent(userId = session.userId, clientId = client.id, call)) {
                     null -> {
-                        call.respond(MustacheContent("consent.hbs", mapOf(
+                        call.respond(MustacheContent("oauth_templates/consent.hbs", mapOf(
                             "clientName" to client.clientName,
                             "scopes" to client.scopes,
                             "clientId" to client.clientId
@@ -61,7 +61,7 @@ fun Application.consentRoute() {
                     }
                     else -> {
                         if (!consents.containsAll(client.scopes)) {
-                            call.respond(MustacheContent("consent.hbs", mapOf(
+                            call.respond(MustacheContent("oauth_templates/consent.hbs", mapOf(
                                 "clientName" to client.clientName,
                                 "scopes" to client.scopes,
                                 "clientId" to client.clientId
@@ -120,7 +120,7 @@ fun Application.consentRoute() {
                     call.respond(
                         HttpStatusCode.Forbidden,
                         MustacheContent(
-                            "consent_denied.hbs",
+                            "oauth_templates/consent_denied.hbs",
                             mapOf(
                                 "error" to "access_denied",
                                 "error_description" to "You have denied access to the application."

@@ -7,7 +7,7 @@ plugins {
 group = "com.bittokazi.example.ktor"
 version = "0.0.1"
 
-val testKtorOauthAuthLibrary: Boolean = true
+val testKtorOauthAuthLibrary: Boolean = false
 
 application {
     mainClass = "io.ktor.server.netty.EngineMain"
@@ -41,9 +41,9 @@ dependencies {
     implementation("com.nimbusds:nimbus-jose-jwt:10.6")
 
     if(testKtorOauthAuthLibrary) {
-        implementation(files("../../build/libs/ktor-oauth-authorization-server-1.0.4.jar"))
+        implementation(files("../../build/libs/ktor-oauth-authorization-server-1.0.5.jar"))
     } else {
-        implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.0.4")
+        implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.0.5")
     }
 
     implementation("io.ktor:ktor-client-core:3.3.2")
