@@ -3,26 +3,6 @@
 A **Kotlin + Ktor** implementation of a self-hosted OAuth 2.0 Authorization Server with OpenID Connect (OIDC) support.  
 This library provides core features you'd expect from an OAuth / OIDC server: clients, tokens, consent, JWT issuance.
 
----
-
-## 🚀 Features
-
-- OAuth 2.0 **Authorization Code** flow
-- OAuth 2.0 **Client Credentials** flow
-- **Refresh Token** issuance and rotation
-- OpenID Connect (OIDC) **ID Token** as signed JWT
-- JWT-signed **Access Tokens**
-- `/userinfo`, `/introspect`, `/revoke` endpoints
-- OIDC Discovery: `/.well-known/openid-configuration`
-- JWKS endpoint: `/.well-known/jwks.json`
-- Login page with customization options
-- Consent screen + persistent consent storage
-- Secure encrypted & signed Ktor cookie sessions
-- Client storage via PostgreSQL/Exposed or in-memory
-- RSA key loading from PEM or auto-generation
-- Custom JWT claim injection
-
----
 
 ## Table of contents
 
@@ -63,17 +43,22 @@ This library provides core features you'd expect from an OAuth / OIDC server: cl
 
 ---
 
-## Features
+## 🚀 Features
 
-- OAuth 2.0: `authorization_code` (with PKCE), `refresh_token`, `client_credentials`
-- OpenID Connect: `id_token` as a signed JWT; discovery (`/.well-known/openid-configuration`) and JWKS (`/.well-known/jwks.json`)
-- Both **access tokens** and **ID tokens** are signed JWTs (RS256)
-- Token rotation for refresh tokens
-- Consent pages (mustache templates) and persistent consent storage
-- Ktor routes for login, authorize, token, revoke, introspect, userinfo
-- Exposed + PostgreSQL schema with example migrations (Flyway shown)
-- In-memory service providers for easier testing
-- Flexible configuration and hooks for customizing claims
+- OAuth 2.0 **Authorization Code** flow
+- OAuth 2.0 **Client Credentials** flow
+- **Refresh Token** issuance and rotation
+- OpenID Connect (OIDC) **ID Token** as signed JWT
+- JWT-signed **Access Tokens**
+- `/userinfo`, `/introspect`, `/revoke` endpoints
+- OIDC Discovery: `/.well-known/openid-configuration`
+- JWKS endpoint: `/.well-known/jwks.json`
+- Login page with customization options
+- Consent screen + persistent consent storage
+- Secure encrypted & signed Ktor cookie sessions
+- Client storage via PostgreSQL/Exposed or in-memory
+- RSA key loading from PEM or auto-generation
+- Custom JWT claim injection
 
 ---
 
