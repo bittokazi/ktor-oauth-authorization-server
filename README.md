@@ -717,6 +717,6 @@ Please follow repository coding style and include migration/versioning updates f
 
 ## License
 
-Add your chosen license (MIT / Apache 2.0 / etc).
+Apache 2.0
 
 ---
