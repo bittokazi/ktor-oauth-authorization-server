@@ -128,14 +128,14 @@ class JwksProvider(
 object PemUtils {
 
     fun loadPrivateKey(filename: String?): RSAPrivateKey {
-        val keyBytes = parsePEM(File(filename!!).readText(), "PRIVATE KEY")
+        val keyBytes = parsePEM(loadTextFile(filename!!), "PRIVATE KEY")
         val keySpec = PKCS8EncodedKeySpec(keyBytes)
         val kf = KeyFactory.getInstance("RSA")
         return kf.generatePrivate(keySpec) as RSAPrivateKey
     }
 
     fun loadPublicKey(filename: String?): RSAPublicKey {
-        val keyBytes = parsePEM(File(filename!!).readText(), "PUBLIC KEY")
+        val keyBytes = parsePEM(loadTextFile(filename!!), "PUBLIC KEY")
         val keySpec = X509EncodedKeySpec(keyBytes)
         val kf = KeyFactory.getInstance("RSA")
         return kf.generatePublic(keySpec) as RSAPublicKey
@@ -147,5 +147,20 @@ object PemUtils {
             .replace("-----END $type-----", "")
             .replace("\\s".toRegex(), "")
         return Base64.getDecoder().decode(cleanPem)
+    }
+
+    fun loadTextFile(path: String): String {
+        val file = File(path)
+
+        // 1) Absolute or relative file on host filesystem
+        if (file.exists()) {
+            return file.readText()
+        }
+
+        // 2) Resource inside the JAR (from src/main/resources)
+        val resourceStream = object {}.javaClass.classLoader.getResourceAsStream(path)
+            ?: error("File '$path' not found on filesystem or resources")
+
+        return resourceStream.bufferedReader().readText()
     }
 }
