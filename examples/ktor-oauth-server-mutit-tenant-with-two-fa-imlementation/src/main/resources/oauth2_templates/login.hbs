@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login to Tenant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .login-container {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 320px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .remember-me input {
+            margin-right: 0.5rem;
+            accent-color: #007BFF;
+        }
+        button {
+            width: 100%;
+            padding: 0.6rem;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        button:hover {
+            background-color: #0069d9;
+        }
+        .error {
+            color: red;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <h2>Login to Tenant</h2>
+
+    {{#error}}
+        <div class="error">{{errorMessage}}</div>
+    {{/error}}
+
+    <form method="POST" action="/oauth/login">
+        <input type="hidden" name="redirect" value="{{redirect}}" />
+
+        <input type="text" name="username" placeholder="Username" required autofocus>
+        <input type="password" name="password" placeholder="Password" required>
+
+        <div class="remember-me">
+            <input type="checkbox" id="remember" name="rememberMe" value="true">
+            <label for="remember">Remember me</label>
+        </div>
+
+        <button type="submit">Login</button>
+    </form>
+</div>
+</body>
+</html>

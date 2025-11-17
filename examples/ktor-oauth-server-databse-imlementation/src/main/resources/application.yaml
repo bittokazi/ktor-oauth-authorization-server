@@ -1,0 +1,23 @@
+ktor:
+    application:
+        modules:
+            - com.bittokazi.example.ktor.ApplicationKt.module
+    deployment:
+        port: 8080
+
+database:
+  url: ${DB_URL}
+  driver: "org.postgresql.Driver"
+  schema: "public"
+  username: ${DB_USERNAME}
+  password: ${DB_PASSWORD}
+
+jwk:
+  key-id: "my-key-id"
+  private-key-path: certificates/default_private_key_pkcs8.pem
+  public-key-path: certificates/default_public_key.pem
+
+oauth:
+  session:
+    encryption-key: dd78055a2c57f50a636efe0e034764f7 # has to be 32 character. set your own
+    signing-key: a94f3c2e8b7f5d4c1e0296a1b3d8f7e2 # has to be 32 character. set your own
