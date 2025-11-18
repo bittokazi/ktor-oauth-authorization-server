@@ -110,7 +110,7 @@ implementation("com.nimbusds:nimbus-jose-jwt:10.6")
 // =========================
 // ⭐ OAuth / OpenID Server Library
 // =========================
-implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.0.4")
+implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.0.5")
 ```
 
 Replace `<...>` with concrete versions used in your project.
@@ -138,7 +138,7 @@ ktor:
     port: 8080
 
 database:
-  url: ${DB_URL}
+  url: "jdbc:postgresql://127.0.0.1:5432/ktor_auth_server"
   driver: "org.postgresql.Driver"
   schema: "public"
   username: ${DB_USERNAME}
