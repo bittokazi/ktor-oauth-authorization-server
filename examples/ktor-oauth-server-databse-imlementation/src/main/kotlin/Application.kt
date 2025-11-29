@@ -81,7 +81,8 @@ class JwtCustomizerImpl: JwtTokenCustomizer {
     override fun customize(
         user: String?,
         client: OAuthClientDTO?,
-        claims: JWTClaimsSet.Builder
+        claims: JWTClaimsSet.Builder,
+        call: ApplicationCall?
     ): Map<String, Any> {
         return mapOf(
             "extra-scope" to "test-value",
