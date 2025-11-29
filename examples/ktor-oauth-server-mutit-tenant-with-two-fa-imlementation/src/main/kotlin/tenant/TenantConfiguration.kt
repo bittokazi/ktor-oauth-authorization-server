@@ -10,6 +10,7 @@ data class TenantConfiguration(
 
 @Serializable
 data class Tenant(
+    val name: String,
     val domain: String,
     val databaseSchema: String
 )

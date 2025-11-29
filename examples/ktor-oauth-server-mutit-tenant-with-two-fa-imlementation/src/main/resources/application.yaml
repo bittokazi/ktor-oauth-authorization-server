@@ -14,8 +14,10 @@ database:
 tenants:
   - domain: localhost:8080
     databaseSchema: "public"
+    name: "Ktor Auth Server"
   - domain: tenant1.auth.test.local
     databaseSchema: "tenant_one"
+    name: "Tenant One"
 
 jwk:
   key-id: "my-key-id"
