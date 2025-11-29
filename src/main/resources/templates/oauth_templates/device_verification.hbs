@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Device Authorization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .verify-container {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 340px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        button {
+            width: 100%;
+            padding: 0.6rem;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        button:hover {
+            background-color: #0069d9;
+        }
+        .error {
+            color: red;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .success {
+            color: green;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .code-display {
+            background: #f7f7f7;
+            border: 1px dashed #ccc;
+            padding: 0.8rem;
+            font-size: 1.1rem;
+            text-align: center;
+            margin-bottom: 1.3rem;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="verify-container">
+    <h2>Device Authorization</h2>
+
+    {{#result}}
+        {{#isInvalid}}
+            <div class="error">Invalid or expired code. Please try again.</div>
+        {{/isInvalid}}
+
+        {{#isSuccess}}
+            <div class="success">Authorization successful! You may return to your device.</div>
+        {{/isSuccess}}
+    {{/result}}
+
+    {{#userCode}}
+        <div class="code-display">{{userCode}}</div>
+    {{/userCode}}
+
+    {{^result}}
+        <form method="POST" action="/oauth/device-verification">
+            {{^userCode}}
+                <input type="text" name="user_code" placeholder="Enter your code" required autofocus>
+            {{/userCode}}
+            {{#userCode}}
+                <input type="hidden" name="user_code" value="{{userCode}}">
+            {{/userCode}}
+            <button type="submit">Verify</button>
+        </form>
+    {{/result}}
+
+</div>
+
+</body>
+</html>

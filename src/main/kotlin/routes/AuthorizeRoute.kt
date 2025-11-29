@@ -65,6 +65,10 @@ fun Application.authorizeRoute() {
                 return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid scopes"))
             }
 
+            if(!client.grantTypes.contains("authorization_code")) {
+                return@get call.respond(HttpStatusCode.Unauthorized, mutableMapOf("message" to "Unauthorized"))
+            }
+
             // Check user session
             val session = call.sessions.get<OauthUserSession>()
             if (session == null || session.expiresAt < System.currentTimeMillis()) {

@@ -9,7 +9,7 @@ CREATE TABLE oauth_clients (
     redirect_uris TEXT NOT NULL,
     scopes TEXT,
     grant_types TEXT,
-    token_endpoint_auth_method VARCHAR(100) DEFAULT 'client_secret_basic',
+    token_endpoint_auth_method VARCHAR(100) DEFAULT 'client_secret_post',
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now(),
     access_token_validity BIGINT NOT NULL,

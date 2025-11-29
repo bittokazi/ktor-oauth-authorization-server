@@ -80,6 +80,7 @@ fun Application.oidcRoutes() {
             val metadata = mapOf(
                 "issuer" to issuer,
                 "authorization_endpoint" to "$baseUrl/authorize",
+                "device_authorization_endpoint" to "$baseUrl/device_authorization",
                 "token_endpoint" to "$baseUrl/token",
                 "userinfo_endpoint" to "$baseUrl/userinfo",
                 "revocation_endpoint" to "$baseUrl/revoke",

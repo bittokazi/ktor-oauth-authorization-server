@@ -4,6 +4,7 @@ import com.bittokazi.ktor.auth.domains.token.TokenType
 import com.bittokazi.ktor.auth.services.JwksProvider
 import com.bittokazi.ktor.auth.services.providers.OauthAuthorizationCodeService
 import com.bittokazi.ktor.auth.services.providers.OauthClientService
+import com.bittokazi.ktor.auth.services.providers.OauthDeviceCodeService
 import com.bittokazi.ktor.auth.services.providers.OauthTokenService
 import com.bittokazi.ktor.auth.services.providers.OauthUserService
 import com.bittokazi.ktor.auth.utils.getBaseUrl
@@ -24,6 +25,7 @@ fun Application.tokenRoutes() {
     val oauthTokenService: OauthTokenService by dependencies
     val jwksProvider: JwksProvider by dependencies
     val oauthUserService: OauthUserService by dependencies
+    val oauthDeviceCodeService: OauthDeviceCodeService by dependencies
 
     routing {
 
@@ -109,6 +111,11 @@ fun Application.tokenRoutes() {
 
                         val codeData = oauthAuthorizationCodeService.findByCode(code, call)
                             ?: return@post call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Invalid code"))
+
+                        if (client.id != codeData.clientId) {
+                            call.respond(HttpStatusCode.Unauthorized, mutableMapOf("error" to "Unauthorized"))
+                            return@post
+                        }
 
                         if (codeData.redirectUri != redirectUri || codeData.consumed) {
                             call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Invalid or used code"))
@@ -210,8 +217,18 @@ fun Application.tokenRoutes() {
                             return@post
                         }
 
+                        if (!client.grantTypes.contains("refresh_token")) {
+                            call.respond(HttpStatusCode.Unauthorized, mutableMapOf("message" to "Grant type not permitted"))
+                            return@post
+                        }
+
                         val existing = oauthTokenService.findByRefreshToken(refreshToken, call)
                             ?: return@post call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Invalid refresh_token"))
+
+                        if (client.id != existing.clientId) {
+                            call.respond(HttpStatusCode.Unauthorized, mutableMapOf("error" to "Unauthorized"))
+                            return@post
+                        }
 
                         if (existing.revoked || existing.expiresAt.isBefore(Instant.now())) {
                             call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Expired or revoked token"))
@@ -285,6 +302,145 @@ fun Application.tokenRoutes() {
                             response["id_token"] = idToken
                         }
                         call.respond(response)
+                    }
+
+                    "urn:ietf:params:oauth:grant-type:device_code" -> {
+                        val clientId = params["client_id"] ?: return@post call.respond(HttpStatusCode.BadRequest,
+                            mutableMapOf("error" to "Missing client_id"))
+
+                        val clientSecret = params["client_secret"] ?: return@post call.respond(HttpStatusCode.BadRequest,
+                            mutableMapOf("error" to "Missing client_secret"))
+
+                        val deviceCode = params["device_code"] ?: return@post call.respond(HttpStatusCode.BadRequest,
+                            mutableMapOf("error" to "Missing device_code"))
+
+                        val client = oauthClientService.findByClientId(clientId, call)
+                            ?: return@post call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Invalid client_id"))
+
+                        if (client.clientType == "confidential" && client.clientSecret != clientSecret) {
+                            call.respond(HttpStatusCode.Unauthorized, mutableMapOf("error" to "Unauthorized"))
+                            return@post
+                        }
+
+                        if (!client.grantTypes.contains("urn:ietf:params:oauth:grant-type:device_code")) {
+                            call.respond(HttpStatusCode.Unauthorized, mutableMapOf("message" to "Grant type not permitted"))
+                            return@post
+                        }
+
+                        var oauthDeviceCodeEntity =
+                            oauthDeviceCodeService.findByDeviceCode(deviceCode, false, false, call)
+
+                        if (oauthDeviceCodeEntity != null && client.id != oauthDeviceCodeEntity.clientId) {
+                            call.respond(HttpStatusCode.Unauthorized, mutableMapOf("error" to "Unauthorized"))
+                            return@post
+                        }
+
+                        if(oauthDeviceCodeEntity != null && !oauthDeviceCodeEntity.isDeviceAuthorized && !oauthDeviceCodeEntity.consumed)
+                            return@post call.respond(
+                                HttpStatusCode.BadRequest,
+                                mutableMapOf("message" to "authorization_pending")
+                            )
+
+                        oauthDeviceCodeEntity =
+                            oauthDeviceCodeService.findByDeviceCode(deviceCode, true, false, call)
+
+                        if (oauthDeviceCodeEntity != null && client.id != oauthDeviceCodeEntity.clientId) {
+                            call.respond(HttpStatusCode.Unauthorized, mutableMapOf("error" to "Unauthorized"))
+                            return@post
+                        }
+
+                        if (oauthDeviceCodeEntity != null && oauthDeviceCodeEntity.expiresAt < Instant.now()) {
+                            return@post call.respond(
+                                HttpStatusCode.BadRequest,
+                                mutableMapOf("message" to "expired_token")
+                            )
+                        }
+
+                        if (oauthDeviceCodeEntity != null) {
+                            oauthDeviceCodeService.consumeDeviceCode(oauthDeviceCodeEntity.deviceCode, call)
+
+                            val userId = oauthDeviceCodeEntity.userId
+                            val issuer = call.getBaseUrl()
+
+                            val accessToken = jwksProvider.generateJwt(
+                                subject = userId!!,
+                                audience = clientId,
+                                scopes = oauthDeviceCodeEntity.scopes,
+                                issuer = issuer,
+                                expiresInSeconds = client.accessTokenValidity,
+                                client = client,
+                                userId = userId,
+                                tokenType = TokenType.ACCESS_TOKEN
+                            )
+
+                            val idToken = if(oauthDeviceCodeEntity.scopes.contains("openid")) jwksProvider.generateJwt(
+                                subject = userId,
+                                audience = clientId,
+                                scopes = oauthDeviceCodeEntity.scopes,
+                                issuer = issuer,
+                                expiresInSeconds = client.accessTokenValidity,
+                                client = client,
+                                userId = userId,
+                                tokenType = TokenType.ID_TOKEN,
+                                user = oauthUserService.findById(userId, call)
+                            ) else null
+
+                            val refreshToken = if (client.grantTypes.contains("refresh_token")) jwksProvider.generateJwt(
+                                subject = userId,
+                                audience = clientId,
+                                scopes = oauthDeviceCodeEntity.scopes,
+                                issuer = issuer,
+                                expiresInSeconds = client.refreshTokenValidity,
+                                client = client,
+                                userId = userId,
+                                tokenType = TokenType.REFRESH_TOKEN
+                            ) else null
+
+
+                            val now = Instant.now()
+                            val accessExpiry = now.plusSeconds(client.accessTokenValidity)
+                            val refreshExpiry = now.plusSeconds(client.refreshTokenValidity)
+
+                            oauthTokenService.storeAccessToken(
+                                accessToken,
+                                client.id,
+                                userId,
+                                client.scopes,
+                                accessExpiry,
+                                call
+                            )
+
+                            if(refreshToken != null) oauthTokenService.storeRefreshToken(
+                                refreshToken,
+                                client.id,
+                                userId,
+                                client.scopes,
+                                refreshExpiry,
+                                call
+                            )
+
+                            val response = mutableMapOf(
+                                "access_token" to accessToken,
+                                "token_type" to "bearer",
+                                "expires_in" to client.accessTokenValidity,
+                                "id_token" to idToken,
+                                "scope" to client.scopes.joinToString(" ")
+                            )
+
+                            if (refreshToken != null) {
+                                response["refresh_token"] = refreshToken
+                            }
+
+                            if (idToken != null) {
+                                response["id_token"] = idToken
+                            }
+                            call.respond(response)
+                        }
+
+                        return@post call.respond(
+                            HttpStatusCode.Unauthorized,
+                            mutableMapOf("message" to "Unauthorized")
+                        )
                     }
 
                     else -> call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Unsupported grant type"))

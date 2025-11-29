@@ -40,5 +40,5 @@ interface OauthTokenService {
 
     fun rotateRefreshToken(oldToken: String, newToken: String, expiresAt: Instant, call: ApplicationCall): Boolean
 
-    fun logoutAction(userId: String, call: ApplicationCall)
+    fun logoutAction(userId: String, clientId: String?, call: ApplicationCall)
 }

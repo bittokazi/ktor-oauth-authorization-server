@@ -8,7 +8,8 @@ fun Application.configureOauth2AuthorizationServer(
     defaultAuthorizeRoute: Boolean = true,
     defaultOidcRoute: Boolean = true,
     defaultTokenRoute: Boolean = true,
-    defaultConsentRoute: Boolean = true
+    defaultConsentRoute: Boolean = true,
+    defaultDeviceAuthorizationRoute: Boolean = true
 ) {
     if (configureSerialization) {
         configureSerialization()
@@ -20,7 +21,8 @@ fun Application.configureOauth2AuthorizationServer(
         defaultAuthorizeRoute = defaultAuthorizeRoute,
         defaultOidcRoute = defaultOidcRoute,
         defaultTokenRoute = defaultTokenRoute,
-        defaultConsentRoute = defaultConsentRoute
+        defaultConsentRoute = defaultConsentRoute,
+        defaultDeviceAuthorizationRoute = defaultDeviceAuthorizationRoute
     )
 
 }

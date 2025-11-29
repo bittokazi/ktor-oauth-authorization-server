@@ -33,5 +33,5 @@ interface OauthAuthorizationCodeService {
 
     fun consumeCode(code: String, call: ApplicationCall): Boolean
 
-    fun logoutAction(userId: String, call: ApplicationCall)
+    fun logoutAction(userId: String, clientId: String?, call: ApplicationCall)
 }

@@ -39,7 +39,7 @@ VALUES (
     '',
     'openid,profile,email',
     'authorization_code,refresh_token,client_credentials',
-    'client_secret_basic',
+    'client_secret_post',
     now(),
     300,
     7200,

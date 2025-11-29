@@ -2,6 +2,7 @@ package com.bittokazi.ktor.auth
 
 import com.bittokazi.ktor.auth.routes.authorizeRoute
 import com.bittokazi.ktor.auth.routes.consentRoute
+import com.bittokazi.ktor.auth.routes.deviceCodeRoute
 import com.bittokazi.ktor.auth.routes.loginRoutes
 import com.bittokazi.ktor.auth.routes.oidcRoutes
 import com.bittokazi.ktor.auth.routes.tokenRoutes
@@ -12,11 +13,13 @@ fun Application.configureRouting(
     defaultAuthorizeRoute: Boolean = true,
     defaultOidcRoute: Boolean = true,
     defaultTokenRoute: Boolean = true,
-    defaultConsentRoute: Boolean = true
+    defaultConsentRoute: Boolean = true,
+    defaultDeviceAuthorizationRoute: Boolean = true
 ) {
     if (defaultAuthorizeRoute) authorizeRoute()
     if (defaultLoginRoutes) loginRoutes()
     if (defaultOidcRoute) oidcRoutes()
     if (defaultTokenRoute) tokenRoutes()
     if (defaultConsentRoute) consentRoute()
+    if (defaultDeviceAuthorizationRoute) deviceCodeRoute()
 }
