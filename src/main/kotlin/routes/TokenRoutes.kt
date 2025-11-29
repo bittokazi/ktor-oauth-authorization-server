@@ -66,7 +66,8 @@ fun Application.tokenRoutes() {
                             issuer = issuer,
                             expiresInSeconds = client.accessTokenValidity,
                             client = client,
-                            tokenType = TokenType.ACCESS_TOKEN
+                            tokenType = TokenType.ACCESS_TOKEN,
+                            call = call
                         )
 
                         val expiry = Instant.now().plusSeconds(client.accessTokenValidity)
@@ -135,7 +136,8 @@ fun Application.tokenRoutes() {
                             expiresInSeconds = client.accessTokenValidity,
                             client = client,
                             userId = userId,
-                            tokenType = TokenType.ACCESS_TOKEN
+                            tokenType = TokenType.ACCESS_TOKEN,
+                            call = call
                         )
 
                         val idToken = if(codeData.scopes.contains("openid")) jwksProvider.generateJwt(
@@ -147,7 +149,8 @@ fun Application.tokenRoutes() {
                             client = client,
                             userId = userId,
                             tokenType = TokenType.ID_TOKEN,
-                            user = oauthUserService.findById(codeData.userId, call)
+                            user = oauthUserService.findById(codeData.userId, call),
+                            call = call
                         ) else null
 
                         val refreshToken = if (client.grantTypes.contains("refresh_token")) jwksProvider.generateJwt(
@@ -158,7 +161,8 @@ fun Application.tokenRoutes() {
                             expiresInSeconds = client.refreshTokenValidity,
                             client = client,
                             userId = userId,
-                            tokenType = TokenType.REFRESH_TOKEN
+                            tokenType = TokenType.REFRESH_TOKEN,
+                            call = call
                         ) else null
 
 
@@ -246,7 +250,8 @@ fun Application.tokenRoutes() {
                             expiresInSeconds = client.accessTokenValidity,
                             client = client,
                             userId = userId,
-                            tokenType = TokenType.ACCESS_TOKEN
+                            tokenType = TokenType.ACCESS_TOKEN,
+                            call = call
                         )
 
                         val idToken = if(existing.scopes.contains("openid")) jwksProvider.generateJwt(
@@ -258,7 +263,8 @@ fun Application.tokenRoutes() {
                             client = client,
                             userId = userId,
                             tokenType = TokenType.ID_TOKEN,
-                            user = oauthUserService.findById(userId, call)
+                            user = oauthUserService.findById(userId, call),
+                            call = call
                         ) else null
 
                         val newRefreshToken = jwksProvider.generateJwt(
@@ -269,7 +275,8 @@ fun Application.tokenRoutes() {
                             expiresInSeconds = client.refreshTokenValidity,
                             client = client,
                             userId = userId,
-                            tokenType = TokenType.REFRESH_TOKEN
+                            tokenType = TokenType.REFRESH_TOKEN,
+                            call = call
                         )
                         val newExpiry = Instant.now().plusSeconds(client.accessTokenValidity)
                         val newRefreshExpiry = Instant.now().plusSeconds(client.refreshTokenValidity)
@@ -370,7 +377,8 @@ fun Application.tokenRoutes() {
                                 expiresInSeconds = client.accessTokenValidity,
                                 client = client,
                                 userId = userId,
-                                tokenType = TokenType.ACCESS_TOKEN
+                                tokenType = TokenType.ACCESS_TOKEN,
+                                call = call
                             )
 
                             val idToken = if(oauthDeviceCodeEntity.scopes.contains("openid")) jwksProvider.generateJwt(
@@ -382,7 +390,8 @@ fun Application.tokenRoutes() {
                                 client = client,
                                 userId = userId,
                                 tokenType = TokenType.ID_TOKEN,
-                                user = oauthUserService.findById(userId, call)
+                                user = oauthUserService.findById(userId, call),
+                                call = call
                             ) else null
 
                             val refreshToken = if (client.grantTypes.contains("refresh_token")) jwksProvider.generateJwt(
@@ -393,7 +402,8 @@ fun Application.tokenRoutes() {
                                 expiresInSeconds = client.refreshTokenValidity,
                                 client = client,
                                 userId = userId,
-                                tokenType = TokenType.REFRESH_TOKEN
+                                tokenType = TokenType.REFRESH_TOKEN,
+                                call = call
                             ) else null
 
 
