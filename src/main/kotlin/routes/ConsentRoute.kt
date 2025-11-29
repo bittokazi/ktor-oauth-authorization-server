@@ -1,6 +1,7 @@
 package com.bittokazi.ktor.auth.routes
 
 import com.bittokazi.ktor.auth.OauthUserSession
+import com.bittokazi.ktor.auth.services.TemplateCustomizer
 import com.bittokazi.ktor.auth.services.providers.OauthClientService
 import com.bittokazi.ktor.auth.services.providers.OauthConsentService
 import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
@@ -22,6 +23,7 @@ fun Application.consentRoute() {
     val oauthClientService: OauthClientService by dependencies
     val oauthConsentService: OauthConsentService by dependencies
     val oauthLoginOptionService: OauthLoginOptionService by dependencies
+    val templateCustomizer: TemplateCustomizer? by dependencies
 
     routing {
         get("/oauth/consent") {
@@ -50,13 +52,15 @@ fun Application.consentRoute() {
                 ?: return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid client_id"))
 
             if (client.consentRequired) {
+                val templateData = templateCustomizer?.addExtraData(call) ?: mapOf()
+
                 when (val consents = oauthConsentService.getConsent(userId = session.userId, clientId = client.id, call)) {
                     null -> {
                         call.respond(MustacheContent("oauth_templates/consent.hbs", mapOf(
                             "clientName" to client.clientName,
                             "scopes" to client.scopes,
                             "clientId" to client.clientId
-                        )))
+                        ).plus(templateData)))
                         return@get
                     }
                     else -> {
@@ -65,7 +69,7 @@ fun Application.consentRoute() {
                                 "clientName" to client.clientName,
                                 "scopes" to client.scopes,
                                 "clientId" to client.clientId
-                            )))
+                            ).plus(templateData)))
                             return@get
                         }
                         // Retrieve saved original request URL
@@ -102,6 +106,8 @@ fun Application.consentRoute() {
             val client = oauthClientService.findByClientId(clientIdParam, call)
                 ?: return@post call.respond(HttpStatusCode.BadRequest, mapOf("message" to "Invalid client_id"))
 
+            val templateData = templateCustomizer?.addExtraData(call) ?: mapOf()
+
             when (action) {
                 "approve" -> {
                     oauthConsentService.grantConsent(
@@ -124,7 +130,7 @@ fun Application.consentRoute() {
                             mapOf(
                                 "error" to "access_denied",
                                 "error_description" to "You have denied access to the application."
-                            )
+                            ).plus(templateData)
                         )
                     )
                 }

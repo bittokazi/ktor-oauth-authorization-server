@@ -1,6 +1,7 @@
 package com.bittokazi.ktor.auth.routes
 
 import com.bittokazi.ktor.auth.OauthUserSession
+import com.bittokazi.ktor.auth.services.TemplateCustomizer
 import com.bittokazi.ktor.auth.services.providers.OauthClientService
 import com.bittokazi.ktor.auth.services.providers.OauthDeviceCodeService
 import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
@@ -27,6 +28,7 @@ fun Application.deviceCodeRoute() {
     val oauthClientService: OauthClientService by dependencies
     val oauthLoginOptionService: OauthLoginOptionService by dependencies
     val oauthDeviceCodeService: OauthDeviceCodeService by dependencies
+    val templateCustomizer: TemplateCustomizer? by dependencies
 
     routing {
         post("/oauth/device_authorization") {
@@ -100,10 +102,11 @@ fun Application.deviceCodeRoute() {
                 return@get
             }
 
+            val templateData = templateCustomizer?.addExtraData(call) ?: mapOf()
             call.respond(MustacheContent("oauth_templates/device_verification.hbs", mapOf(
                 "result" to false,
                 "userCode" to userCode
-            )))
+            ).plus(templateData)))
         }
 
         post("/oauth/device-verification") {
@@ -124,11 +127,13 @@ fun Application.deviceCodeRoute() {
                 return@post
             }
 
+            val templateData = templateCustomizer?.addExtraData(call) ?: mapOf()
+
             val userCode = params["user_code"]
                 ?: return@post call.respond(MustacheContent("oauth_templates/device_verification.hbs", mapOf(
                     "result" to true,
                     "isInvalid" to true
-                )))
+                ).plus(templateData)))
 
             val oauthDeviceCodeEntity =
                 oauthDeviceCodeService.findByUserCode(userCode, call) ?: return@post call.respond(
@@ -136,7 +141,7 @@ fun Application.deviceCodeRoute() {
                         "oauth_templates/device_verification.hbs", mapOf(
                             "result" to true,
                             "isInvalid" to true
-                        )
+                        ).plus(templateData)
                     )
                 )
 
@@ -145,7 +150,7 @@ fun Application.deviceCodeRoute() {
             return@post call.respond(MustacheContent("oauth_templates/device_verification.hbs", mapOf(
                 "result" to true,
                 "isSuccess" to true
-            )))
+            ).plus(templateData)))
         }
     }
 }
