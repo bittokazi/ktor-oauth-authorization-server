@@ -3,6 +3,7 @@ package com.bittokazi.ktor.auth.routes
 import at.favre.lib.crypto.bcrypt.BCrypt
 import com.bittokazi.ktor.auth.OauthUserSession
 import com.bittokazi.ktor.auth.services.SessionCustomizer
+import com.bittokazi.ktor.auth.services.TemplateCustomizer
 import com.bittokazi.ktor.auth.services.providers.OauthAuthorizationCodeService
 import com.bittokazi.ktor.auth.services.providers.OauthDeviceCodeService
 import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
@@ -31,13 +32,16 @@ fun Application.loginRoutes() {
     val sessionCustomizer: SessionCustomizer by dependencies
     val oauthLoginOptionService: OauthLoginOptionService by dependencies
     val oauthDeviceCodeService: OauthDeviceCodeService by dependencies
+    val templateCustomizer: TemplateCustomizer? by dependencies
 
     routing {
         route("/oauth") {
             get("/login") {
+                val templateData = templateCustomizer?.addExtraData(call) ?: mapOf()
+
                 val session = call.sessions.get<OauthUserSession>()
                 if (session == null) {
-                    call.respond(MustacheContent("oauth_templates/login.hbs", mapOf<String, Any>()))
+                    call.respond(MustacheContent("oauth_templates/login.hbs", templateData))
                     return@get
                 }
 
@@ -59,6 +63,8 @@ fun Application.loginRoutes() {
             }
 
             post("/login") {
+                val templateData = templateCustomizer?.addExtraData(call) ?: mapOf()
+
                 val params = call.receiveParameters()
                 val username = params["username"] ?: ""
                 val password = params["password"] ?: ""
@@ -68,10 +74,10 @@ fun Application.loginRoutes() {
 
                 if (user == null || !BCrypt.verifyer().verify(password.toCharArray(), user.passwordHash).verified) {
                     // Invalid login
-                    call.respond(MustacheContent("oauth_templates/login.hbs", mapOf<String, Any>(
+                    call.respond(MustacheContent("oauth_templates/login.hbs", mutableMapOf<String, Any>(
                         "error" to "invalidLogin",
                         "errorMessage" to "Login credentials do not match"
-                    )))
+                    ).plus(templateData)))
                     return@post
                 }
 
