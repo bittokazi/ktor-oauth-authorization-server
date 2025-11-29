@@ -41,9 +41,9 @@ dependencies {
     implementation("com.nimbusds:nimbus-jose-jwt:10.6")
 
     if(testKtorOauthAuthLibrary) {
-        implementation(files("../../build/libs/ktor-oauth-authorization-server-1.0.7.jar"))
+        implementation(files("../../build/libs/ktor-oauth-authorization-server-1.0.8.jar"))
     } else {
-        implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.0.7")
+        implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.0.8")
     }
 
     implementation("io.ktor:ktor-client-core:3.3.2")

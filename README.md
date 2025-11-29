@@ -73,7 +73,7 @@ Start by adding in `build.gradle.kts`:
 // =========================
 // ⭐ OAuth / OpenID Server Library
 // =========================
-implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.0.7")
+implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.0.8")
 ```
 
 Also make sure you have the following libraries as well. Below is a complete example of complete `build.gradle.kts`
@@ -120,7 +120,7 @@ implementation("com.nimbusds:nimbus-jose-jwt:10.6")
 // =========================
 // ⭐ OAuth / OpenID Server Library
 // =========================
-implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.0.7")
+implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.0.8")
 ```
 
 Replace `<...>` with concrete versions used in your project.
@@ -195,6 +195,7 @@ The below endpoints are created by the library
 
 - `GET /oauth/authorize` — authorization endpoint (interactive). Checks session; if no session, saves request and redirects to `/oauth/login`.
 - `GET, POST /oauth/login` — login page and submit handler (sets secure session).
+- `GET /oauth/logout` — logout path, Optionally pass `client_id` as query parameter to delete credentials for that client id only.
 - `POST /oauth/token` — token endpoint (authorization_code, refresh_token, client_credentials).
 - `POST /oauth/revoke` — token revocation (accepts access or refresh token).
 - `POST /oauth/introspect` — token introspection.
@@ -330,7 +331,7 @@ Also included `consent_denied.hbs` seen in the repo.
 If you want to use your custom template then just create a folder `templates/oauth_templates` under `resources`
 and create files `login.hbs`, `consent.hbs`, `consent_denied.hbs`, `device_verification.hbs` as needed.
 
-Reference here: https://github.com/bittokazi/ktor-oauth-authorization-server/tree/main/src/main/resources/oauth2_templates
+Reference here: https://github.com/bittokazi/ktor-oauth-authorization-server/tree/main/src/main/resources/templates/oauth_templates
 
 ---
 
