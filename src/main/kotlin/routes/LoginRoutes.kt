@@ -114,6 +114,8 @@ fun Application.loginRoutes() {
 
                     oauthLogoutActionService?.afterLogoutAction(userId, call)
                 }
+
+                oauthLogoutActionService?.afterLogoutAction(null, call)
             }
         }
     }
