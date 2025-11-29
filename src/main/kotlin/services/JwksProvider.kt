@@ -9,6 +9,7 @@ import com.nimbusds.jose.crypto.RSASSASigner
 import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.plugins.di.annotations.Property
 import java.io.File
 import java.security.KeyFactory
@@ -24,7 +25,12 @@ import java.util.Date
 import java.util.UUID
 
 interface JwtTokenCustomizer {
-    fun customize(user: String? = null, client: OAuthClientDTO?, claims: JWTClaimsSet.Builder): Map<String, Any>
+    fun customize(
+        user: String? = null,
+        client: OAuthClientDTO?,
+        claims: JWTClaimsSet.Builder,
+        call: ApplicationCall?
+    ): Map<String, Any>
 }
 
 class JwksProvider(
@@ -81,7 +87,8 @@ class JwksProvider(
         userId: String? = null,
         client: OAuthClientDTO? = null,
         tokenType: TokenType,
-        user: OAuthUserDTO? = null
+        user: OAuthUserDTO? = null,
+        call: ApplicationCall
     ): String {
         val now = Instant.now()
         val claims = JWTClaimsSet.Builder()
@@ -92,7 +99,7 @@ class JwksProvider(
             .expirationTime(Date.from(now.plusSeconds(expiresInSeconds)))
             .claim("scope", scopes.joinToString(" "))
 
-        jwtTokenCustomizer?.customize(userId, client, claims)?.forEach {
+        jwtTokenCustomizer?.customize(userId, client, claims, call)?.forEach {
             claims.claim(it.key, it.value)
         }
 
