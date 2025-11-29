@@ -1,15 +1,12 @@
 package com.bittokazi.ktor.auth.services.providers.inmemory
 
-import com.bittokazi.ktor.auth.database.OauthDatabaseConfiguration
 import com.bittokazi.ktor.auth.services.providers.OauthDeviceCodeDTO
 import com.bittokazi.ktor.auth.services.providers.OauthDeviceCodeService
 import io.ktor.server.application.ApplicationCall
 import java.time.Instant
 import java.util.UUID
 
-class OauthDeviceCodeServiceInMemoryProvider(
-    val oauthDatabaseConfiguration: OauthDatabaseConfiguration
-): OauthDeviceCodeService {
+class OauthDeviceCodeServiceInMemoryProvider: OauthDeviceCodeService {
 
     val codes: MutableList<OauthDeviceCodeDTO> = mutableListOf()
 
