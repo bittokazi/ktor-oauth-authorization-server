@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login to Tenant</title>
+    <title>Login to {{tenant}}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -68,7 +68,7 @@
 </head>
 <body>
 <div class="login-container">
-    <h2>Login to Tenant</h2>
+    <h2>Login to {{tenant}}</h2>
 
     {{#error}}
         <div class="error">{{errorMessage}}</div>

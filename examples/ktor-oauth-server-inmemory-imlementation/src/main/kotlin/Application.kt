@@ -13,6 +13,7 @@ import com.bittokazi.ktor.auth.services.providers.OAuthUserDTO
 import com.bittokazi.ktor.auth.services.providers.OauthAuthorizationCodeService
 import com.bittokazi.ktor.auth.services.providers.OauthClientService
 import com.bittokazi.ktor.auth.services.providers.OauthConsentService
+import com.bittokazi.ktor.auth.services.providers.OauthDeviceCodeService
 import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
 import com.bittokazi.ktor.auth.services.providers.OauthLogoutActionService
 import com.bittokazi.ktor.auth.services.providers.OauthTokenService
@@ -20,8 +21,10 @@ import com.bittokazi.ktor.auth.services.providers.OauthUserService
 import com.bittokazi.ktor.auth.services.providers.inmemory.OauthAuthorizationCodeServiceInMemoryProvider
 import com.bittokazi.ktor.auth.services.providers.inmemory.OauthClientServiceInMemoryProvider
 import com.bittokazi.ktor.auth.services.providers.inmemory.OauthConsentServiceInMemoryProvider
+import com.bittokazi.ktor.auth.services.providers.inmemory.OauthDeviceCodeServiceInMemoryProvider
 import com.bittokazi.ktor.auth.services.providers.inmemory.OauthTokenServiceInMemoryProvider
 import com.bittokazi.ktor.auth.services.providers.inmemory.OauthUserServiceInMemoryProvider
+import com.nimbusds.jwt.JWTClaimsSet
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.dependencies
 import java.util.UUID
@@ -68,6 +71,7 @@ fun Application.module() {
         provide<OauthAuthorizationCodeService>(OauthAuthorizationCodeServiceInMemoryProvider::class)
         provide<OauthTokenService>(OauthTokenServiceInMemoryProvider::class)
         provide<OauthConsentService>(OauthConsentServiceInMemoryProvider::class)
+        provide<OauthDeviceCodeService>(OauthDeviceCodeServiceInMemoryProvider::class)
         provide<JwtTokenCustomizer>(JwtCustomizerImpl::class)
         provide(JwksProvider::class)
         provide(JwtVerifier::class)
@@ -85,7 +89,8 @@ fun Application.module() {
         defaultAuthorizeRoute = true,
         defaultOidcRoute = true,
         defaultTokenRoute = true,
-        defaultConsentRoute = true
+        defaultConsentRoute = true,
+        defaultDeviceAuthorizationRoute = true
     )
 
     configureRouting()
@@ -94,8 +99,12 @@ fun Application.module() {
 class JwtCustomizerImpl: JwtTokenCustomizer {
     override fun customize(
         user: String?,
-        client: OAuthClientDTO?
+        client: OAuthClientDTO?,
+        claims: JWTClaimsSet.Builder
     ): Map<String, String> {
-        return mapOf("extra-scope" to "test-value")
+        return mapOf(
+            "extra-scope" to "test-value",
+            "scope" to ("${claims.claims["scope"]} extraScope")
+        )
     }
 }

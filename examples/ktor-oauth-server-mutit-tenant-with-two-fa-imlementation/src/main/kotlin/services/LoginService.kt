@@ -32,6 +32,8 @@ class LoginService(
                         .where { Users.id eq oauthUserSession.userId.toLong() }
                         .map {
                             UserData(
+                                id = it[Users.id].value,
+                                email = it[Users.email],
                                 twoFaEnabled = it[Users.twoFaEnabled]
                             )
                         }.singleOrNull()
