@@ -46,7 +46,8 @@ This library provides core features you'd expect from an OAuth / OIDC server: cl
 ## 🚀 Features
 
 - OAuth 2.0 **Authorization Code** flow
-- OAuth 2.0 **Client Credentials** flow
+- OAuth 2.0 **Client Credentials** flow 
+- OAuth 2.0 **Device Authorization** flow
 - **Refresh Token** issuance and rotation
 - OpenID Connect (OIDC) **ID Token** as signed JWT
 - JWT-signed **Access Tokens**
@@ -66,7 +67,16 @@ This library provides core features you'd expect from an OAuth / OIDC server: cl
 
 ### Dependencies (Gradle)
 
-Add in `build.gradle.kts`:
+Start by adding in `build.gradle.kts`:
+
+```kotlin
+// =========================
+// ⭐ OAuth / OpenID Server Library
+// =========================
+implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.0.6")
+```
+
+Also make sure you have the following libraries as well. Below is a complete example of complete `build.gradle.kts`
 
 ```kotlin
 // =========================
@@ -176,6 +186,7 @@ The below tables will be created by default
 - oauth_access_tokens
 - oauth_authorization_codes
 - oauth_consents
+- oauth_device_codes
 ---
 
 ## Endpoints
@@ -188,6 +199,8 @@ The below endpoints are created by the library
 - `POST /oauth/revoke` — token revocation (accepts access or refresh token).
 - `POST /oauth/introspect` — token introspection.
 - `GET /oauth/userinfo` — OIDC userinfo endpoint (requires access token).
+- `POST /oauth/device_authorization` — Device Authorization endpoint.
+- `GET /oauth/device-verification` — Device Verification Endpoint.
 - `GET /.well-known/openid-configuration` — discovery document.
 - `GET /.well-known/jwks.json` — public JWKS for verifying tokens.
 
@@ -203,6 +216,7 @@ Typical tables:
 - `oauth_access_tokens` — issued access tokens (id, token, client_id, user_id, scopes, issued_at, expires_at, revoked, refresh_token_id?)
 - `oauth_refresh_tokens` — refresh tokens (id, token, client_id, user_id, scopes, expires_at, revoked, rotated_to)
 - `oauth_consents` — user consents per client (id, user_id, client_id, scopes)
+- `oauth_device_codes` — user consents per client (id, user_id, client_id, scopes...)
 
 ### Enforce single default client
 
@@ -314,7 +328,7 @@ Example `login.hbs` (already included in templates `oauth_templates/templates` u
 Also included `consent_denied.hbs` seen in the repo.
 
 If you want to use your custom template then just create a folder `templates/oauth_templates` under `resources`
-and create files `login.hbs`, `consent.hbs`, `consent_denied.hbs` as needed.
+and create files `login.hbs`, `consent.hbs`, `consent_denied.hbs`, `device_verification.hbs` as needed.
 
 Reference here: https://github.com/bittokazi/ktor-oauth-authorization-server/tree/main/src/main/resources/oauth2_templates
 
@@ -349,11 +363,11 @@ Below is a **list** with explanations of what each provider does.
 
 These providers configure the database-backed implementations for storing users, clients, and OAuth data.
 
-| Provider | Implementation | Description |
-|---------|----------------|-------------|
-| `OauthDatabaseConfiguration` | `DefaultOauthDatabaseConfiguration` | Holds database configuration for OAuth-related tables. |
+| Provider | Implementation | Description                                                            |
+|---------|----------------|------------------------------------------------------------------------|
+| `OauthDatabaseConfiguration` | `DefaultOauthDatabaseConfiguration` | Holds database configuration for OAuth-related tables.                 |
 | `OauthUserServiceDatabaseProvider` | `OauthUserServiceDatabaseProvider` | Database implementation for user lookup, authentication, and creation. |
-| `OauthClientServiceDatabaseProvider` | `OauthClientServiceDatabaseProvider` | Database-backed provider for OAuth client registration & lookup. |
+| `OauthClientServiceDatabaseProvider` | `OauthClientServiceDatabaseProvider` | Database-backed provider for OAuth client registration & lookup.       |
 
 ```kotlin
 dependencies {
@@ -379,6 +393,7 @@ These are the core services required for OAuth 2.0 flows.
 | `OauthAuthorizationCodeService` | `OauthAuthorizationCodeServiceDatabaseProvider` | Stores & retrieves authorization codes for Authorization Code Flow. |
 | `OauthTokenService` | `OauthTokenServiceDatabaseProvider` | Generates, persists, and retrieves access & refresh tokens. |
 | `OauthConsentService` | `OauthConsentServiceDatabaseProvider` | Manages user consent for scopes. |
+| `OauthDeviceCodeService` | `OauthDeviceCodeServiceDatabaseProvider` | Database-backed provider for OAuth Device auth registration & lookup.  |
 
 ```kotlin
 dependencies {
@@ -387,6 +402,7 @@ dependencies {
     provide<OauthAuthorizationCodeService>(OauthAuthorizationCodeServiceDatabaseProvider::class)
     provide<OauthTokenService>(OauthTokenServiceDatabaseProvider::class)
     provide<OauthConsentService>(OauthConsentServiceDatabaseProvider::class)
+    provide<OauthDeviceCodeService>(OauthDeviceCodeServiceDatabaseProvider::class)
 }
 ```
 
@@ -416,11 +432,12 @@ dependencies {
 
 These allow integration with your session and application login/logout flow.
 
-| Provider | Implementation | Purpose |
-|----------|----------------|---------|
+| Provider | Implementation | Purpose                                              |
+|----------|----------------|------------------------------------------------------|
 | `SessionCustomizer` | `SessionCustomizer` | Customize session behavior (storage, cookies, etc.). |
-| `OauthLoginOptionService` | `DefaultOauthLoginOptionService("/home")` | Controls the redirect location after login. |
-| `OauthLogoutActionService` | `DefaultOauthLogoutActionService("/home")` | Controls the redirect location after logout. |
+| `OauthLoginOptionService` | `DefaultOauthLoginOptionService("/home")` | Controls the redirect location after login.          |
+| `OauthLogoutActionService` | `DefaultOauthLogoutActionService("/home")` | Controls the redirect location after logout.         |
+| `TemplateCustomizer` | `TemplateCustomizer` | Mustache template customization provider             |
 
 ```kotlin
 dependencies {
@@ -520,8 +537,10 @@ import com.bittokazi.ktor.auth.services.providers.OauthUserService
 import com.bittokazi.ktor.auth.services.providers.database.OauthAuthorizationCodeServiceDatabaseProvider
 import com.bittokazi.ktor.auth.services.providers.database.OauthClientServiceDatabaseProvider
 import com.bittokazi.ktor.auth.services.providers.database.OauthConsentServiceDatabaseProvider
+import com.bittokazi.ktor.auth.services.providers.database.OauthDeviceCodeServiceDatabaseProvider
 import com.bittokazi.ktor.auth.services.providers.database.OauthTokenServiceDatabaseProvider
 import com.bittokazi.ktor.auth.services.providers.database.OauthUserServiceDatabaseProvider
+import com.nimbusds.jwt.JWTClaimsSet
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.dependencies
 
@@ -547,6 +566,7 @@ fun Application.module() {
         provide<OauthAuthorizationCodeService>(OauthAuthorizationCodeServiceDatabaseProvider::class)
         provide<OauthTokenService>(OauthTokenServiceDatabaseProvider::class)
         provide<OauthConsentService>(OauthConsentServiceDatabaseProvider::class)
+        provide<OauthDeviceCodeService>(OauthDeviceCodeServiceDatabaseProvider::class)
         provide<JwtTokenCustomizer>(JwtCustomizerImpl::class)
         provide(JwksProvider::class)
         provide(JwtVerifier::class)
@@ -574,9 +594,13 @@ fun Application.module() {
 class JwtCustomizerImpl: JwtTokenCustomizer {
     override fun customize(
         user: String?,
-        client: OAuthClientDTO?
-    ): Map<String, String> {
-        return mapOf("extra-scope" to "test-value")
+        client: OAuthClientDTO?,
+        claims: JWTClaimsSet.Builder
+    ): Map<String, Any> {
+        return mapOf(
+            "extra-scope" to "test-value",
+            "scope" to ("${claims.claims["scope"]} extraScope")
+        )
     }
 }
 ```
