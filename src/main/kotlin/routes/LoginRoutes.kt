@@ -4,6 +4,7 @@ import at.favre.lib.crypto.bcrypt.BCrypt
 import com.bittokazi.ktor.auth.OauthUserSession
 import com.bittokazi.ktor.auth.services.SessionCustomizer
 import com.bittokazi.ktor.auth.services.providers.OauthAuthorizationCodeService
+import com.bittokazi.ktor.auth.services.providers.OauthDeviceCodeService
 import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
 import com.bittokazi.ktor.auth.services.providers.OauthLogoutActionService
 import com.bittokazi.ktor.auth.services.providers.OauthTokenService
@@ -29,6 +30,7 @@ fun Application.loginRoutes() {
     val oauthLogoutActionService: OauthLogoutActionService? by dependencies
     val sessionCustomizer: SessionCustomizer by dependencies
     val oauthLoginOptionService: OauthLoginOptionService by dependencies
+    val oauthDeviceCodeService: OauthDeviceCodeService by dependencies
 
     routing {
         route("/oauth") {
@@ -93,16 +95,19 @@ fun Application.loginRoutes() {
 
             get("/logout") {
                 val session = call.sessions.get<OauthUserSession>()
-                var userId: String? = null
-                if (session != null) {
-                    userId = session.userId
-                    oauthAuthorizationCodeService.logoutAction(session.userId, call)
-                    oauthTokenService.logoutAction(session.userId, call)
-                }
-                call.sessions.clear("OAUTH_USER_SESSION")
-                call.sessions.clear("OAUTH_ORIGINAL_URL")
 
-                oauthLogoutActionService?.afterLogoutAction(userId, call)
+                if (session != null) {
+                    val userId = session.userId
+                    val clientId = call.request.queryParameters["client_id"]
+
+                    oauthAuthorizationCodeService.logoutAction(userId, clientId, call)
+                    oauthTokenService.logoutAction(userId, clientId, call)
+                    oauthDeviceCodeService.logoutAction(userId, clientId, call)
+                    call.sessions.clear("OAUTH_USER_SESSION")
+                    call.sessions.clear("OAUTH_ORIGINAL_URL")
+
+                    oauthLogoutActionService?.afterLogoutAction(userId, call)
+                }
             }
         }
     }

@@ -94,8 +94,13 @@ class OauthTokenServiceInMemoryProvider: OauthTokenService {
         return true
     }
 
-    override fun logoutAction(userId: String, call: ApplicationCall) {
-        accessTokens.removeIf { it.userId == userId }
-        refreshTokens.removeIf { it.userId == userId }
+    override fun logoutAction(userId: String, clientId: String?, call: ApplicationCall) {
+        clientId?.let {
+            accessTokens.removeIf { it.userId == userId && it.clientId == UUID.fromString(clientId) }
+            refreshTokens.removeIf { it.userId == userId && it.clientId == UUID.fromString(clientId) }
+        } ?: run {
+            accessTokens.removeIf { it.userId == userId }
+            refreshTokens.removeIf { it.userId == userId }
+        }
     }
 }

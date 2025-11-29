@@ -74,9 +74,18 @@ class OauthAuthorizationCodeServiceDatabaseProvider(
         } > 0
     }
 
-    override fun logoutAction(userId: String, call: ApplicationCall) {
-        oauthDatabaseConfiguration.dbQuery(call) {
-            OAuthAuthorizationCodes.deleteWhere { OAuthAuthorizationCodes.userId eq userId }
+    override fun logoutAction(userId: String, clientId: String?, call: ApplicationCall) {
+        clientId?.let {
+            oauthDatabaseConfiguration.dbQuery(call) {
+                OAuthAuthorizationCodes.deleteWhere {
+                    (OAuthAuthorizationCodes.userId eq userId)
+                        .and(OAuthAuthorizationCodes.clientId eq UUID.fromString(clientId))
+                }
+            }
+        } ?: run {
+            oauthDatabaseConfiguration.dbQuery(call) {
+                OAuthAuthorizationCodes.deleteWhere { OAuthAuthorizationCodes.userId eq userId }
+            }
         }
     }
 }

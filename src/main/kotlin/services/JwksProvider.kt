@@ -24,7 +24,7 @@ import java.util.Date
 import java.util.UUID
 
 interface JwtTokenCustomizer {
-    fun customize(user: String? = null, client: OAuthClientDTO?): Map<String, String>
+    fun customize(user: String? = null, client: OAuthClientDTO?, claims: JWTClaimsSet.Builder): Map<String, Any>
 }
 
 class JwksProvider(
@@ -92,7 +92,7 @@ class JwksProvider(
             .expirationTime(Date.from(now.plusSeconds(expiresInSeconds)))
             .claim("scope", scopes.joinToString(" "))
 
-        jwtTokenCustomizer?.customize(userId, client)?.forEach {
+        jwtTokenCustomizer?.customize(userId, client, claims)?.forEach {
             claims.claim(it.key, it.value)
         }
 

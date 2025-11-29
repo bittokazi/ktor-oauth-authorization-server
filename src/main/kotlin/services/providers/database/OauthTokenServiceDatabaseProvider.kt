@@ -154,10 +154,23 @@ class OauthTokenServiceDatabaseProvider(
         inserted > 0
     }
 
-    override fun logoutAction(userId: String, call: ApplicationCall) {
-        oauthDatabaseConfiguration.dbQuery(call) {
-            OAuthAccessTokens.deleteWhere { OAuthAccessTokens.userId eq userId }
-            OAuthRefreshTokens.deleteWhere { OAuthRefreshTokens.userId eq userId }
+    override fun logoutAction(userId: String, clientId: String?, call: ApplicationCall) {
+        clientId?.let {
+            oauthDatabaseConfiguration.dbQuery(call) {
+                OAuthAccessTokens.deleteWhere {
+                    (OAuthAccessTokens.userId eq userId)
+                        .and(OAuthAccessTokens.clientId eq UUID.fromString(clientId))
+                }
+                OAuthRefreshTokens.deleteWhere {
+                    (OAuthRefreshTokens.userId eq userId)
+                        .and(OAuthRefreshTokens.clientId eq UUID.fromString(clientId))
+                }
+            }
+        } ?: run {
+            oauthDatabaseConfiguration.dbQuery(call) {
+                OAuthAccessTokens.deleteWhere { OAuthAccessTokens.userId eq userId }
+                OAuthRefreshTokens.deleteWhere { OAuthRefreshTokens.userId eq userId }
+            }
         }
     }
 }
