@@ -73,7 +73,7 @@ Start by adding in `build.gradle.kts`:
 // =========================
 // ⭐ OAuth / OpenID Server Library
 // =========================
-implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.0.8")
+implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.0.9")
 ```
 
 Also make sure you have the following libraries as well. Below is a complete example of complete `build.gradle.kts`
@@ -92,6 +92,9 @@ implementation("io.ktor:ktor-server-auth-jwt:<ktor_version>")
 implementation("io.ktor:ktor-server-mustache:<ktor_version>")
 implementation("io.ktor:ktor-server-config-yaml:<ktor_version>")
 implementation("io.ktor:ktor-server-di:<ktor_version>")
+
+implementation("io.ktor:ktor-server-forwarded-header:${ktorVersion}")
+implementation("io.ktor:ktor-server-default-headers:${ktorVersion}")
 
 // Ktor Client
 implementation("io.ktor:ktor-client-core:<ktor_version>")
@@ -120,7 +123,7 @@ implementation("com.nimbusds:nimbus-jose-jwt:10.6")
 // =========================
 // ⭐ OAuth / OpenID Server Library
 // =========================
-implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.0.8")
+implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.0.9")
 ```
 
 Replace `<...>` with concrete versions used in your project.
@@ -249,6 +252,31 @@ jwk:
   key-id: "my-key-id"
   private-key-path: certificates/default_private_key_pkcs8.pem # provide your own certificate otherwise will be generated on everytime on app start
   public-key-path: certificates/default_public_key.pem # provide your own certificate otherwise will be generated on everytime on app start
+```
+
+#### Follow these instructions to create your own certificates.
+1. Open terminal and execute the command listed in second point. you can set your desired filenames here.
+   RECOMMENDED that You save/create these certificate files in a different directory rather than in this repository
+   directory, please put the absolute path to the certificate folder in docker-compose.yml file in the volumes property.
+
+example:
+volumes:
+- /path/to/certificates/directory:/certs
+
+
+2. Command to create new certificate for oauth2 authorization server:
+
+openssl genrsa -out private_key.pem 4096 &&
+openssl rsa -pubout -in private_key.pem -out public_key.pem &&
+openssl pkcs8 -topk8 -in private_key.pem -inform pem -out private_key_pkcs8.pem -outform pem -nocrypt
+
+3. Mount the certificates from the certs directory like below example in application.yaml:
+
+```yaml
+jwk:
+  key-id: "my-key-id"
+  private-key-path: /certs/default_private_key_pkcs8.pem
+  public-key-path: /certs/default_public_key.pem
 ```
 
 ---
@@ -581,12 +609,13 @@ fun Application.module() {
     }
 
     configureOauth2AuthorizationServer(
-        configureSerialization = true,
+        configureSerialization = true, // if you already configured serialization plugin then make it false
         defaultLoginRoutes = true,
         defaultAuthorizeRoute = true,
         defaultOidcRoute = true,
         defaultTokenRoute = true,
-        defaultConsentRoute = true
+        defaultConsentRoute = true,
+        configureForwardHeaderAndDefaultHeadersPlugin = true // if you configured these two plugins then make it false
     )
 
     configureRouting()
