@@ -55,8 +55,8 @@ fun Application.authorizeRoute() {
             }
 
             if (client.isDefault && call.getBaseUrl()
-                .replace("http://", "").replace("https//", "").replace("www.", "") != redirectUri
-                    .replace("http://", "").replace("https//", "").replace("www.", "")
+                .replace("http://", "").replace("https://", "").replace("www.", "") != redirectUri
+                    .replace("http://", "").replace("https://", "").replace("www.", "")
                     .split("/").firstOrNull()) {
                 return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid redirect_uri"))
             }
