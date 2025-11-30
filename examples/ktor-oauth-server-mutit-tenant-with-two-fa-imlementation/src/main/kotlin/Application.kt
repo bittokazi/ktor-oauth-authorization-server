@@ -107,7 +107,8 @@ fun Application.module() {
         defaultOidcRoute = true,
         defaultTokenRoute = true,
         defaultConsentRoute = true,
-        defaultDeviceAuthorizationRoute = true
+        defaultDeviceAuthorizationRoute = true,
+        configureForwardHeaderAndDefaultHeadersPlugin = true
     )
 
     configureRouting()

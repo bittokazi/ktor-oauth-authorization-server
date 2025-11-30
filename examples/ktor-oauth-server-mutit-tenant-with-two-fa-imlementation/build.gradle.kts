@@ -37,13 +37,15 @@ dependencies {
     implementation("io.ktor:ktor-server-di:${libs.versions.ktor}")
     implementation("io.ktor:ktor-server-mustache:${libs.versions.ktor}")
     implementation("io.ktor:ktor-serialization-gson:${libs.versions.ktor}")
+    implementation("io.ktor:ktor-server-forwarded-header:${libs.versions.ktor}")
+    implementation("io.ktor:ktor-server-default-headers:${libs.versions.ktor}")
     implementation("at.favre.lib:bcrypt:0.10.2")
     implementation("com.nimbusds:nimbus-jose-jwt:10.6")
 
     if(testKtorOauthAuthLibrary) {
-        implementation(files("../../build/libs/ktor-oauth-authorization-server-1.0.8.jar"))
+        implementation(files("../../build/libs/ktor-oauth-authorization-server-1.0.9.jar"))
     } else {
-        implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.0.8")
+        implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.0.9")
     }
 
     implementation("io.ktor:ktor-client-core:3.3.2")
