@@ -51,7 +51,7 @@ fun Application.tokenRoutes() {
                         }
 
                         if (!client.grantTypes.contains("client_credentials")) {
-                            call.respond(HttpStatusCode.Unauthorized, mutableMapOf("message" to "Grant type not permitted"))
+                            call.respond(HttpStatusCode.Unauthorized, mutableMapOf("error" to "Grant type not permitted"))
                             return@post
                         }
 
@@ -106,7 +106,7 @@ fun Application.tokenRoutes() {
                         }
 
                         if (!client.grantTypes.contains("authorization_code")) {
-                            call.respond(HttpStatusCode.Unauthorized, mutableMapOf("message" to "Grant type not permitted"))
+                            call.respond(HttpStatusCode.Unauthorized, mutableMapOf("error" to "Grant type not permitted"))
                             return@post
                         }
 
@@ -222,7 +222,7 @@ fun Application.tokenRoutes() {
                         }
 
                         if (!client.grantTypes.contains("refresh_token")) {
-                            call.respond(HttpStatusCode.Unauthorized, mutableMapOf("message" to "Grant type not permitted"))
+                            call.respond(HttpStatusCode.Unauthorized, mutableMapOf("error" to "Grant type not permitted"))
                             return@post
                         }
 
@@ -330,7 +330,7 @@ fun Application.tokenRoutes() {
                         }
 
                         if (!client.grantTypes.contains("urn:ietf:params:oauth:grant-type:device_code")) {
-                            call.respond(HttpStatusCode.Unauthorized, mutableMapOf("message" to "Grant type not permitted"))
+                            call.respond(HttpStatusCode.Unauthorized, mutableMapOf("error" to "Grant type not permitted"))
                             return@post
                         }
 
@@ -345,7 +345,7 @@ fun Application.tokenRoutes() {
                         if(oauthDeviceCodeEntity != null && !oauthDeviceCodeEntity.isDeviceAuthorized && !oauthDeviceCodeEntity.consumed)
                             return@post call.respond(
                                 HttpStatusCode.BadRequest,
-                                mutableMapOf("message" to "authorization_pending")
+                                mutableMapOf("error" to "authorization_pending")
                             )
 
                         oauthDeviceCodeEntity =
@@ -359,7 +359,7 @@ fun Application.tokenRoutes() {
                         if (oauthDeviceCodeEntity != null && oauthDeviceCodeEntity.expiresAt < Instant.now()) {
                             return@post call.respond(
                                 HttpStatusCode.BadRequest,
-                                mutableMapOf("message" to "expired_token")
+                                mutableMapOf("error" to "expired_token")
                             )
                         }
 
@@ -449,7 +449,7 @@ fun Application.tokenRoutes() {
 
                         return@post call.respond(
                             HttpStatusCode.Unauthorized,
-                            mutableMapOf("message" to "Unauthorized")
+                            mutableMapOf("error" to "Unauthorized")
                         )
                     }
 
