@@ -5,7 +5,6 @@ import com.bittokazi.ktor.auth.services.providers.AuthorizationCodeDTO
 import com.bittokazi.ktor.auth.services.providers.OauthAuthorizationCodeService
 import io.ktor.server.application.ApplicationCall
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.javatime.timestamp
 import java.time.Instant
 import java.util.*
@@ -75,17 +74,6 @@ class OauthAuthorizationCodeServiceDatabaseProvider(
     }
 
     override fun logoutAction(userId: String, clientId: String?, call: ApplicationCall) {
-        clientId?.let {
-            oauthDatabaseConfiguration.dbQuery(call) {
-                OAuthAuthorizationCodes.deleteWhere {
-                    (OAuthAuthorizationCodes.userId eq userId)
-                        .and(OAuthAuthorizationCodes.clientId eq UUID.fromString(clientId))
-                }
-            }
-        } ?: run {
-            oauthDatabaseConfiguration.dbQuery(call) {
-                OAuthAuthorizationCodes.deleteWhere { OAuthAuthorizationCodes.userId eq userId }
-            }
-        }
+
     }
 }
