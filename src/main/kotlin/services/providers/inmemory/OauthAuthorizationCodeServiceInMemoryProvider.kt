@@ -44,10 +44,6 @@ class OauthAuthorizationCodeServiceInMemoryProvider(): OauthAuthorizationCodeSer
     }
 
     override fun logoutAction(userId: String, clientId: String?, call: ApplicationCall) {
-        clientId?.let {
-            codes.removeIf { it.userId == userId && it.clientId == UUID.fromString(clientId) }
-        } ?: run {
-            codes.removeIf { it.userId == userId }
-        }
+
     }
 }

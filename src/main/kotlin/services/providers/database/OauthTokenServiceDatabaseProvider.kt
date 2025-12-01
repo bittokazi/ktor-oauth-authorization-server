@@ -6,7 +6,6 @@ import com.bittokazi.ktor.auth.services.providers.OauthTokenService
 import com.bittokazi.ktor.auth.services.providers.RefreshTokenDTO
 import io.ktor.server.application.ApplicationCall
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.javatime.timestamp
 import java.time.Instant
 import java.time.Instant.now
@@ -155,22 +154,6 @@ class OauthTokenServiceDatabaseProvider(
     }
 
     override fun logoutAction(userId: String, clientId: String?, call: ApplicationCall) {
-        clientId?.let {
-            oauthDatabaseConfiguration.dbQuery(call) {
-                OAuthAccessTokens.deleteWhere {
-                    (OAuthAccessTokens.userId eq userId)
-                        .and(OAuthAccessTokens.clientId eq UUID.fromString(clientId))
-                }
-                OAuthRefreshTokens.deleteWhere {
-                    (OAuthRefreshTokens.userId eq userId)
-                        .and(OAuthRefreshTokens.clientId eq UUID.fromString(clientId))
-                }
-            }
-        } ?: run {
-            oauthDatabaseConfiguration.dbQuery(call) {
-                OAuthAccessTokens.deleteWhere { OAuthAccessTokens.userId eq userId }
-                OAuthRefreshTokens.deleteWhere { OAuthRefreshTokens.userId eq userId }
-            }
-        }
+
     }
 }
