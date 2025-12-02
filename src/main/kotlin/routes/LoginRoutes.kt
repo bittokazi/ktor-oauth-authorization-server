@@ -113,6 +113,7 @@ fun Application.loginRoutes() {
                     call.sessions.clear("OAUTH_ORIGINAL_URL")
 
                     oauthLogoutActionService?.afterLogoutAction(userId, call)
+                    return@get
                 }
 
                 oauthLogoutActionService?.afterLogoutAction(null, call)
