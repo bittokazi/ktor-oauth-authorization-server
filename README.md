@@ -73,7 +73,7 @@ Start by adding in `build.gradle.kts`:
 // =========================
 // ⭐ OAuth / OpenID Server Library
 // =========================
-implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.1.1")
+implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.1.2")
 ```
 
 Also make sure you have the following libraries as well. Below is a complete example of complete `build.gradle.kts`
@@ -123,7 +123,7 @@ implementation("com.nimbusds:nimbus-jose-jwt:10.6")
 // =========================
 // ⭐ OAuth / OpenID Server Library
 // =========================
-implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.1.1")
+implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.1.2")
 ```
 
 Replace `<...>` with concrete versions used in your project.
