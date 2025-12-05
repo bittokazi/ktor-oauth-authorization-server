@@ -7,6 +7,7 @@ import com.bittokazi.ktor.auth.services.providers.OauthClientService
 import com.bittokazi.ktor.auth.services.providers.OauthDeviceCodeService
 import com.bittokazi.ktor.auth.services.providers.OauthTokenService
 import com.bittokazi.ktor.auth.services.providers.OauthUserService
+import com.bittokazi.ktor.auth.utils.Utils
 import com.bittokazi.ktor.auth.utils.getBaseUrl
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
@@ -75,7 +76,7 @@ fun Application.tokenRoutes() {
                         oauthTokenService.storeAccessToken(
                             token = accessToken,
                             clientId = client.id,
-                            userId = null,                // no user
+                            userId = null,
                             scopes = scopes,
                             expiresAt = expiry,
                             call
@@ -95,15 +96,9 @@ fun Application.tokenRoutes() {
                         val code = params["code"] ?: return@post call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Missing code"))
                         val redirectUri = params["redirect_uri"] ?: return@post call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Missing redirect_uri"))
                         val clientId = params["client_id"] ?: return@post call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Missing client_id"))
-                        val clientSecret = params["client_secret"] ?: return@post call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Missing client_secret"))
 
                         val client = oauthClientService.findByClientId(clientId, call)
                             ?: return@post call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Invalid client_id"))
-
-                        if (client.clientType == "confidential" && client.clientSecret != clientSecret) {
-                            call.respond(HttpStatusCode.Unauthorized, mutableMapOf("error" to "Unauthorized"))
-                            return@post
-                        }
 
                         if (!client.grantTypes.contains("authorization_code")) {
                             call.respond(HttpStatusCode.Unauthorized, mutableMapOf("error" to "Grant type not permitted"))
@@ -118,7 +113,43 @@ fun Application.tokenRoutes() {
                             return@post
                         }
 
-                        if (codeData.redirectUri != redirectUri || codeData.consumed) {
+                        if (client.clientType == "confidential") {
+                            val clientSecret = params["client_secret"] ?: return@post call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Missing client_secret"))
+
+                            if (client.clientSecret != clientSecret) {
+                                call.respond(HttpStatusCode.Unauthorized, mutableMapOf("error" to "Unauthorized"))
+                                return@post
+                            }
+                        } else if (client.clientType == "public") {
+                            val codeVerifier = params["code_verifier"] ?: return@post call.respond(HttpStatusCode.BadRequest,
+                                mutableMapOf("error" to "Missing code_verifier"))
+
+                            if (codeData.codeChallenge == null) {
+                                call.respond(HttpStatusCode.BadRequest,
+                                    mutableMapOf("error" to "Missing code_challenge"))
+
+                                return@post
+                            }
+
+                            if (codeData.codeChallengeMethod == "plain") {
+                                if (codeVerifier != codeData.codeChallenge) {
+                                    call.respond(HttpStatusCode.Unauthorized, mutableMapOf("error" to "Invalid code challenge"))
+                                    return@post
+                                }
+                            } else if (codeData.codeChallengeMethod == "S256") {
+                                if (!Utils.verifyPkce(codeVerifier, codeData.codeChallenge)) {
+                                    call.respond(HttpStatusCode.Unauthorized, mutableMapOf("error" to "Invalid code challenge"))
+                                    return@post
+                                }
+                            }
+                        }
+
+                        if (codeData.redirectUri != redirectUri) {
+                            call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Invalid redirect_uri"))
+                            return@post
+                        }
+
+                        if (codeData.consumed) {
                             call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Invalid or used code"))
                             return@post
                         }

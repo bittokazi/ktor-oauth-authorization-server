@@ -69,6 +69,15 @@ fun Application.authorizeRoute() {
                 return@get call.respond(HttpStatusCode.Unauthorized, mutableMapOf("message" to "Unauthorized"))
             }
 
+            if (client.clientType == "public") {
+                if (codeChallenge == null || codeChallengeMethod == null) {
+                    return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Missing code challenge properties"))
+                }
+                if (!listOf("S256", "plain").contains(codeChallengeMethod)) {
+                    return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid code challenge method"))
+                }
+            }
+
             // Check user session
             val session = call.sessions.get<OauthUserSession>()
             if (session == null || session.expiresAt < System.currentTimeMillis()) {
