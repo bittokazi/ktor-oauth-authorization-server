@@ -242,14 +242,17 @@ fun Application.tokenRoutes() {
                             ?: return@post call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Missing refresh_token"))
 
                         val clientId = params["client_id"] ?: return@post call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Missing client_id"))
-                        val clientSecret = params["client_secret"] ?: return@post call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Missing client_secret"))
 
                         val client = oauthClientService.findByClientId(clientId, call)
                             ?: return@post call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Invalid client_id"))
 
-                        if (client.clientType == "confidential" && client.clientSecret != clientSecret) {
-                            call.respond(HttpStatusCode.Unauthorized, mutableMapOf("error" to "Unauthorized"))
-                            return@post
+                        if (client.clientType == "confidential") {
+                            val clientSecret = params["client_secret"] ?: return@post call.respond(HttpStatusCode.BadRequest, mutableMapOf("error" to "Missing client_secret"))
+
+                            if (client.clientSecret != clientSecret) {
+                                call.respond(HttpStatusCode.Unauthorized, mutableMapOf("error" to "Unauthorized"))
+                                return@post
+                            }
                         }
 
                         if (!client.grantTypes.contains("refresh_token")) {
