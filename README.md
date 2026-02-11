@@ -749,7 +749,7 @@ https://github.com/bittokazi/ktor-oauth-authorization-server/tree/main/examples/
 
 ## 🧩 Example Ktor IDP server with Multi Tenancy and 2fa implementation
 
-https://github.com/bittokazi/ktor-oauth-authorization-server/tree/main/examples/ktor-oauth-server-mutit-tenant-with-two-fa-implementation
+https://github.com/bittokazi/ktor-oauth-authorization-server/tree/main/examples/ktor-oauth-server-multi-tenant-with-two-fa-implementation
 
 ---
 
