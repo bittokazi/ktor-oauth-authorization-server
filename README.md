@@ -541,7 +541,7 @@ class UserService(
 
 Your full provider configuration looks like this:
 
-https://github.com/bittokazi/ktor-oauth-authorization-server/blob/main/examples/ktor-oauth-server-databse-imlementation/src/main/kotlin/Application.kt
+https://github.com/bittokazi/ktor-oauth-authorization-server/blob/main/examples/ktor-oauth-server-database-implementation/src/main/kotlin/Application.kt
 
 ```kotlin
 package com.bittokazi.example.ktor
@@ -737,19 +737,19 @@ fun Application.userRoutes() {
 
 ## 🧩 Example Database Providers
 
-https://github.com/bittokazi/ktor-oauth-authorization-server/tree/main/examples/ktor-oauth-server-databse-imlementation
+https://github.com/bittokazi/ktor-oauth-authorization-server/tree/main/examples/ktor-oauth-server-database-implementation
 
 ---
 
 ## 🧩 Example InMemory Providers
 
-https://github.com/bittokazi/ktor-oauth-authorization-server/tree/main/examples/ktor-oauth-server-inmemory-imlementation
+https://github.com/bittokazi/ktor-oauth-authorization-server/tree/main/examples/ktor-oauth-server-inmemory-implementation
 
 ---
 
 ## 🧩 Example Ktor IDP server with Multi Tenancy and 2fa implementation
 
-https://github.com/bittokazi/ktor-oauth-authorization-server/tree/main/examples/ktor-oauth-server-mutit-tenant-with-two-fa-imlementation
+https://github.com/bittokazi/ktor-oauth-authorization-server/tree/main/examples/ktor-oauth-server-mutit-tenant-with-two-fa-implementation
 
 ---
 
