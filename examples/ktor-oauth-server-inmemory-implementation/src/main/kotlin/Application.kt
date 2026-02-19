@@ -61,6 +61,8 @@ fun Application.module() {
                         clientSecret = "password",
                         clientName = "backend",
                         clientType = "confidential",
+                        isDefault = true, // Only one client should be default
+                        consentRequired = true,
                         scopes = listOf("openid", "profile", "email"),
                         redirectUris = listOf("http://localhost:8080/callback"),
                         grantTypes = listOf("authorization_code", "client_credentials", "refresh_token")
