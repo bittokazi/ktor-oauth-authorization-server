@@ -33,19 +33,22 @@ dependencies {
     implementation(libs.exposed.java.time)
     implementation(libs.ktor.server.mustach)
 
-    implementation("io.ktor:ktor-utils:${libs.versions.ktor}")
-    implementation("io.ktor:ktor-server-auth:${libs.versions.ktor}")
-    implementation("io.ktor:ktor-server-auth-jwt:${libs.versions.ktor}")
-    implementation("io.ktor:ktor-serialization-gson:${libs.versions.ktor}")
-    implementation("at.favre.lib:bcrypt:0.10.2")
+    implementation(libs.ktor.utils)
+    implementation(libs.ktor.server.auth)
+    implementation(libs.ktor.server.auth.jwt)
+    implementation(libs.ktor.serialization.gson)
+    implementation(libs.bcrypt)
 
-    implementation("com.zaxxer:HikariCP:4.0.3")
-    implementation("org.flywaydb:flyway-core:9.22.3")
+    implementation(libs.hikari.cp)
+    implementation(libs.flyway.core)
 
-    implementation("com.nimbusds:nimbus-jose-jwt:10.6")
+    implementation(libs.nimbus.jose.jwt)
 
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.testcontainers.postgresql)
+    testImplementation(libs.testcontainers.junit.jupiter)
 }
 
 java {
