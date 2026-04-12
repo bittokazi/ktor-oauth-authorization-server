@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      checks: write
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 21
@@ -22,5 +23,19 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
+      - name: Run Tests
+        id: tests
+        run: gradle check
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: JUnit Tests
+          path: '**/build/test-results/test/*.xml'
+          reporter: java-junit
+
       - name: Build Ktor Oauth Library
         run: gradle build
+        if: steps.tests.outcome == 'success'
+
