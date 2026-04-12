@@ -32,7 +32,7 @@ class OauthAuthorizationCodeServiceDatabaseProviderTest {
     @Test
     fun `createCode successfully creates authorization code`() {
         val result = codeService.createCode(
-            code = "auth_code_123",
+            code = "auth_code_1231",
             clientId = clientId,
             userId = "user_1",
             redirectUri = "https://example.com/callback",
