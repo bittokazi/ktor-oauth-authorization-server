@@ -5,8 +5,12 @@ import com.bittokazi.ktor.auth.database.OauthDatabaseConfiguration
 import com.bittokazi.ktor.auth.services.providers.OAuthUserDTO
 import com.bittokazi.ktor.auth.services.providers.OauthUserService
 import io.ktor.server.application.ApplicationCall
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.javatime.timestamp
+import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.javatime.timestamp
+import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.update
 import java.util.*
 
 object OAuthUsers : Table("oauth_users") {
@@ -25,7 +29,14 @@ class OauthUserServiceDatabaseProvider(
     val oauthDatabaseConfiguration: OauthDatabaseConfiguration
 ): OauthUserService {
 
-    fun createUser(username: String, password: String, email: String?, firstName: String?, lastName: String?, call: ApplicationCall): OAuthUserDTO =
+    fun createUser(
+        username: String,
+        password: String,
+        email: String?,
+        firstName: String?,
+        lastName: String?,
+        call: ApplicationCall
+    ): OAuthUserDTO =
         oauthDatabaseConfiguration.dbQuery(call) {
             val id = UUID.randomUUID().toString()
             OAuthUsers.insert {
@@ -39,7 +50,10 @@ class OauthUserServiceDatabaseProvider(
             OAuthUserDTO(id, username, email, firstName, lastName, true)
         }
 
-    override fun findByUsername(username: String, call: ApplicationCall): OAuthUserDTO? = oauthDatabaseConfiguration.dbQuery(call) {
+    override fun findByUsername(
+        username: String,
+        call: ApplicationCall
+    ): OAuthUserDTO? = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthUsers.selectAll().where { OAuthUsers.username eq username }
             .map {
                 OAuthUserDTO(
@@ -54,7 +68,10 @@ class OauthUserServiceDatabaseProvider(
             }.singleOrNull()
     }
 
-    override fun findById(id: String, call: ApplicationCall): OAuthUserDTO? = oauthDatabaseConfiguration.dbQuery(call) {
+    override fun findById(
+        id: String,
+        call: ApplicationCall
+    ): OAuthUserDTO? = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthUsers.selectAll().where { OAuthUsers.id eq id }
             .map {
                 OAuthUserDTO(
@@ -69,7 +86,14 @@ class OauthUserServiceDatabaseProvider(
             }.singleOrNull()
     }
 
-    fun updateUser(userId: String, username: String, email: String?, firstName: String?, lastName: String?, call: ApplicationCall): Boolean =
+    fun updateUser(
+        userId: String,
+        username: String,
+        email: String?,
+        firstName: String?,
+        lastName: String?,
+        call: ApplicationCall
+    ): Boolean =
         oauthDatabaseConfiguration.dbQuery(call) {
             OAuthUsers.update({ OAuthUsers.id eq userId }) {
                 it[OAuthUsers.username] = username
@@ -79,7 +103,11 @@ class OauthUserServiceDatabaseProvider(
             } > 0
         }
 
-    fun updateUserPassword(userId: String, password: String, call: ApplicationCall): Boolean =
+    fun updateUserPassword(
+        userId: String,
+        password: String,
+        call: ApplicationCall
+    ): Boolean =
         oauthDatabaseConfiguration.dbQuery(call) {
             OAuthUsers.update({ OAuthUsers.id eq userId }) {
                 it[OAuthUsers.passwordHash] = BCrypt.withDefaults().hashToString(12, password.toCharArray())

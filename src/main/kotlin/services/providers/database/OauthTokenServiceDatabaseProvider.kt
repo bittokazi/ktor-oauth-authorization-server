@@ -5,13 +5,22 @@ import com.bittokazi.ktor.auth.services.providers.AccessTokenDTO
 import com.bittokazi.ktor.auth.services.providers.OauthTokenService
 import com.bittokazi.ktor.auth.services.providers.RefreshTokenDTO
 import io.ktor.server.application.ApplicationCall
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.javatime.timestamp
+import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.javatime.timestamp
+import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.update
 import java.time.Instant
 import java.time.Instant.now
 import java.util.*
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.toJavaUuid
+import kotlin.uuid.toKotlinUuid
 
+@OptIn(ExperimentalUuidApi::class)
 object OAuthAccessTokens : Table("oauth_access_tokens") {
+    @OptIn(ExperimentalUuidApi::class)
     val id = uuid("id")
     val token = text("token").uniqueIndex()
     val clientId = uuid("client_id")
@@ -22,6 +31,7 @@ object OAuthAccessTokens : Table("oauth_access_tokens") {
     val revoked = bool("revoked").default(false)
 }
 
+@OptIn(ExperimentalUuidApi::class)
 object OAuthRefreshTokens : Table("oauth_refresh_tokens") {
     val id = uuid("id")
     val token = text("token").uniqueIndex()
@@ -33,6 +43,7 @@ object OAuthRefreshTokens : Table("oauth_refresh_tokens") {
     val rotatedTo = (uuid("rotated_to") references this.id).nullable()
 }
 
+@OptIn(ExperimentalUuidApi::class)
 class OauthTokenServiceDatabaseProvider(
     val oauthDatabaseConfiguration: OauthDatabaseConfiguration
 ): OauthTokenService {
@@ -47,9 +58,9 @@ class OauthTokenServiceDatabaseProvider(
     ): Boolean =
         oauthDatabaseConfiguration.dbQuery(call) {
             OAuthAccessTokens.insert {
-                it[OAuthAccessTokens.id] = UUID.randomUUID()
+                it[OAuthAccessTokens.id] = UUID.randomUUID().toKotlinUuid()
                 it[OAuthAccessTokens.token] = token
-                it[OAuthAccessTokens.clientId] = clientId
+                it[OAuthAccessTokens.clientId] = clientId.toKotlinUuid()
                 it[OAuthAccessTokens.userId] = userId
                 it[OAuthAccessTokens.scopes] = scopes.joinToString(",")
                 it[OAuthAccessTokens.issuedAt] = now()
@@ -57,7 +68,10 @@ class OauthTokenServiceDatabaseProvider(
             }.insertedCount > 0
         }
 
-    override fun revokeAccessToken(token: String, call: ApplicationCall): Boolean = oauthDatabaseConfiguration.dbQuery(call) {
+    override fun revokeAccessToken(
+        token: String,
+        call: ApplicationCall
+    ): Boolean = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthAccessTokens.update({ OAuthAccessTokens.token eq token }) {
             it[revoked] = true
         } > 0
@@ -73,9 +87,9 @@ class OauthTokenServiceDatabaseProvider(
     ): UUID = oauthDatabaseConfiguration.dbQuery(call) {
         val id = UUID.randomUUID()
         OAuthRefreshTokens.insert {
-            it[OAuthRefreshTokens.id] = id
+            it[OAuthRefreshTokens.id] = id.toKotlinUuid()
             it[OAuthRefreshTokens.token] = token
-            it[OAuthRefreshTokens.clientId] = clientId
+            it[OAuthRefreshTokens.clientId] = clientId.toKotlinUuid()
             it[OAuthRefreshTokens.userId] = userId
             it[OAuthRefreshTokens.scopes] = scopes.joinToString(",")
             it[OAuthRefreshTokens.expiresAt] = expiresAt
@@ -84,15 +98,18 @@ class OauthTokenServiceDatabaseProvider(
         id
     }
 
-    override fun findByAccessToken(token: String, call: ApplicationCall): AccessTokenDTO? = oauthDatabaseConfiguration.dbQuery(call) {
+    override fun findByAccessToken(
+        token: String,
+        call: ApplicationCall
+    ): AccessTokenDTO? = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthAccessTokens
             .selectAll()
             .where { OAuthAccessTokens.token eq token }
             .map {
                 AccessTokenDTO(
-                    id = it[OAuthAccessTokens.id],
+                    id = it[OAuthAccessTokens.id].toJavaUuid(),
                     token = it[OAuthAccessTokens.token],
-                    clientId = it[OAuthAccessTokens.clientId],
+                    clientId = it[OAuthAccessTokens.clientId].toJavaUuid(),
                     userId = it[OAuthAccessTokens.userId],
                     scopes = it[OAuthAccessTokens.scopes].split(","),
                     expiresAt = it[OAuthAccessTokens.expiresAt],
@@ -101,25 +118,31 @@ class OauthTokenServiceDatabaseProvider(
             }.singleOrNull()
     }
 
-    override fun findByRefreshToken(token: String, call: ApplicationCall): RefreshTokenDTO? = oauthDatabaseConfiguration.dbQuery(call) {
+    override fun findByRefreshToken(
+        token: String,
+        call: ApplicationCall
+    ): RefreshTokenDTO? = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthRefreshTokens
             .selectAll()
             .where { OAuthRefreshTokens.token eq token }
             .map {
                 RefreshTokenDTO(
-                    id = it[OAuthRefreshTokens.id],
+                    id = it[OAuthRefreshTokens.id].toJavaUuid(),
                     token = it[OAuthRefreshTokens.token],
-                    clientId = it[OAuthRefreshTokens.clientId],
+                    clientId = it[OAuthRefreshTokens.clientId].toJavaUuid(),
                     userId = it[OAuthRefreshTokens.userId],
                     scopes = it[OAuthRefreshTokens.scopes].split(","),
                     expiresAt = it[OAuthRefreshTokens.expiresAt],
                     revoked = it[OAuthRefreshTokens.revoked],
-                    rotatedTo = it[OAuthRefreshTokens.rotatedTo]
+                    rotatedTo = it[OAuthRefreshTokens.rotatedTo]?.toJavaUuid()
                 )
             }.singleOrNull()
     }
 
-    override fun revokeRefreshToken(token: String, call: ApplicationCall): Boolean = oauthDatabaseConfiguration.dbQuery(call) {
+    override fun revokeRefreshToken(
+        token: String,
+        call: ApplicationCall
+    ): Boolean = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthRefreshTokens.update({ OAuthRefreshTokens.token eq token }) {
             it[revoked] = true
         } > 0
@@ -136,7 +159,7 @@ class OauthTokenServiceDatabaseProvider(
 
         val newId = UUID.randomUUID()
         val inserted = OAuthRefreshTokens.insert {
-            it[id] = newId
+            it[id] = newId.toKotlinUuid()
             it[token] = newToken
             it[clientId] = old[OAuthRefreshTokens.clientId]
             it[userId] = old[OAuthRefreshTokens.userId]
@@ -147,7 +170,7 @@ class OauthTokenServiceDatabaseProvider(
         if (inserted > 0) {
             OAuthRefreshTokens.update({ OAuthRefreshTokens.token eq oldToken }) {
                 it[revoked] = true
-                it[rotatedTo] = newId
+                it[rotatedTo] = newId.toKotlinUuid()
             }
         }
         inserted > 0

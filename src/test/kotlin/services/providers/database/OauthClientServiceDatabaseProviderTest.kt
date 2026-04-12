@@ -3,8 +3,9 @@ package com.bittokazi.ktor.auth.services.providers.database
 import com.bittokazi.ktor.auth.config.TestOauthDatabaseConfiguration
 import com.bittokazi.ktor.auth.services.providers.database.OAuthClients.isDefault
 import io.ktor.server.application.*
-import org.jetbrains.exposed.exceptions.ExposedSQLException
-import org.jetbrains.exposed.sql.update
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
+import org.jetbrains.exposed.v1.jdbc.update
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
