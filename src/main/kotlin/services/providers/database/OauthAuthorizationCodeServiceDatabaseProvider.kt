@@ -4,13 +4,21 @@ import com.bittokazi.ktor.auth.database.OauthDatabaseConfiguration
 import com.bittokazi.ktor.auth.services.providers.AuthorizationCodeDTO
 import com.bittokazi.ktor.auth.services.providers.OauthAuthorizationCodeService
 import io.ktor.server.application.ApplicationCall
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.javatime.timestamp
+import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.javatime.timestamp
+import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.update
 import java.time.Instant
 import java.util.*
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.toJavaUuid
+import kotlin.uuid.toKotlinUuid
 
 object OAuthAuthorizationCodes : Table("oauth_authorization_codes") {
     val code = varchar("code", 255)
+    @OptIn(ExperimentalUuidApi::class)
     val clientId = uuid("client_id")
     val userId = varchar("user_id", 255)
     val redirectUri = text("redirect_uri")
@@ -25,6 +33,7 @@ class OauthAuthorizationCodeServiceDatabaseProvider(
     val oauthDatabaseConfiguration: OauthDatabaseConfiguration
 ): OauthAuthorizationCodeService {
 
+    @OptIn(ExperimentalUuidApi::class)
     override fun createCode(
         code: String,
         clientId: UUID,
@@ -38,7 +47,7 @@ class OauthAuthorizationCodeServiceDatabaseProvider(
     ): Boolean = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthAuthorizationCodes.insert {
             it[OAuthAuthorizationCodes.code] = code
-            it[OAuthAuthorizationCodes.clientId] = clientId
+            it[OAuthAuthorizationCodes.clientId] = clientId.toKotlinUuid()
             it[OAuthAuthorizationCodes.userId] = userId
             it[OAuthAuthorizationCodes.redirectUri] = redirectUri
             it[OAuthAuthorizationCodes.scopes] = scopes.joinToString(",")
@@ -48,14 +57,18 @@ class OauthAuthorizationCodeServiceDatabaseProvider(
         }.insertedCount > 0
     }
 
-    override fun findByCode(code: String, call: ApplicationCall): AuthorizationCodeDTO? = oauthDatabaseConfiguration.dbQuery(call) {
+    @OptIn(ExperimentalUuidApi::class)
+    override fun findByCode(
+        code: String,
+        call: ApplicationCall
+    ): AuthorizationCodeDTO? = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthAuthorizationCodes
             .selectAll()
             .where { OAuthAuthorizationCodes.code eq code }
             .map {
                 AuthorizationCodeDTO(
                     code = it[OAuthAuthorizationCodes.code],
-                    clientId = it[OAuthAuthorizationCodes.clientId],
+                    clientId = it[OAuthAuthorizationCodes.clientId].toJavaUuid(),
                     userId = it[OAuthAuthorizationCodes.userId],
                     redirectUri = it[OAuthAuthorizationCodes.redirectUri],
                     scopes = it[OAuthAuthorizationCodes.scopes].split(","),

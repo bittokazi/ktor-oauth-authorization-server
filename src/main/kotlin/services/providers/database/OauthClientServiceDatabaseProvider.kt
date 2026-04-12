@@ -4,10 +4,18 @@ import com.bittokazi.ktor.auth.database.OauthDatabaseConfiguration
 import com.bittokazi.ktor.auth.services.providers.OAuthClientDTO
 import com.bittokazi.ktor.auth.services.providers.OauthClientService
 import io.ktor.server.application.ApplicationCall
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.javatime.timestamp
+import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.javatime.timestamp
+import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.update
 import java.util.*
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.toJavaUuid
+import kotlin.uuid.toKotlinUuid
 
+@OptIn(ExperimentalUuidApi::class)
 object OAuthClients : Table("oauth_clients") {
     val id = uuid("id")
     val clientId = varchar("client_id", 100).uniqueIndex()
@@ -25,6 +33,7 @@ object OAuthClients : Table("oauth_clients") {
     val consentRequired = bool("consent_required")
 }
 
+@OptIn(ExperimentalUuidApi::class)
 class OauthClientServiceDatabaseProvider(
     val oauthDatabaseConfiguration: OauthDatabaseConfiguration
 ): OauthClientService {
@@ -44,7 +53,7 @@ class OauthClientServiceDatabaseProvider(
     ): OAuthClientDTO = oauthDatabaseConfiguration.dbQuery(call) {
         val id = UUID.randomUUID()
         OAuthClients.insert {
-            it[OAuthClients.id] = id
+            it[OAuthClients.id] = id.toKotlinUuid()
             it[OAuthClients.clientId] = clientId
             it[OAuthClients.clientSecret] = clientSecret
             it[OAuthClients.clientName] = name
@@ -65,7 +74,7 @@ class OauthClientServiceDatabaseProvider(
         OAuthClients.selectAll().where { OAuthClients.clientId eq clientId }
             .map {
                 OAuthClientDTO(
-                    it[OAuthClients.id],
+                    it[OAuthClients.id].toJavaUuid(),
                     it[OAuthClients.clientId],
                     it[OAuthClients.clientName],
                     it[OAuthClients.clientType],
@@ -85,7 +94,7 @@ class OauthClientServiceDatabaseProvider(
         OAuthClients.selectAll().where { OAuthClients.isDefault eq true }
             .map {
                 OAuthClientDTO(
-                    it[OAuthClients.id],
+                    it[OAuthClients.id].toJavaUuid(),
                     it[OAuthClients.clientId],
                     it[OAuthClients.clientName],
                     it[OAuthClients.clientType],

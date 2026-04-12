@@ -4,11 +4,20 @@ import com.bittokazi.ktor.auth.database.OauthDatabaseConfiguration
 import com.bittokazi.ktor.auth.services.providers.OauthDeviceCodeDTO
 import com.bittokazi.ktor.auth.services.providers.OauthDeviceCodeService
 import io.ktor.server.application.ApplicationCall
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.javatime.timestamp
+import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.javatime.timestamp
+import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.update
 import java.time.Instant
 import java.util.*
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.toJavaUuid
+import kotlin.uuid.toKotlinUuid
 
+@OptIn(ExperimentalUuidApi::class)
 object OAuthDeviceCodes : Table("oauth_device_codes") {
     val id = uuid("id")
     val clientId = uuid("client_id")
@@ -21,6 +30,7 @@ object OAuthDeviceCodes : Table("oauth_device_codes") {
     val userCode = varchar("user_code", 128)
 }
 
+@OptIn(ExperimentalUuidApi::class)
 class OauthDeviceCodeServiceDatabaseProvider(
     val oauthDatabaseConfiguration: OauthDatabaseConfiguration
 ): OauthDeviceCodeService {
@@ -34,7 +44,7 @@ class OauthDeviceCodeServiceDatabaseProvider(
         userCode: String
     ): Boolean = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthDeviceCodes.insert {
-            it[OAuthDeviceCodes.clientId] = clientId
+            it[OAuthDeviceCodes.clientId] = clientId.toKotlinUuid()
             it[OAuthDeviceCodes.scopes] = scopes.joinToString(",")
             it[OAuthDeviceCodes.expiresAt] = expiresAt
             it[OAuthDeviceCodes.deviceCode] = deviceCode
@@ -55,8 +65,8 @@ class OauthDeviceCodeServiceDatabaseProvider(
             }
             .map {
                 OauthDeviceCodeDTO(
-                    id = it[OAuthDeviceCodes.id],
-                    clientId = it[OAuthDeviceCodes.clientId],
+                    id = it[OAuthDeviceCodes.id].toJavaUuid(),
+                    clientId = it[OAuthDeviceCodes.clientId].toJavaUuid(),
                     userId = it[OAuthDeviceCodes.userId],
                     scopes = it[OAuthDeviceCodes.scopes].split(","),
                     expiresAt = it[OAuthDeviceCodes.expiresAt],
@@ -83,8 +93,8 @@ class OauthDeviceCodeServiceDatabaseProvider(
             }
             .map {
                 OauthDeviceCodeDTO(
-                    id = it[OAuthDeviceCodes.id],
-                    clientId = it[OAuthDeviceCodes.clientId],
+                    id = it[OAuthDeviceCodes.id].toJavaUuid(),
+                    clientId = it[OAuthDeviceCodes.clientId].toJavaUuid(),
                     userId = it[OAuthDeviceCodes.userId],
                     scopes = it[OAuthDeviceCodes.scopes].split(","),
                     expiresAt = it[OAuthDeviceCodes.expiresAt],
