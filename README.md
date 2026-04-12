@@ -73,7 +73,7 @@ Start by adding in `build.gradle.kts`:
 // =========================
 // ⭐ OAuth / OpenID Server Library
 // =========================
-implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.1.6")
+implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.1.4")
 ```
 
 Also make sure you have the following libraries as well. Below is a complete example of complete `build.gradle.kts`
@@ -108,7 +108,7 @@ implementation("ch.qos.logback:logback-classic:<logback_version>")
 // =========================
 implementation("org.jetbrains.exposed:exposed-core:<exposed_version>")
 implementation("org.jetbrains.exposed:exposed-jdbc:<exposed_version>")
-implementation("org.jetbrains.exposed:exposed-java-time:<exposed_version>")
+implementation("org.jetbrains.exposed:exposed-java-time:0.61.0")
 
 implementation("org.postgresql:postgresql:<postgres_version>")
 implementation("com.zaxxer:HikariCP:4.0.3")
@@ -123,7 +123,7 @@ implementation("com.nimbusds:nimbus-jose-jwt:10.6")
 // =========================
 // ⭐ OAuth / OpenID Server Library
 // =========================
-implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.1.6")
+implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.1.4")
 ```
 
 Replace `<...>` with concrete versions used in your project.
