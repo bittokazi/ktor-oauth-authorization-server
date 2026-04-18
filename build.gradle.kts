@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.bittokazi.sonartype"
-version = "1.1.5"
+version = "1.1.6"
 
 application {
     mainClass = "io.ktor.server.netty.EngineMain"
