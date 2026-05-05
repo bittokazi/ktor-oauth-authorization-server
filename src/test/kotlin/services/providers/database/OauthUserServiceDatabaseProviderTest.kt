@@ -1,7 +1,8 @@
-package com.bittokazi.ktor.auth.services.providers.database
+package services.providers.database
 
 import at.favre.lib.crypto.bcrypt.BCrypt
-import com.bittokazi.ktor.auth.config.TestOauthDatabaseConfiguration
+import com.bittokazi.ktor.auth.services.providers.database.OauthUserServiceDatabaseProvider
+import config.TestOauthDatabaseConfiguration
 import io.ktor.server.application.ApplicationCall
 import org.junit.After
 import org.junit.Before

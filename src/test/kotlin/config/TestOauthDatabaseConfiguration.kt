@@ -1,4 +1,4 @@
-package com.bittokazi.ktor.auth.config
+package config
 
 import com.bittokazi.ktor.auth.database.DefaultOauthDatabaseConfiguration
 import com.bittokazi.ktor.auth.database.OauthDatabaseConfiguration

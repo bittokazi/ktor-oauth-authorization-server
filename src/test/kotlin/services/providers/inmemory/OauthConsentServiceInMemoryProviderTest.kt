@@ -1,5 +1,6 @@
-package com.bittokazi.ktor.auth.services.providers.inmemory
+package services.providers.inmemory
 
+import com.bittokazi.ktor.auth.services.providers.inmemory.OauthConsentServiceInMemoryProvider
 import io.ktor.server.application.ApplicationCall
 import org.junit.Assert.*
 import org.junit.Before
@@ -165,4 +166,3 @@ class OauthConsentServiceInMemoryProviderTest {
         assertEquals("write", result2?.get(0))
     }
 }
-

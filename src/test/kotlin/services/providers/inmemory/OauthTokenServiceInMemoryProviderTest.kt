@@ -1,7 +1,6 @@
-package com.bittokazi.ktor.auth.services.providers.inmemory
+package services.providers.inmemory
 
-import com.bittokazi.ktor.auth.services.providers.AccessTokenDTO
-import com.bittokazi.ktor.auth.services.providers.RefreshTokenDTO
+import com.bittokazi.ktor.auth.services.providers.inmemory.OauthTokenServiceInMemoryProvider
 import io.ktor.server.application.ApplicationCall
 import org.junit.Assert.*
 import org.junit.Before
@@ -204,4 +203,3 @@ class OauthTokenServiceInMemoryProviderTest {
         // No exception should be thrown
     }
 }
-

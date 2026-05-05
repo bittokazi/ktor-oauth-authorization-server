@@ -1,6 +1,6 @@
-package com.bittokazi.ktor.auth.services.providers.inmemory
+package services.providers.inmemory
 
-import com.bittokazi.ktor.auth.services.providers.AuthorizationCodeDTO
+import com.bittokazi.ktor.auth.services.providers.inmemory.OauthAuthorizationCodeServiceInMemoryProvider
 import io.ktor.server.application.ApplicationCall
 import org.junit.Assert.*
 import org.junit.Before

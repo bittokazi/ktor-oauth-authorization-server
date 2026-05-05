@@ -1,6 +1,6 @@
-package com.bittokazi.ktor.auth.services.providers.inmemory
+package services.providers.inmemory
 
-import com.bittokazi.ktor.auth.services.providers.OauthDeviceCodeDTO
+import com.bittokazi.ktor.auth.services.providers.inmemory.OauthDeviceCodeServiceInMemoryProvider
 import io.ktor.server.application.ApplicationCall
 import org.junit.Assert.*
 import org.junit.Before
@@ -217,4 +217,3 @@ class OauthDeviceCodeServiceInMemoryProviderTest {
         assertEquals("USER_CODE_B", code2?.userCode)
     }
 }
-
