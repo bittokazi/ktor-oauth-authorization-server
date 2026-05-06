@@ -7,6 +7,9 @@ plugins {
     id("signing")
     id("maven-publish")
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
+
+    // for code coverage
+    jacoco
 }
 
 group = "com.bittokazi.sonartype"
@@ -47,30 +50,29 @@ dependencies {
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockito.junit.jupiter)
     testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.testcontainers.junit.jupiter)
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
-    testImplementation("io.ktor:ktor-server-test-host-jvm:3.4.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
-    testImplementation("org.mockito:mockito-junit-jupiter:5.5.0")
-
-    // JUnit 5 Version
-    val junitVersion = "5.10.0"
-
-    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
-    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.10.0")
-
-    // This is often what's missing for the "Could not start Gradle Test Executor" error
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-
-    // Mockito for JUnit 5
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.jupiter.params)
+    testRuntimeOnly(libs.junit.vintage.engine)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 tasks.test {
     useJUnitPlatform {
         includeEngines("junit-jupiter", "junit-vintage")
+    }
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
     }
 }
 
