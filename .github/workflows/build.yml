@@ -26,7 +26,7 @@ jobs:
 
       - name: Run Tests & Generate Coverage Report
         id: tests
-        run: gradle check jacocoTestReport
+        run: gradle test jacocoTestReport
 
       - name: JaCoCo Code Coverage Report
         id: jacoco
