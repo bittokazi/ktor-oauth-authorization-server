@@ -12,7 +12,6 @@ import org.mockito.junit.MockitoJUnitRunner
 
 @RunWith(MockitoJUnitRunner::class)
 class DefaultTokenGeneratorFactoryTest {
-
     @Mock
     lateinit var clientCredentialsGenerator: TokenGenerator
 
@@ -29,12 +28,13 @@ class DefaultTokenGeneratorFactoryTest {
 
     @Before
     fun setUp() {
-        tokenGeneratorFactory = DefaultTokenGeneratorFactory(
-            clientCredentialsGenerator,
-            authorizationCodeGenerator,
-            refreshTokenGenerator,
-            deviceCodeGenerator
-        )
+        tokenGeneratorFactory =
+            DefaultTokenGeneratorFactory(
+                clientCredentialsGenerator,
+                authorizationCodeGenerator,
+                refreshTokenGenerator,
+                deviceCodeGenerator,
+            )
     }
 
     @Test
@@ -107,4 +107,3 @@ class DefaultTokenGeneratorFactoryTest {
         assertEquals(deviceCodeGenerator, deviceCode)
     }
 }
-

@@ -1,14 +1,13 @@
 package services.providers.inmemory
 
-import org.junit.Test
-import org.junit.Assert.*
-import org.mockito.Mockito
-import io.ktor.server.application.ApplicationCall
 import com.bittokazi.ktor.auth.services.providers.OAuthUserDTO
 import com.bittokazi.ktor.auth.services.providers.inmemory.OauthUserServiceInMemoryProvider
+import io.ktor.server.application.ApplicationCall
+import org.junit.Assert.*
+import org.junit.Test
+import org.mockito.Mockito
 
 class OauthUserServiceInMemoryProviderTest {
-
     private val mockCall = Mockito.mock(ApplicationCall::class.java)
 
     @Test

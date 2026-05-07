@@ -9,20 +9,20 @@ import org.mockito.Mockito
 import java.util.UUID
 
 class OauthClientServiceInMemoryProviderTest {
-
     private val mockCall = Mockito.mock(ApplicationCall::class.java)
 
     @Test
     fun `findByClientId returns client when exists`() {
-        val client1 = OAuthClientDTO(
-            id = UUID.randomUUID(),
-            clientId = "client_1",
-            clientName = "Client One",
-            clientType = "public",
-            redirectUris = listOf("https://example.com/callback"),
-            scopes = listOf("read", "write"),
-            grantTypes = listOf("authorization_code")
-        )
+        val client1 =
+            OAuthClientDTO(
+                id = UUID.randomUUID(),
+                clientId = "client_1",
+                clientName = "Client One",
+                clientType = "public",
+                redirectUris = listOf("https://example.com/callback"),
+                scopes = listOf("read", "write"),
+                grantTypes = listOf("authorization_code"),
+            )
         val provider = OauthClientServiceInMemoryProvider(mutableListOf(client1))
 
         val result = provider.findByClientId("client_1", mockCall)
@@ -33,15 +33,16 @@ class OauthClientServiceInMemoryProviderTest {
 
     @Test
     fun `findByClientId returns null when not found`() {
-        val client1 = OAuthClientDTO(
-            id = UUID.randomUUID(),
-            clientId = "client_1",
-            clientName = "Client One",
-            clientType = "public",
-            redirectUris = listOf("https://example.com/callback"),
-            scopes = listOf("read"),
-            grantTypes = listOf("authorization_code")
-        )
+        val client1 =
+            OAuthClientDTO(
+                id = UUID.randomUUID(),
+                clientId = "client_1",
+                clientName = "Client One",
+                clientType = "public",
+                redirectUris = listOf("https://example.com/callback"),
+                scopes = listOf("read"),
+                grantTypes = listOf("authorization_code"),
+            )
         val provider = OauthClientServiceInMemoryProvider(mutableListOf(client1))
 
         val result = provider.findByClientId("nonexistent", mockCall)
@@ -50,24 +51,26 @@ class OauthClientServiceInMemoryProviderTest {
 
     @Test
     fun `findDefaultClient returns first client as default`() {
-        val client1 = OAuthClientDTO(
-            id = UUID.randomUUID(),
-            clientId = "client_1",
-            clientName = "Client One",
-            clientType = "public",
-            redirectUris = listOf("https://example.com/callback"),
-            scopes = listOf("read"),
-            grantTypes = listOf("authorization_code")
-        )
-        val client2 = OAuthClientDTO(
-            id = UUID.randomUUID(),
-            clientId = "client_2",
-            clientName = "Client Two",
-            clientType = "confidential",
-            redirectUris = listOf("https://example2.com/callback"),
-            scopes = listOf("write"),
-            grantTypes = listOf("client_credentials")
-        )
+        val client1 =
+            OAuthClientDTO(
+                id = UUID.randomUUID(),
+                clientId = "client_1",
+                clientName = "Client One",
+                clientType = "public",
+                redirectUris = listOf("https://example.com/callback"),
+                scopes = listOf("read"),
+                grantTypes = listOf("authorization_code"),
+            )
+        val client2 =
+            OAuthClientDTO(
+                id = UUID.randomUUID(),
+                clientId = "client_2",
+                clientName = "Client Two",
+                clientType = "confidential",
+                redirectUris = listOf("https://example2.com/callback"),
+                scopes = listOf("write"),
+                grantTypes = listOf("client_credentials"),
+            )
         val provider = OauthClientServiceInMemoryProvider(mutableListOf(client1, client2))
 
         val result = provider.findDefaultClient(mockCall)
@@ -78,26 +81,28 @@ class OauthClientServiceInMemoryProviderTest {
 
     @Test
     fun `init sets first client as default`() {
-        val client1 = OAuthClientDTO(
-            id = UUID.randomUUID(),
-            clientId = "client_1",
-            clientName = "Client One",
-            clientType = "public",
-            redirectUris = listOf("https://example.com/callback"),
-            scopes = listOf("read"),
-            grantTypes = listOf("authorization_code"),
-            isDefault = false
-        )
-        val client2 = OAuthClientDTO(
-            id = UUID.randomUUID(),
-            clientId = "client_2",
-            clientName = "Client Two",
-            clientType = "public",
-            redirectUris = listOf("https://example2.com/callback"),
-            scopes = listOf("write"),
-            grantTypes = listOf("authorization_code"),
-            isDefault = false
-        )
+        val client1 =
+            OAuthClientDTO(
+                id = UUID.randomUUID(),
+                clientId = "client_1",
+                clientName = "Client One",
+                clientType = "public",
+                redirectUris = listOf("https://example.com/callback"),
+                scopes = listOf("read"),
+                grantTypes = listOf("authorization_code"),
+                isDefault = false,
+            )
+        val client2 =
+            OAuthClientDTO(
+                id = UUID.randomUUID(),
+                clientId = "client_2",
+                clientName = "Client Two",
+                clientType = "public",
+                redirectUris = listOf("https://example2.com/callback"),
+                scopes = listOf("write"),
+                grantTypes = listOf("authorization_code"),
+                isDefault = false,
+            )
         val provider = OauthClientServiceInMemoryProvider(mutableListOf(client1, client2))
 
         assertTrue(provider.clients[0].isDefault)
@@ -113,35 +118,36 @@ class OauthClientServiceInMemoryProviderTest {
 
     @Test
     fun `init sets isDefault correctly for multiple clients`() {
-        val clients = mutableListOf(
-            OAuthClientDTO(
-                id = UUID.randomUUID(),
-                clientId = "client_1",
-                clientName = "Client One",
-                clientType = "public",
-                redirectUris = listOf("https://example.com/callback"),
-                scopes = listOf("read"),
-                grantTypes = listOf("authorization_code")
-            ),
-            OAuthClientDTO(
-                id = UUID.randomUUID(),
-                clientId = "client_2",
-                clientName = "Client Two",
-                clientType = "public",
-                redirectUris = listOf("https://example2.com/callback"),
-                scopes = listOf("write"),
-                grantTypes = listOf("authorization_code")
-            ),
-            OAuthClientDTO(
-                id = UUID.randomUUID(),
-                clientId = "client_3",
-                clientName = "Client Three",
-                clientType = "public",
-                redirectUris = listOf("https://example3.com/callback"),
-                scopes = listOf("admin"),
-                grantTypes = listOf("client_credentials")
+        val clients =
+            mutableListOf(
+                OAuthClientDTO(
+                    id = UUID.randomUUID(),
+                    clientId = "client_1",
+                    clientName = "Client One",
+                    clientType = "public",
+                    redirectUris = listOf("https://example.com/callback"),
+                    scopes = listOf("read"),
+                    grantTypes = listOf("authorization_code"),
+                ),
+                OAuthClientDTO(
+                    id = UUID.randomUUID(),
+                    clientId = "client_2",
+                    clientName = "Client Two",
+                    clientType = "public",
+                    redirectUris = listOf("https://example2.com/callback"),
+                    scopes = listOf("write"),
+                    grantTypes = listOf("authorization_code"),
+                ),
+                OAuthClientDTO(
+                    id = UUID.randomUUID(),
+                    clientId = "client_3",
+                    clientName = "Client Three",
+                    clientType = "public",
+                    redirectUris = listOf("https://example3.com/callback"),
+                    scopes = listOf("admin"),
+                    grantTypes = listOf("client_credentials"),
+                ),
             )
-        )
         val provider = OauthClientServiceInMemoryProvider(clients)
 
         for (i in clients.indices) {
@@ -155,26 +161,27 @@ class OauthClientServiceInMemoryProviderTest {
 
     @Test
     fun `findByClientId works with multiple clients`() {
-        val clients = mutableListOf(
-            OAuthClientDTO(
-                id = UUID.randomUUID(),
-                clientId = "client_1",
-                clientName = "Client One",
-                clientType = "public",
-                redirectUris = listOf("https://example.com/callback"),
-                scopes = listOf("read"),
-                grantTypes = listOf("authorization_code")
-            ),
-            OAuthClientDTO(
-                id = UUID.randomUUID(),
-                clientId = "client_2",
-                clientName = "Client Two",
-                clientType = "public",
-                redirectUris = listOf("https://example2.com/callback"),
-                scopes = listOf("write"),
-                grantTypes = listOf("authorization_code")
+        val clients =
+            mutableListOf(
+                OAuthClientDTO(
+                    id = UUID.randomUUID(),
+                    clientId = "client_1",
+                    clientName = "Client One",
+                    clientType = "public",
+                    redirectUris = listOf("https://example.com/callback"),
+                    scopes = listOf("read"),
+                    grantTypes = listOf("authorization_code"),
+                ),
+                OAuthClientDTO(
+                    id = UUID.randomUUID(),
+                    clientId = "client_2",
+                    clientName = "Client Two",
+                    clientType = "public",
+                    redirectUris = listOf("https://example2.com/callback"),
+                    scopes = listOf("write"),
+                    grantTypes = listOf("authorization_code"),
+                ),
             )
-        )
         val provider = OauthClientServiceInMemoryProvider(clients)
 
         val result1 = provider.findByClientId("client_1", mockCall)
@@ -184,4 +191,3 @@ class OauthClientServiceInMemoryProviderTest {
         assertEquals("Client Two", result2?.clientName)
     }
 }
-

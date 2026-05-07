@@ -29,7 +29,7 @@ interface JwtTokenCustomizer {
         user: String? = null,
         client: OAuthClientDTO?,
         claims: JWTClaimsSet.Builder,
-        call: ApplicationCall?
+        call: ApplicationCall?,
     ): Map<String, Any>
 }
 
@@ -37,9 +37,8 @@ class JwksProvider(
     @Property("jwk.private-key-path") val privateKeyPath: String? = null,
     @Property("jwk.public-key-path") val publicKeyPath: String? = null,
     @Property("jwk.key-id") val keyId: String?,
-    val jwtTokenCustomizer: JwtTokenCustomizer? = null
+    val jwtTokenCustomizer: JwtTokenCustomizer? = null,
 ) {
-
     val rsaJwk: RSAKey
 
     init {
@@ -55,16 +54,18 @@ class JwksProvider(
             rsaPrivateKey = PemUtils.loadPrivateKey(privateKeyPath)
             rsaPublicKey = PemUtils.loadPublicKey(publicKeyPath)
 
-            rsaJwk = RSAKey.Builder(rsaPublicKey)
-                .privateKey(rsaPrivateKey)
-                .keyID(tmpKeyId)
-                .build()
+            rsaJwk =
+                RSAKey.Builder(rsaPublicKey)
+                    .privateKey(rsaPrivateKey)
+                    .keyID(tmpKeyId)
+                    .build()
         } else {
             val keyPair = generateRsaKey()
-            rsaJwk = RSAKey.Builder(keyPair.public as RSAPublicKey)
-                .privateKey(keyPair.private)
-                .keyID(tmpKeyId)
-                .build()
+            rsaJwk =
+                RSAKey.Builder(keyPair.public as RSAPublicKey)
+                    .privateKey(keyPair.private)
+                    .keyID(tmpKeyId)
+                    .build()
         }
     }
 
@@ -88,16 +89,17 @@ class JwksProvider(
         client: OAuthClientDTO? = null,
         tokenType: TokenType,
         user: OAuthUserDTO? = null,
-        call: ApplicationCall
+        call: ApplicationCall,
     ): String {
         val now = Instant.now()
-        val claims = JWTClaimsSet.Builder()
-            .issuer(issuer)
-            .subject(subject)
-            .audience(audience)
-            .issueTime(Date.from(now))
-            .expirationTime(Date.from(now.plusSeconds(expiresInSeconds)))
-            .claim("scope", scopes.joinToString(" "))
+        val claims =
+            JWTClaimsSet.Builder()
+                .issuer(issuer)
+                .subject(subject)
+                .audience(audience)
+                .issueTime(Date.from(now))
+                .expirationTime(Date.from(now.plusSeconds(expiresInSeconds)))
+                .claim("scope", scopes.joinToString(" "))
 
         jwtTokenCustomizer?.customize(userId, client, claims, call)?.forEach {
             claims.claim(it.key, it.value)
@@ -115,17 +117,19 @@ class JwksProvider(
             }
         }
 
-        val claimSet = claims
-            .jwtID(UUID.randomUUID().toString())
-            .build()
+        val claimSet =
+            claims
+                .jwtID(UUID.randomUUID().toString())
+                .build()
 
         val signer = RSASSASigner(rsaJwk.toPrivateKey())
-        val signedJWT = SignedJWT(
-            JWSHeader.Builder(JWSAlgorithm.RS256)
-                .keyID(rsaJwk.keyID)
-                .build(),
-            claimSet
-        )
+        val signedJWT =
+            SignedJWT(
+                JWSHeader.Builder(JWSAlgorithm.RS256)
+                    .keyID(rsaJwk.keyID)
+                    .build(),
+                claimSet,
+            )
 
         signedJWT.sign(signer)
         return signedJWT.serialize()
@@ -133,7 +137,6 @@ class JwksProvider(
 }
 
 object PemUtils {
-
     fun loadPrivateKey(filename: String?): RSAPrivateKey {
         val keyBytes = parsePEM(loadTextFile(filename!!), "PRIVATE KEY")
         val keySpec = PKCS8EncodedKeySpec(keyBytes)
@@ -148,11 +151,15 @@ object PemUtils {
         return kf.generatePublic(keySpec) as RSAPublicKey
     }
 
-    private fun parsePEM(pem: String, type: String): ByteArray {
-        val cleanPem = pem
-            .replace("-----BEGIN $type-----", "")
-            .replace("-----END $type-----", "")
-            .replace("\\s".toRegex(), "")
+    private fun parsePEM(
+        pem: String,
+        type: String,
+    ): ByteArray {
+        val cleanPem =
+            pem
+                .replace("-----BEGIN $type-----", "")
+                .replace("-----END $type-----", "")
+                .replace("\\s".toRegex(), "")
         return Base64.getDecoder().decode(cleanPem)
     }
 
@@ -165,8 +172,9 @@ object PemUtils {
         }
 
         // 2) Resource inside the JAR (from src/main/resources)
-        val resourceStream = object {}.javaClass.classLoader.getResourceAsStream(path)
-            ?: error("File '$path' not found on filesystem or resources")
+        val resourceStream =
+            object {}.javaClass.classLoader.getResourceAsStream(path)
+                ?: error("File '$path' not found on filesystem or resources")
 
         return resourceStream.bufferedReader().readText()
     }

@@ -13,7 +13,7 @@ data class AuthorizationCodeDTO(
     val codeChallenge: String?,
     val codeChallengeMethod: String?,
     val expiresAt: Instant,
-    val consumed: Boolean
+    val consumed: Boolean,
 )
 
 interface OauthAuthorizationCodeService {
@@ -26,12 +26,22 @@ interface OauthAuthorizationCodeService {
         expiresAt: Instant,
         challenge: String?,
         challengeMethod: String?,
-        call: ApplicationCall
+        call: ApplicationCall,
     ): Boolean
 
-    fun findByCode(code: String, call: ApplicationCall): AuthorizationCodeDTO?
+    fun findByCode(
+        code: String,
+        call: ApplicationCall,
+    ): AuthorizationCodeDTO?
 
-    fun consumeCode(code: String, call: ApplicationCall): Boolean
+    fun consumeCode(
+        code: String,
+        call: ApplicationCall,
+    ): Boolean
 
-    fun logoutAction(userId: String, clientId: String?, call: ApplicationCall)
+    fun logoutAction(
+        userId: String,
+        clientId: String?,
+        call: ApplicationCall,
+    )
 }

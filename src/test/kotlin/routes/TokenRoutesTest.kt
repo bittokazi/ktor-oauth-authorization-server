@@ -31,7 +31,6 @@ import org.mockito.kotlin.given
 @RunWith(MockitoJUnitRunner::class)
 @ExtendWith(MockitoExtension::class)
 class TokenRoutesTest {
-
     @Mock
     lateinit var tokenGeneratorFactory: TokenGeneratorFactory
 
@@ -48,111 +47,118 @@ class TokenRoutesTest {
 
     @ParameterizedTest
     @ValueSource(strings = ["client_credentials", "urn:ietf:params:oauth:grant-type:device_code", "refresh_token"])
-    fun `POST oauth token - success`(grantType: String) = testApplication {
-        given(tokenGeneratorFactory.getGenerator(grantType))
-            .willReturn(tokenGenerator)
+    fun `POST oauth token - success`(grantType: String) =
+        testApplication {
+            given(tokenGeneratorFactory.getGenerator(grantType))
+                .willReturn(tokenGenerator)
 
-        given(tokenGenerator.generateTokens(any(), any()))
-            .willReturn(
-                Result.Success(
-                    outcome = mapOf("access_token" to "abc123")
+            given(tokenGenerator.generateTokens(any(), any()))
+                .willReturn(
+                    Result.Success(
+                        outcome = mapOf("access_token" to "abc123"),
+                    ),
                 )
-            )
 
-        application {
-            configureSerialization()
+            application {
+                configureSerialization()
 
-            dependencies {
-                provide { tokenGeneratorFactory }
-                provide { tokenIntrospectService }
-                provide { tokenRevokeService }
+                dependencies {
+                    provide { tokenGeneratorFactory }
+                    provide { tokenIntrospectService }
+                    provide { tokenRevokeService }
+                }
+                tokenRoutes()
             }
-            tokenRoutes()
-        }
 
-        val response = client.post("/oauth/token") {
-            contentType(ContentType.Application.FormUrlEncoded)
-            setBody(
-                listOf(
-                    "grant_type" to grantType
-                ).formUrlEncode()
-            )
-        }
+            val response =
+                client.post("/oauth/token") {
+                    contentType(ContentType.Application.FormUrlEncoded)
+                    setBody(
+                        listOf(
+                            "grant_type" to grantType,
+                        ).formUrlEncode(),
+                    )
+                }
 
-        Assertions.assertEquals(HttpStatusCode.OK, response.status)
-        Assertions.assertEquals(true, response.bodyAsText().contains("abc123"))
-    }
+            Assertions.assertEquals(HttpStatusCode.OK, response.status)
+            Assertions.assertEquals(true, response.bodyAsText().contains("abc123"))
+        }
 
     @Test
-    fun `POST oauth token - missing grant_type - error`() = testApplication {
-        application {
-            configureSerialization()
+    fun `POST oauth token - missing grant_type - error`() =
+        testApplication {
+            application {
+                configureSerialization()
 
-            dependencies {
-                provide { tokenGeneratorFactory }
-                provide { tokenIntrospectService }
-                provide { tokenRevokeService }
+                dependencies {
+                    provide { tokenGeneratorFactory }
+                    provide { tokenIntrospectService }
+                    provide { tokenRevokeService }
+                }
+                tokenRoutes()
             }
-            tokenRoutes()
-        }
 
-        val response = client.post("/oauth/token") {
-            contentType(ContentType.Application.FormUrlEncoded)
-            setBody(
-                listOf<Pair<String, String>>().formUrlEncode()
-            )
-        }
+            val response =
+                client.post("/oauth/token") {
+                    contentType(ContentType.Application.FormUrlEncoded)
+                    setBody(
+                        listOf<Pair<String, String>>().formUrlEncode(),
+                    )
+                }
 
-        Assertions.assertEquals(HttpStatusCode.BadRequest, response.status)
-        Assertions.assertEquals(true, response.bodyAsText().contains("Unsupported grant type"))
-    }
+            Assertions.assertEquals(HttpStatusCode.BadRequest, response.status)
+            Assertions.assertEquals(true, response.bodyAsText().contains("Unsupported grant type"))
+        }
 
     @Test
-    fun `POST oauth token - unknown grant type - error`() = testApplication {
-        application {
-            configureSerialization()
+    fun `POST oauth token - unknown grant type - error`() =
+        testApplication {
+            application {
+                configureSerialization()
 
-            dependencies {
-                provide { tokenGeneratorFactory }
-                provide { tokenIntrospectService }
-                provide { tokenRevokeService }
+                dependencies {
+                    provide { tokenGeneratorFactory }
+                    provide { tokenIntrospectService }
+                    provide { tokenRevokeService }
+                }
+                tokenRoutes()
             }
-            tokenRoutes()
-        }
 
-        val response = client.post("/oauth/token") {
-            contentType(ContentType.Application.FormUrlEncoded)
-            setBody(
-                listOf(
-                    "grant_type" to "authorization_code"
-                ).formUrlEncode()
-            )
-        }
+            val response =
+                client.post("/oauth/token") {
+                    contentType(ContentType.Application.FormUrlEncoded)
+                    setBody(
+                        listOf(
+                            "grant_type" to "authorization_code",
+                        ).formUrlEncode(),
+                    )
+                }
 
-        Assertions.assertEquals(HttpStatusCode.BadRequest, response.status)
-        Assertions.assertEquals(true, response.bodyAsText().contains("Unsupported grant type"))
-    }
+            Assertions.assertEquals(HttpStatusCode.BadRequest, response.status)
+            Assertions.assertEquals(true, response.bodyAsText().contains("Unsupported grant type"))
+        }
 
     @ParameterizedTest
     @CsvSource(
         "BadRequest,Invalid credentials",
         "Unauthorized,Unauthorized",
         "Forbidden,Forbidden",
-        "InternalServerError,Internal server error"
+        "InternalServerError,Internal server error",
     )
     fun `POST oauth token - generator failure with different status codes`(
         statusCodeName: String,
-        errorMessage: String
+        errorMessage: String,
     ) = testApplication {
-        val statusCode = HttpStatusCode.fromValue(
-            when (statusCodeName) {
-                "BadRequest" -> 400
-                "Unauthorized" -> 401
-                "Forbidden" -> 403
-                "InternalServerError" -> 500
-                else -> 500
-            }
-        )
+        val statusCode =
+            HttpStatusCode.fromValue(
+                when (statusCodeName) {
+                    "BadRequest" -> 400
+                    "Unauthorized" -> 401
+                    "Forbidden" -> 403
+                    "InternalServerError" -> 500
+                    else -> 500
+                },
+            )
 
         given(tokenGeneratorFactory.getGenerator("client_credentials"))
             .willReturn(tokenGenerator)
@@ -160,11 +166,12 @@ class TokenRoutesTest {
         given(tokenGenerator.generateTokens(any(), any()))
             .willReturn(
                 Result.Failure(
-                    errorBody = mapOf(
-                        "error" to errorMessage,
-                        "statusCode" to statusCode
-                    )
-                )
+                    errorBody =
+                        mapOf(
+                            "error" to errorMessage,
+                            "statusCode" to statusCode,
+                        ),
+                ),
             )
 
         application {
@@ -178,215 +185,230 @@ class TokenRoutesTest {
             tokenRoutes()
         }
 
-        val response = client.post("/oauth/token") {
-            contentType(ContentType.Application.FormUrlEncoded)
-            setBody(
-                listOf(
-                    "grant_type" to "client_credentials"
-                ).formUrlEncode()
-            )
-        }
+        val response =
+            client.post("/oauth/token") {
+                contentType(ContentType.Application.FormUrlEncoded)
+                setBody(
+                    listOf(
+                        "grant_type" to "client_credentials",
+                    ).formUrlEncode(),
+                )
+            }
 
         Assertions.assertEquals(statusCode, response.status)
         Assertions.assertEquals(true, response.bodyAsText().contains(errorMessage))
     }
 
     @Test
-    fun `POST oauth token - generator failure without status code defaults to InternalServerError`() = testApplication {
-        given(tokenGeneratorFactory.getGenerator("client_credentials"))
-            .willReturn(tokenGenerator)
+    fun `POST oauth token - generator failure without status code defaults to InternalServerError`() =
+        testApplication {
+            given(tokenGeneratorFactory.getGenerator("client_credentials"))
+                .willReturn(tokenGenerator)
 
-        given(tokenGenerator.generateTokens(any(), any()))
-            .willReturn(
-                Result.Failure(
-                    errorBody = mapOf(
-                        "error" to "Something went wrong"
-                    )
+            given(tokenGenerator.generateTokens(any(), any()))
+                .willReturn(
+                    Result.Failure(
+                        errorBody =
+                            mapOf(
+                                "error" to "Something went wrong",
+                            ),
+                    ),
                 )
-            )
 
-        application {
-            configureSerialization()
+            application {
+                configureSerialization()
 
-            dependencies {
-                provide { tokenGeneratorFactory }
-                provide { tokenIntrospectService }
-                provide { tokenRevokeService }
+                dependencies {
+                    provide { tokenGeneratorFactory }
+                    provide { tokenIntrospectService }
+                    provide { tokenRevokeService }
+                }
+                tokenRoutes()
             }
-            tokenRoutes()
-        }
 
-        val response = client.post("/oauth/token") {
-            contentType(ContentType.Application.FormUrlEncoded)
-            setBody(
-                listOf(
-                    "grant_type" to "client_credentials"
-                ).formUrlEncode()
-            )
-        }
+            val response =
+                client.post("/oauth/token") {
+                    contentType(ContentType.Application.FormUrlEncoded)
+                    setBody(
+                        listOf(
+                            "grant_type" to "client_credentials",
+                        ).formUrlEncode(),
+                    )
+                }
 
-        Assertions.assertEquals(HttpStatusCode.InternalServerError, response.status)
-        Assertions.assertEquals(true, response.bodyAsText().contains("Something went wrong"))
-    }
+            Assertions.assertEquals(HttpStatusCode.InternalServerError, response.status)
+            Assertions.assertEquals(true, response.bodyAsText().contains("Something went wrong"))
+        }
 
     // ==================== POST /oauth/introspect Tests ====================
 
     @ParameterizedTest
     @CsvSource(
         "true",
-        "false"
+        "false",
     )
-    fun `POST oauth introspect - success`(active: Boolean) = testApplication {
-        given(tokenIntrospectService.introspect(any(), any(), any(), any()))
-            .willReturn(
-                Result.Success(
-                    outcome = mapOf(
-                        "active" to active,
-                        "scope" to "openid profile email",
-                        "client_id" to "test_client",
-                        "username" to "test_user",
-                        "token_type" to "Bearer"
-                    )
+    fun `POST oauth introspect - success`(active: Boolean) =
+        testApplication {
+            given(tokenIntrospectService.introspect(any(), any(), any(), any()))
+                .willReturn(
+                    Result.Success(
+                        outcome =
+                            mapOf(
+                                "active" to active,
+                                "scope" to "openid profile email",
+                                "client_id" to "test_client",
+                                "username" to "test_user",
+                                "token_type" to "Bearer",
+                            ),
+                    ),
                 )
-            )
 
-        application {
-            configureSerialization()
+            application {
+                configureSerialization()
 
-            dependencies {
-                provide { tokenGeneratorFactory }
-                provide { tokenIntrospectService }
-                provide { tokenRevokeService }
+                dependencies {
+                    provide { tokenGeneratorFactory }
+                    provide { tokenIntrospectService }
+                    provide { tokenRevokeService }
+                }
+                tokenRoutes()
             }
-            tokenRoutes()
-        }
 
-        val response = client.post("/oauth/introspect") {
-            contentType(ContentType.Application.FormUrlEncoded)
-            setBody(
-                listOf(
-                    "token" to "test_token",
-                    "client_id" to "test_client",
-                    "client_secret" to "test_secret"
-                ).formUrlEncode()
-            )
-        }
+            val response =
+                client.post("/oauth/introspect") {
+                    contentType(ContentType.Application.FormUrlEncoded)
+                    setBody(
+                        listOf(
+                            "token" to "test_token",
+                            "client_id" to "test_client",
+                            "client_secret" to "test_secret",
+                        ).formUrlEncode(),
+                    )
+                }
 
-        Assertions.assertEquals(HttpStatusCode.OK, response.status)
-        val responseBody = response.bodyAsText()
-        Assertions.assertTrue(responseBody.contains("active"), "Response should contain active field")
-        Assertions.assertTrue(responseBody.contains("scope"), "Response should contain scope")
-        Assertions.assertTrue(responseBody.contains("test_client"), "Response should contain client_id")
-    }
+            Assertions.assertEquals(HttpStatusCode.OK, response.status)
+            val responseBody = response.bodyAsText()
+            Assertions.assertTrue(responseBody.contains("active"), "Response should contain active field")
+            Assertions.assertTrue(responseBody.contains("scope"), "Response should contain scope")
+            Assertions.assertTrue(responseBody.contains("test_client"), "Response should contain client_id")
+        }
 
     @Test
-    fun `POST oauth introspect - missing token - error`() = testApplication {
-        application {
-            configureSerialization()
+    fun `POST oauth introspect - missing token - error`() =
+        testApplication {
+            application {
+                configureSerialization()
 
-            dependencies {
-                provide { tokenGeneratorFactory }
-                provide { tokenIntrospectService }
-                provide { tokenRevokeService }
+                dependencies {
+                    provide { tokenGeneratorFactory }
+                    provide { tokenIntrospectService }
+                    provide { tokenRevokeService }
+                }
+                tokenRoutes()
             }
-            tokenRoutes()
-        }
 
-        val response = client.post("/oauth/introspect") {
-            contentType(ContentType.Application.FormUrlEncoded)
-            setBody(
-                listOf(
-                    "client_id" to "test_client",
-                    "client_secret" to "test_secret"
-                ).formUrlEncode()
-            )
-        }
+            val response =
+                client.post("/oauth/introspect") {
+                    contentType(ContentType.Application.FormUrlEncoded)
+                    setBody(
+                        listOf(
+                            "client_id" to "test_client",
+                            "client_secret" to "test_secret",
+                        ).formUrlEncode(),
+                    )
+                }
 
-        Assertions.assertEquals(HttpStatusCode.BadRequest, response.status)
-        Assertions.assertEquals(true, response.bodyAsText().contains("Missing token"))
-    }
+            Assertions.assertEquals(HttpStatusCode.BadRequest, response.status)
+            Assertions.assertEquals(true, response.bodyAsText().contains("Missing token"))
+        }
 
     @Test
-    fun `POST oauth introspect - missing client_id - error`() = testApplication {
-        application {
-            configureSerialization()
+    fun `POST oauth introspect - missing client_id - error`() =
+        testApplication {
+            application {
+                configureSerialization()
 
-            dependencies {
-                provide { tokenGeneratorFactory }
-                provide { tokenIntrospectService }
-                provide { tokenRevokeService }
+                dependencies {
+                    provide { tokenGeneratorFactory }
+                    provide { tokenIntrospectService }
+                    provide { tokenRevokeService }
+                }
+                tokenRoutes()
             }
-            tokenRoutes()
-        }
 
-        val response = client.post("/oauth/introspect") {
-            contentType(ContentType.Application.FormUrlEncoded)
-            setBody(
-                listOf(
-                    "token" to "test_token",
-                    "client_secret" to "test_secret"
-                ).formUrlEncode()
-            )
-        }
+            val response =
+                client.post("/oauth/introspect") {
+                    contentType(ContentType.Application.FormUrlEncoded)
+                    setBody(
+                        listOf(
+                            "token" to "test_token",
+                            "client_secret" to "test_secret",
+                        ).formUrlEncode(),
+                    )
+                }
 
-        Assertions.assertEquals(HttpStatusCode.BadRequest, response.status)
-        Assertions.assertEquals(true, response.bodyAsText().contains("Missing client_id"))
-    }
+            Assertions.assertEquals(HttpStatusCode.BadRequest, response.status)
+            Assertions.assertEquals(true, response.bodyAsText().contains("Missing client_id"))
+        }
 
     @Test
-    fun `POST oauth introspect - missing client_secret - error`() = testApplication {
-        application {
-            configureSerialization()
+    fun `POST oauth introspect - missing client_secret - error`() =
+        testApplication {
+            application {
+                configureSerialization()
 
-            dependencies {
-                provide { tokenGeneratorFactory }
-                provide { tokenIntrospectService }
-                provide { tokenRevokeService }
+                dependencies {
+                    provide { tokenGeneratorFactory }
+                    provide { tokenIntrospectService }
+                    provide { tokenRevokeService }
+                }
+                tokenRoutes()
             }
-            tokenRoutes()
-        }
 
-        val response = client.post("/oauth/introspect") {
-            contentType(ContentType.Application.FormUrlEncoded)
-            setBody(
-                listOf(
-                    "token" to "test_token",
-                    "client_id" to "test_client"
-                ).formUrlEncode()
-            )
-        }
+            val response =
+                client.post("/oauth/introspect") {
+                    contentType(ContentType.Application.FormUrlEncoded)
+                    setBody(
+                        listOf(
+                            "token" to "test_token",
+                            "client_id" to "test_client",
+                        ).formUrlEncode(),
+                    )
+                }
 
-        Assertions.assertEquals(HttpStatusCode.BadRequest, response.status)
-        Assertions.assertEquals(true, response.bodyAsText().contains("Missing client_secret"))
-    }
+            Assertions.assertEquals(HttpStatusCode.BadRequest, response.status)
+            Assertions.assertEquals(true, response.bodyAsText().contains("Missing client_secret"))
+        }
 
     @ParameterizedTest
     @CsvSource(
         "BadRequest,Invalid token",
         "Unauthorized,Token expired",
-        "Forbidden,Access denied"
+        "Forbidden,Access denied",
     )
     fun `POST oauth introspect - service failure with different status codes`(
         statusCodeName: String,
-        errorMessage: String
+        errorMessage: String,
     ) = testApplication {
-        val statusCode = HttpStatusCode.fromValue(
-            when (statusCodeName) {
-                "BadRequest" -> 400
-                "Unauthorized" -> 401
-                "Forbidden" -> 403
-                else -> 500
-            }
-        )
+        val statusCode =
+            HttpStatusCode.fromValue(
+                when (statusCodeName) {
+                    "BadRequest" -> 400
+                    "Unauthorized" -> 401
+                    "Forbidden" -> 403
+                    else -> 500
+                },
+            )
 
         given(tokenIntrospectService.introspect(any(), any(), any(), any()))
             .willReturn(
                 Result.Failure(
-                    errorBody = mapOf(
-                        "error" to errorMessage,
-                        "statusCode" to statusCode
-                    )
-                )
+                    errorBody =
+                        mapOf(
+                            "error" to errorMessage,
+                            "statusCode" to statusCode,
+                        ),
+                ),
             )
 
         application {
@@ -400,57 +422,61 @@ class TokenRoutesTest {
             tokenRoutes()
         }
 
-        val response = client.post("/oauth/introspect") {
-            contentType(ContentType.Application.FormUrlEncoded)
-            setBody(
-                listOf(
-                    "token" to "test_token",
-                    "client_id" to "test_client",
-                    "client_secret" to "test_secret"
-                ).formUrlEncode()
-            )
-        }
+        val response =
+            client.post("/oauth/introspect") {
+                contentType(ContentType.Application.FormUrlEncoded)
+                setBody(
+                    listOf(
+                        "token" to "test_token",
+                        "client_id" to "test_client",
+                        "client_secret" to "test_secret",
+                    ).formUrlEncode(),
+                )
+            }
 
         Assertions.assertEquals(statusCode, response.status)
         Assertions.assertEquals(true, response.bodyAsText().contains(errorMessage))
     }
 
     @Test
-    fun `POST oauth introspect - service failure without status code defaults to InternalServerError`() = testApplication {
-        given(tokenIntrospectService.introspect(any(), any(), any(), any()))
-            .willReturn(
-                Result.Failure(
-                    errorBody = mapOf(
-                        "error" to "Service error"
-                    )
+    fun `POST oauth introspect - service failure without status code defaults to InternalServerError`() =
+        testApplication {
+            given(tokenIntrospectService.introspect(any(), any(), any(), any()))
+                .willReturn(
+                    Result.Failure(
+                        errorBody =
+                            mapOf(
+                                "error" to "Service error",
+                            ),
+                    ),
                 )
-            )
 
-        application {
-            configureSerialization()
+            application {
+                configureSerialization()
 
-            dependencies {
-                provide { tokenGeneratorFactory }
-                provide { tokenIntrospectService }
-                provide { tokenRevokeService }
+                dependencies {
+                    provide { tokenGeneratorFactory }
+                    provide { tokenIntrospectService }
+                    provide { tokenRevokeService }
+                }
+                tokenRoutes()
             }
-            tokenRoutes()
-        }
 
-        val response = client.post("/oauth/introspect") {
-            contentType(ContentType.Application.FormUrlEncoded)
-            setBody(
-                listOf(
-                    "token" to "test_token",
-                    "client_id" to "test_client",
-                    "client_secret" to "test_secret"
-                ).formUrlEncode()
-            )
-        }
+            val response =
+                client.post("/oauth/introspect") {
+                    contentType(ContentType.Application.FormUrlEncoded)
+                    setBody(
+                        listOf(
+                            "token" to "test_token",
+                            "client_id" to "test_client",
+                            "client_secret" to "test_secret",
+                        ).formUrlEncode(),
+                    )
+                }
 
-        Assertions.assertEquals(HttpStatusCode.InternalServerError, response.status)
-        Assertions.assertEquals(true, response.bodyAsText().contains("Service error"))
-    }
+            Assertions.assertEquals(HttpStatusCode.InternalServerError, response.status)
+            Assertions.assertEquals(true, response.bodyAsText().contains("Service error"))
+        }
 
     // ==================== POST /oauth/revoke Tests ====================
 
@@ -458,19 +484,23 @@ class TokenRoutesTest {
     @CsvSource(
         "access_token,Access token revoked successfully",
         "refresh_token,Refresh token revoked successfully",
-        "device_code,Device code revoked successfully"
+        "device_code,Device code revoked successfully",
     )
-    fun `POST oauth revoke - success`(tokenType: String, message: String) = testApplication {
+    fun `POST oauth revoke - success`(
+        tokenType: String,
+        message: String,
+    ) = testApplication {
         given(tokenRevokeService.revoke(any(), any()))
             .willReturn(
                 Result.Success(
-                    outcome = mapOf(
-                        "revoked" to true,
-                        "token_type" to tokenType,
-                        "message" to message,
-                        "revocation_timestamp" to System.currentTimeMillis()
-                    )
-                )
+                    outcome =
+                        mapOf(
+                            "revoked" to true,
+                            "token_type" to tokenType,
+                            "message" to message,
+                            "revocation_timestamp" to System.currentTimeMillis(),
+                        ),
+                ),
             )
 
         application {
@@ -484,14 +514,15 @@ class TokenRoutesTest {
             tokenRoutes()
         }
 
-        val response = client.post("/oauth/revoke") {
-            contentType(ContentType.Application.FormUrlEncoded)
-            setBody(
-                listOf(
-                    "token" to "test_token"
-                ).formUrlEncode()
-            )
-        }
+        val response =
+            client.post("/oauth/revoke") {
+                contentType(ContentType.Application.FormUrlEncoded)
+                setBody(
+                    listOf(
+                        "token" to "test_token",
+                    ).formUrlEncode(),
+                )
+            }
 
         Assertions.assertEquals(HttpStatusCode.OK, response.status)
         val responseBody = response.bodyAsText()
@@ -501,56 +532,60 @@ class TokenRoutesTest {
     }
 
     @Test
-    fun `POST oauth revoke - missing token - error`() = testApplication {
-        application {
-            configureSerialization()
+    fun `POST oauth revoke - missing token - error`() =
+        testApplication {
+            application {
+                configureSerialization()
 
-            dependencies {
-                provide { tokenGeneratorFactory }
-                provide { tokenIntrospectService }
-                provide { tokenRevokeService }
+                dependencies {
+                    provide { tokenGeneratorFactory }
+                    provide { tokenIntrospectService }
+                    provide { tokenRevokeService }
+                }
+                tokenRoutes()
             }
-            tokenRoutes()
-        }
 
-        val response = client.post("/oauth/revoke") {
-            contentType(ContentType.Application.FormUrlEncoded)
-            setBody(
-                listOf<Pair<String, String>>().formUrlEncode()
-            )
-        }
+            val response =
+                client.post("/oauth/revoke") {
+                    contentType(ContentType.Application.FormUrlEncoded)
+                    setBody(
+                        listOf<Pair<String, String>>().formUrlEncode(),
+                    )
+                }
 
-        Assertions.assertEquals(HttpStatusCode.BadRequest, response.status)
-        Assertions.assertEquals(true, response.bodyAsText().contains("Missing token"))
-    }
+            Assertions.assertEquals(HttpStatusCode.BadRequest, response.status)
+            Assertions.assertEquals(true, response.bodyAsText().contains("Missing token"))
+        }
 
     @ParameterizedTest
     @CsvSource(
         "BadRequest,Invalid token format",
         "Unauthorized,Token not found",
-        "Forbidden,Cannot revoke token"
+        "Forbidden,Cannot revoke token",
     )
     fun `POST oauth revoke - service failure with different status codes`(
         statusCodeName: String,
-        errorMessage: String
+        errorMessage: String,
     ) = testApplication {
-        val statusCode = HttpStatusCode.fromValue(
-            when (statusCodeName) {
-                "BadRequest" -> 400
-                "Unauthorized" -> 401
-                "Forbidden" -> 403
-                else -> 500
-            }
-        )
+        val statusCode =
+            HttpStatusCode.fromValue(
+                when (statusCodeName) {
+                    "BadRequest" -> 400
+                    "Unauthorized" -> 401
+                    "Forbidden" -> 403
+                    else -> 500
+                },
+            )
 
         given(tokenRevokeService.revoke(any(), any()))
             .willReturn(
                 Result.Failure(
-                    errorBody = mapOf(
-                        "error" to errorMessage,
-                        "statusCode" to statusCode
-                    )
-                )
+                    errorBody =
+                        mapOf(
+                            "error" to errorMessage,
+                            "statusCode" to statusCode,
+                        ),
+                ),
             )
 
         application {
@@ -564,52 +599,55 @@ class TokenRoutesTest {
             tokenRoutes()
         }
 
-        val response = client.post("/oauth/revoke") {
-            contentType(ContentType.Application.FormUrlEncoded)
-            setBody(
-                listOf(
-                    "token" to "test_token"
-                ).formUrlEncode()
-            )
-        }
+        val response =
+            client.post("/oauth/revoke") {
+                contentType(ContentType.Application.FormUrlEncoded)
+                setBody(
+                    listOf(
+                        "token" to "test_token",
+                    ).formUrlEncode(),
+                )
+            }
 
         Assertions.assertEquals(statusCode, response.status)
         Assertions.assertEquals(true, response.bodyAsText().contains(errorMessage))
     }
 
     @Test
-    fun `POST oauth revoke - service failure without status code defaults to InternalServerError`() = testApplication {
-        given(tokenRevokeService.revoke(any(), any()))
-            .willReturn(
-                Result.Failure(
-                    errorBody = mapOf(
-                        "error" to "Revocation service error"
-                    )
+    fun `POST oauth revoke - service failure without status code defaults to InternalServerError`() =
+        testApplication {
+            given(tokenRevokeService.revoke(any(), any()))
+                .willReturn(
+                    Result.Failure(
+                        errorBody =
+                            mapOf(
+                                "error" to "Revocation service error",
+                            ),
+                    ),
                 )
-            )
 
-        application {
-            configureSerialization()
+            application {
+                configureSerialization()
 
-            dependencies {
-                provide { tokenGeneratorFactory }
-                provide { tokenIntrospectService }
-                provide { tokenRevokeService }
+                dependencies {
+                    provide { tokenGeneratorFactory }
+                    provide { tokenIntrospectService }
+                    provide { tokenRevokeService }
+                }
+                tokenRoutes()
             }
-            tokenRoutes()
-        }
 
-        val response = client.post("/oauth/revoke") {
-            contentType(ContentType.Application.FormUrlEncoded)
-            setBody(
-                listOf(
-                    "token" to "test_token"
-                ).formUrlEncode()
-            )
-        }
+            val response =
+                client.post("/oauth/revoke") {
+                    contentType(ContentType.Application.FormUrlEncoded)
+                    setBody(
+                        listOf(
+                            "token" to "test_token",
+                        ).formUrlEncode(),
+                    )
+                }
 
-        Assertions.assertEquals(HttpStatusCode.InternalServerError, response.status)
-        Assertions.assertEquals(true, response.bodyAsText().contains("Revocation service error"))
-    }
+            Assertions.assertEquals(HttpStatusCode.InternalServerError, response.status)
+            Assertions.assertEquals(true, response.bodyAsText().contains("Revocation service error"))
+        }
 }
-

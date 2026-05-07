@@ -30,13 +30,3 @@ jobs:
       - name: Run ktlint
         id: ktlint
         run: ./gradlew ktlintCheck
-
-      - name: Publish Lint Report (PR)
-        if: always()
-        uses: dorny/test-reporter@v1
-        with:
-          name: 🧹 Lint Results
-          path: '**/build/reports/ktlint/**/ktlint*.xml'
-          reporter: java-junit
-          fail-on-error: false
-          comment-mode: always

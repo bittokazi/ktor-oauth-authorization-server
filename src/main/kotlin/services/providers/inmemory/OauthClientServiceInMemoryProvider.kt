@@ -5,11 +5,10 @@ import com.bittokazi.ktor.auth.services.providers.OauthClientService
 import io.ktor.server.application.ApplicationCall
 
 class OauthClientServiceInMemoryProvider(
-    val clients: MutableList<OAuthClientDTO>
-): OauthClientService {
-
+    val clients: MutableList<OAuthClientDTO>,
+) : OauthClientService {
     init {
-        if(clients.isEmpty()) {
+        if (clients.isEmpty()) {
             throw RuntimeException("You have to define atleast 1 client")
         } else {
             clients.forEachIndexed { index, client ->
@@ -18,7 +17,10 @@ class OauthClientServiceInMemoryProvider(
         }
     }
 
-    override fun findByClientId(clientId: String, call: ApplicationCall): OAuthClientDTO? {
+    override fun findByClientId(
+        clientId: String,
+        call: ApplicationCall,
+    ): OAuthClientDTO? {
         return clients.find { it.clientId == clientId }
     }
 

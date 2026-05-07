@@ -8,6 +8,6 @@ interface TokenIntrospectService {
         token: String,
         clientId: String,
         clientSecret: String,
-        call: ApplicationCall
+        call: ApplicationCall,
     ): Result<Map<String, Any?>, Map<String, Any?>>
 }

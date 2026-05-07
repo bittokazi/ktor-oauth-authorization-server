@@ -10,7 +10,6 @@ import java.time.Instant
 import java.util.UUID
 
 class OauthTokenServiceInMemoryProviderTest {
-
     private lateinit var provider: OauthTokenServiceInMemoryProvider
     private val mockCall = Mockito.mock(ApplicationCall::class.java)
     private val clientId = UUID.randomUUID()
@@ -24,14 +23,15 @@ class OauthTokenServiceInMemoryProviderTest {
 
     @Test
     fun `storeAccessToken adds token successfully`() {
-        val result = provider.storeAccessToken(
-            token = "access_token_123",
-            clientId = clientId,
-            userId = "user_1",
-            scopes = listOf("read", "write"),
-            expiresAt = accessTokenExpiresAt,
-            call = mockCall
-        )
+        val result =
+            provider.storeAccessToken(
+                token = "access_token_123",
+                clientId = clientId,
+                userId = "user_1",
+                scopes = listOf("read", "write"),
+                expiresAt = accessTokenExpiresAt,
+                call = mockCall,
+            )
 
         assertTrue(result)
         assertEquals(1, provider.accessTokens.size)
@@ -46,7 +46,7 @@ class OauthTokenServiceInMemoryProviderTest {
             userId = "user_1",
             scopes = listOf("read"),
             expiresAt = accessTokenExpiresAt,
-            call = mockCall
+            call = mockCall,
         )
 
         val result = provider.findByAccessToken("access_token_123", mockCall)
@@ -70,7 +70,7 @@ class OauthTokenServiceInMemoryProviderTest {
             userId = "user_1",
             scopes = listOf("read"),
             expiresAt = accessTokenExpiresAt,
-            call = mockCall
+            call = mockCall,
         )
 
         val result = provider.revokeAccessToken("access_token_123", mockCall)
@@ -80,14 +80,15 @@ class OauthTokenServiceInMemoryProviderTest {
 
     @Test
     fun `storeRefreshToken adds refresh token and returns id`() {
-        val id = provider.storeRefreshToken(
-            token = "refresh_token_123",
-            clientId = clientId,
-            userId = "user_1",
-            scopes = listOf("read", "write"),
-            expiresAt = refreshTokenExpiresAt,
-            call = mockCall
-        )
+        val id =
+            provider.storeRefreshToken(
+                token = "refresh_token_123",
+                clientId = clientId,
+                userId = "user_1",
+                scopes = listOf("read", "write"),
+                expiresAt = refreshTokenExpiresAt,
+                call = mockCall,
+            )
 
         assertNotNull(id)
         assertEquals(1, provider.refreshTokens.size)
@@ -103,7 +104,7 @@ class OauthTokenServiceInMemoryProviderTest {
             userId = "user_1",
             scopes = listOf("read"),
             expiresAt = refreshTokenExpiresAt,
-            call = mockCall
+            call = mockCall,
         )
 
         val result = provider.findByRefreshToken("refresh_token_123", mockCall)
@@ -127,7 +128,7 @@ class OauthTokenServiceInMemoryProviderTest {
             userId = "user_1",
             scopes = listOf("read"),
             expiresAt = refreshTokenExpiresAt,
-            call = mockCall
+            call = mockCall,
         )
 
         val result = provider.revokeRefreshToken("refresh_token_123", mockCall)
@@ -137,21 +138,23 @@ class OauthTokenServiceInMemoryProviderTest {
 
     @Test
     fun `rotateRefreshToken creates new token and revokes old one`() {
-        val oldTokenId = provider.storeRefreshToken(
-            token = "refresh_token_old",
-            clientId = clientId,
-            userId = "user_1",
-            scopes = listOf("read"),
-            expiresAt = refreshTokenExpiresAt,
-            call = mockCall
-        )
+        val oldTokenId =
+            provider.storeRefreshToken(
+                token = "refresh_token_old",
+                clientId = clientId,
+                userId = "user_1",
+                scopes = listOf("read"),
+                expiresAt = refreshTokenExpiresAt,
+                call = mockCall,
+            )
 
-        val result = provider.rotateRefreshToken(
-            oldToken = "refresh_token_old",
-            newToken = "refresh_token_new",
-            expiresAt = refreshTokenExpiresAt.plusSeconds(3600),
-            call = mockCall
-        )
+        val result =
+            provider.rotateRefreshToken(
+                oldToken = "refresh_token_old",
+                newToken = "refresh_token_new",
+                expiresAt = refreshTokenExpiresAt.plusSeconds(3600),
+                call = mockCall,
+            )
 
         assertTrue(result)
         assertEquals(2, provider.refreshTokens.size)
@@ -168,14 +171,15 @@ class OauthTokenServiceInMemoryProviderTest {
 
     @Test
     fun `storeAccessToken with null userId`() {
-        val result = provider.storeAccessToken(
-            token = "client_credentials_token",
-            clientId = clientId,
-            userId = null,
-            scopes = listOf("client_scope"),
-            expiresAt = accessTokenExpiresAt,
-            call = mockCall
-        )
+        val result =
+            provider.storeAccessToken(
+                token = "client_credentials_token",
+                clientId = clientId,
+                userId = null,
+                scopes = listOf("client_scope"),
+                expiresAt = accessTokenExpiresAt,
+                call = mockCall,
+            )
 
         assertTrue(result)
         assertNull(provider.accessTokens[0].userId)
@@ -189,7 +193,7 @@ class OauthTokenServiceInMemoryProviderTest {
             userId = "user_1",
             scopes = listOf("openid", "profile", "email", "offline_access"),
             expiresAt = refreshTokenExpiresAt,
-            call = mockCall
+            call = mockCall,
         )
 
         val token = provider.refreshTokens[0]

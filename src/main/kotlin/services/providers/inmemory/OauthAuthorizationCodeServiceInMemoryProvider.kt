@@ -6,7 +6,7 @@ import io.ktor.server.application.ApplicationCall
 import java.time.Instant
 import java.util.UUID
 
-class OauthAuthorizationCodeServiceInMemoryProvider(): OauthAuthorizationCodeService {
+class OauthAuthorizationCodeServiceInMemoryProvider() : OauthAuthorizationCodeService {
     val codes: MutableList<AuthorizationCodeDTO> = mutableListOf()
 
     override fun createCode(
@@ -18,7 +18,7 @@ class OauthAuthorizationCodeServiceInMemoryProvider(): OauthAuthorizationCodeSer
         expiresAt: Instant,
         challenge: String?,
         challengeMethod: String?,
-        call: ApplicationCall
+        call: ApplicationCall,
     ): Boolean {
         return codes.add(
             AuthorizationCodeDTO(
@@ -30,20 +30,29 @@ class OauthAuthorizationCodeServiceInMemoryProvider(): OauthAuthorizationCodeSer
                 challenge,
                 challengeMethod,
                 expiresAt,
-                false
-            )
+                false,
+            ),
         )
     }
 
-    override fun findByCode(code: String, call: ApplicationCall): AuthorizationCodeDTO? {
+    override fun findByCode(
+        code: String,
+        call: ApplicationCall,
+    ): AuthorizationCodeDTO? {
         return codes.find { it.code == code }
     }
 
-    override fun consumeCode(code: String, call: ApplicationCall): Boolean {
+    override fun consumeCode(
+        code: String,
+        call: ApplicationCall,
+    ): Boolean {
         return codes.find { it.code == code }?.consumed ?: true
     }
 
-    override fun logoutAction(userId: String, clientId: String?, call: ApplicationCall) {
-
+    override fun logoutAction(
+        userId: String,
+        clientId: String?,
+        call: ApplicationCall,
+    ) {
     }
 }

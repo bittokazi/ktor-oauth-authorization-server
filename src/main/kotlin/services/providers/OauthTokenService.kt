@@ -11,7 +11,7 @@ data class AccessTokenDTO(
     val userId: String?,
     val scopes: List<String>,
     val expiresAt: Instant,
-    var revoked: Boolean
+    var revoked: Boolean,
 )
 
 data class RefreshTokenDTO(
@@ -22,23 +22,58 @@ data class RefreshTokenDTO(
     val scopes: List<String>,
     val expiresAt: Instant,
     var revoked: Boolean,
-    val rotatedTo: UUID?
+    val rotatedTo: UUID?,
 )
 
 interface OauthTokenService {
-    fun storeAccessToken(token: String, clientId: UUID, userId: String?, scopes: List<String>, expiresAt: Instant, call: ApplicationCall): Boolean
+    fun storeAccessToken(
+        token: String,
+        clientId: UUID,
+        userId: String?,
+        scopes: List<String>,
+        expiresAt: Instant,
+        call: ApplicationCall,
+    ): Boolean
 
-    fun revokeAccessToken(token: String, call: ApplicationCall): Boolean
+    fun revokeAccessToken(
+        token: String,
+        call: ApplicationCall,
+    ): Boolean
 
-    fun storeRefreshToken(token: String, clientId: UUID, userId: String?, scopes: List<String>, expiresAt: Instant, call: ApplicationCall): UUID
+    fun storeRefreshToken(
+        token: String,
+        clientId: UUID,
+        userId: String?,
+        scopes: List<String>,
+        expiresAt: Instant,
+        call: ApplicationCall,
+    ): UUID
 
-    fun findByAccessToken(token: String, call: ApplicationCall): AccessTokenDTO?
+    fun findByAccessToken(
+        token: String,
+        call: ApplicationCall,
+    ): AccessTokenDTO?
 
-    fun findByRefreshToken(token: String, call: ApplicationCall): RefreshTokenDTO?
+    fun findByRefreshToken(
+        token: String,
+        call: ApplicationCall,
+    ): RefreshTokenDTO?
 
-    fun revokeRefreshToken(token: String, call: ApplicationCall): Boolean
+    fun revokeRefreshToken(
+        token: String,
+        call: ApplicationCall,
+    ): Boolean
 
-    fun rotateRefreshToken(oldToken: String, newToken: String, expiresAt: Instant, call: ApplicationCall): Boolean
+    fun rotateRefreshToken(
+        oldToken: String,
+        newToken: String,
+        expiresAt: Instant,
+        call: ApplicationCall,
+    ): Boolean
 
-    fun logoutAction(userId: String, clientId: String?, call: ApplicationCall)
+    fun logoutAction(
+        userId: String,
+        clientId: String?,
+        call: ApplicationCall,
+    )
 }

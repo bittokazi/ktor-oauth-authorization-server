@@ -7,7 +7,7 @@ import io.ktor.server.application.ApplicationCall
 import java.time.Instant
 import java.util.UUID
 
-class OauthTokenServiceInMemoryProvider: OauthTokenService {
+class OauthTokenServiceInMemoryProvider : OauthTokenService {
     val accessTokens: MutableList<AccessTokenDTO> = mutableListOf()
     val refreshTokens: MutableList<RefreshTokenDTO> = mutableListOf()
 
@@ -17,7 +17,7 @@ class OauthTokenServiceInMemoryProvider: OauthTokenService {
         userId: String?,
         scopes: List<String>,
         expiresAt: Instant,
-        call: ApplicationCall
+        call: ApplicationCall,
     ): Boolean {
         return accessTokens.add(
             AccessTokenDTO(
@@ -27,12 +27,15 @@ class OauthTokenServiceInMemoryProvider: OauthTokenService {
                 userId,
                 scopes,
                 expiresAt,
-                false
-            )
+                false,
+            ),
         )
     }
 
-    override fun revokeAccessToken(token: String, call: ApplicationCall): Boolean {
+    override fun revokeAccessToken(
+        token: String,
+        call: ApplicationCall,
+    ): Boolean {
         accessTokens.find { it.token == token }?.revoked = true
         return true
     }
@@ -43,31 +46,41 @@ class OauthTokenServiceInMemoryProvider: OauthTokenService {
         userId: String?,
         scopes: List<String>,
         expiresAt: Instant,
-        call: ApplicationCall
+        call: ApplicationCall,
     ): UUID {
-        val refreshTokenDTO = RefreshTokenDTO(
-            UUID.randomUUID(),
-            token,
-            clientId,
-            userId,
-            scopes,
-            expiresAt,
-            false,
-            null
-        )
+        val refreshTokenDTO =
+            RefreshTokenDTO(
+                UUID.randomUUID(),
+                token,
+                clientId,
+                userId,
+                scopes,
+                expiresAt,
+                false,
+                null,
+            )
         refreshTokens.add(refreshTokenDTO)
         return refreshTokenDTO.id
     }
 
-    override fun findByAccessToken(token: String, call: ApplicationCall): AccessTokenDTO? {
+    override fun findByAccessToken(
+        token: String,
+        call: ApplicationCall,
+    ): AccessTokenDTO? {
         return accessTokens.find { it.token == token }
     }
 
-    override fun findByRefreshToken(token: String, call: ApplicationCall): RefreshTokenDTO? {
+    override fun findByRefreshToken(
+        token: String,
+        call: ApplicationCall,
+    ): RefreshTokenDTO? {
         return refreshTokens.find { it.token == token }
     }
 
-    override fun revokeRefreshToken(token: String, call: ApplicationCall): Boolean {
+    override fun revokeRefreshToken(
+        token: String,
+        call: ApplicationCall,
+    ): Boolean {
         refreshTokens.find { it.token == token }?.revoked = true
         return true
     }
@@ -76,25 +89,29 @@ class OauthTokenServiceInMemoryProvider: OauthTokenService {
         oldToken: String,
         newToken: String,
         expiresAt: Instant,
-        call: ApplicationCall
+        call: ApplicationCall,
     ): Boolean {
         val old = refreshTokens.find { it.token == oldToken }!!
-        val refreshTokenDTO = RefreshTokenDTO(
-            UUID.randomUUID(),
-            newToken,
-            old.clientId,
-            old.userId,
-            old.scopes,
-            expiresAt,
-            false,
-            old.id
-        )
+        val refreshTokenDTO =
+            RefreshTokenDTO(
+                UUID.randomUUID(),
+                newToken,
+                old.clientId,
+                old.userId,
+                old.scopes,
+                expiresAt,
+                false,
+                old.id,
+            )
         refreshTokens.add(refreshTokenDTO)
         refreshTokens.find { it.token == oldToken }?.revoked = true
         return true
     }
 
-    override fun logoutAction(userId: String, clientId: String?, call: ApplicationCall) {
-
+    override fun logoutAction(
+        userId: String,
+        clientId: String?,
+        call: ApplicationCall,
+    ) {
     }
 }

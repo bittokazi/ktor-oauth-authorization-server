@@ -13,6 +13,6 @@ interface TokenGenerator {
      */
     suspend fun generateTokens(
         params: Map<String, String?>,
-        call: ApplicationCall
+        call: ApplicationCall,
     ): Result<Map<String, Any?>, Map<String, Any?>>
 }

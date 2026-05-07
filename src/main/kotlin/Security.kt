@@ -21,16 +21,15 @@ import kotlin.random.Random
 data class OauthUserSession(val userId: String, val username: String, val expiresAt: Long, val rememberMe: Boolean?)
 
 fun Application.configureSecurity() {
-
     val sessionCustomizer: SessionCustomizer by dependencies
     val sessionExtender: SessionExtender? by dependencies
 
     var secretEncryptKey = hex(Random.nextBytes(16).joinToString("") { "%02x".format(it) }) // 16 bytes = AES128
-    var secretSignKey = hex(Random.nextBytes(16).joinToString("") { "%02x".format(it) })   // 16 bytes
+    var secretSignKey = hex(Random.nextBytes(16).joinToString("") { "%02x".format(it) }) // 16 bytes
 
-    if(sessionCustomizer.encryptionKey != null || sessionCustomizer.signingKey != null) {
-       secretEncryptKey = hex(sessionCustomizer.encryptionKey!!)
-       secretSignKey =  hex(sessionCustomizer.signingKey!!)
+    if (sessionCustomizer.encryptionKey != null || sessionCustomizer.signingKey != null) {
+        secretEncryptKey = hex(sessionCustomizer.encryptionKey!!)
+        secretSignKey = hex(sessionCustomizer.signingKey!!)
     }
 
     install(Sessions) {
@@ -53,7 +52,7 @@ fun AuthenticationConfig.oauthAuthenticationConfig(issuerUrl: String) {
     jwt {
         realm = "ktor-oauth-server"
 
-        verifier(JwkProviderBuilder(URL("${issuerUrl}/.well-known/jwks.json")).build())
+        verifier(JwkProviderBuilder(URL("$issuerUrl/.well-known/jwks.json")).build())
 
         validate { credential ->
             if (credential.payload.issuer != this.getBaseUrl()) {
@@ -64,9 +63,10 @@ fun AuthenticationConfig.oauthAuthenticationConfig(issuerUrl: String) {
 
         challenge { _, _ ->
             call.respond(
-                HttpStatusCode.Unauthorized, mapOf(
-                    "message" to "Unauthorized"
-                )
+                HttpStatusCode.Unauthorized,
+                mapOf(
+                    "message" to "Unauthorized",
+                ),
             )
         }
     }

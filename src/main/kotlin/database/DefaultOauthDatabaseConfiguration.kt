@@ -14,8 +14,7 @@ class DefaultOauthDatabaseConfiguration(
     @Property("database.password") val password: String,
     @Property("database.driver") val driver: String,
     @Property("database.schema") val schema: String,
-): OauthDatabaseConfiguration {
-
+) : OauthDatabaseConfiguration {
     private var dataSource: HikariDataSource
 
     var database: Database
@@ -31,7 +30,7 @@ class DefaultOauthDatabaseConfiguration(
         username: String,
         password: String,
         schema: String,
-        driver: String
+        driver: String,
     ): HikariDataSource {
         val config: HikariConfig = hikariConfigGenerator(url, username, password, schema, driver)
         return HikariDataSource(config)
@@ -42,7 +41,7 @@ class DefaultOauthDatabaseConfiguration(
         username: String,
         password: String,
         schema: String,
-        driver: String
+        driver: String,
     ): HikariConfig {
         val config = HikariConfig()
         config.jdbcUrl = url
@@ -63,7 +62,10 @@ class DefaultOauthDatabaseConfiguration(
             .migrate()
     }
 
-    override fun <T> dbQuery(call: ApplicationCall?, block: () -> T): T {
+    override fun <T> dbQuery(
+        call: ApplicationCall?,
+        block: () -> T,
+    ): T {
         return transaction(database) { block() }
     }
 }

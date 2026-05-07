@@ -9,10 +9,17 @@ data class OAuthUserDTO(
     var firstName: String?,
     var lastName: String?,
     var isActive: Boolean,
-    var passwordHash: String? = null
+    var passwordHash: String? = null,
 )
 
 interface OauthUserService {
-    fun findByUsername(username: String, call: ApplicationCall): OAuthUserDTO?
-    fun findById(id: String, call: ApplicationCall): OAuthUserDTO?
+    fun findByUsername(
+        username: String,
+        call: ApplicationCall,
+    ): OAuthUserDTO?
+
+    fun findById(
+        id: String,
+        call: ApplicationCall,
+    ): OAuthUserDTO?
 }

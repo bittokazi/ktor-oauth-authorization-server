@@ -5,10 +5,11 @@ import io.ktor.server.plugins.origin
 
 fun ApplicationCall.getBaseUrl(): String {
     val origin = request.origin
-    val portPart = when {
-        (origin.scheme == "http" && origin.serverPort == 80) -> ""
-        (origin.scheme == "https" && origin.serverPort == 443) -> ""
-        else -> ":${origin.serverPort}"
-    }
+    val portPart =
+        when {
+            (origin.scheme == "http" && origin.serverPort == 80) -> ""
+            (origin.scheme == "https" && origin.serverPort == 443) -> ""
+            else -> ":${origin.serverPort}"
+        }
     return "${origin.scheme}://${origin.serverHost}$portPart"
 }

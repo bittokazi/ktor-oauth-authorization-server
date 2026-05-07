@@ -6,8 +6,7 @@ import io.ktor.server.application.ApplicationCall
 import java.time.Instant
 import java.util.UUID
 
-class OauthDeviceCodeServiceInMemoryProvider: OauthDeviceCodeService {
-
+class OauthDeviceCodeServiceInMemoryProvider : OauthDeviceCodeService {
     val codes: MutableList<OauthDeviceCodeDTO> = mutableListOf()
 
     override fun createCode(
@@ -16,7 +15,7 @@ class OauthDeviceCodeServiceInMemoryProvider: OauthDeviceCodeService {
         expiresAt: Instant,
         call: ApplicationCall,
         deviceCode: String,
-        userCode: String
+        userCode: String,
     ): Boolean {
         codes.add(
             OauthDeviceCodeDTO(
@@ -28,15 +27,15 @@ class OauthDeviceCodeServiceInMemoryProvider: OauthDeviceCodeService {
                 userCode = userCode,
                 consumed = false,
                 isDeviceAuthorized = false,
-                userId = null
-            )
+                userId = null,
+            ),
         )
         return true
     }
 
     override fun findByUserCode(
         code: String,
-        call: ApplicationCall
+        call: ApplicationCall,
     ): OauthDeviceCodeDTO? {
         return codes.find {
             it.userCode == code && !it.isDeviceAuthorized && !it.consumed
@@ -47,7 +46,7 @@ class OauthDeviceCodeServiceInMemoryProvider: OauthDeviceCodeService {
         code: String,
         isAuthorized: Boolean,
         consumed: Boolean,
-        call: ApplicationCall
+        call: ApplicationCall,
     ): OauthDeviceCodeDTO? {
         return codes.find {
             it.userCode == code && it.isDeviceAuthorized == isAuthorized && it.consumed == consumed
@@ -56,7 +55,7 @@ class OauthDeviceCodeServiceInMemoryProvider: OauthDeviceCodeService {
 
     override fun consumeDeviceCode(
         code: String,
-        call: ApplicationCall
+        call: ApplicationCall,
     ): Boolean {
         codes.find { it.deviceCode == code }?.consumed = true
         return true
@@ -65,14 +64,17 @@ class OauthDeviceCodeServiceInMemoryProvider: OauthDeviceCodeService {
     override fun authorizeDevice(
         code: String,
         userId: String,
-        call: ApplicationCall
+        call: ApplicationCall,
     ): Boolean {
         codes.find { it.deviceCode == code }?.userId = userId
         codes.find { it.deviceCode == code }?.isDeviceAuthorized = true
         return true
     }
 
-    override fun logoutAction(userId: String, clientId: String?, call: ApplicationCall) {
-
+    override fun logoutAction(
+        userId: String,
+        clientId: String?,
+        call: ApplicationCall,
+    ) {
     }
 }

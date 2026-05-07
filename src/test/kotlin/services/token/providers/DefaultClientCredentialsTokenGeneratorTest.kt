@@ -25,7 +25,6 @@ import kotlin.test.assertEquals
 
 @RunWith(MockitoJUnitRunner::class)
 class DefaultClientCredentialsTokenGeneratorTest {
-
     @Mock
     lateinit var oauthClientService: OauthClientService
 
@@ -51,158 +50,20 @@ class DefaultClientCredentialsTokenGeneratorTest {
 
     @Before
     fun setUp() {
-        clientCredentialsTokenGenerator = DefaultClientCredentialsTokenGenerator(
-            oauthClientService,
-            oauthTokenService,
-            jwksProvider
-        )
-    }
-
-    @Test
-    fun `generateTokens() returns generated code successfully`() = runTest {
-        val clientIdentifier = UUID.randomUUID()
-        val clientId = UUID.randomUUID()
-        val client = OAuthClientDTO(
-            id = clientIdentifier,
-            clientName = "Test Client",
-            clientId = clientId.toString(),
-            clientSecret = "valid_client_secret",
-            clientType = "confidential",
-            grantTypes = listOf("client_credentials"),
-            scopes = listOf("read", "write"),
-            redirectUris = listOf("https://example.com/callback")
-        )
-        val accessToken = "generated_access_token"
-
-        given(oauthClientService.findByClientId(clientId.toString(), call))
-            .willReturn(client)
-
-        given(jwksProvider.generateJwt(
-            subject = clientId.toString(),
-            audience = "",
-            scopes = client.scopes,
-            issuer = "https://example.com",
-            expiresInSeconds = client.accessTokenValidity,
-            client = client,
-            tokenType = TokenType.ACCESS_TOKEN,
-            call = call
-        )).willReturn(accessToken)
-
-        given(call.request).willReturn(request)
-        given(request.call).willReturn(call)
-        given(call.attributes).willReturn(attributes)
-        given(request.origin).willReturn(origin)
-        given(origin.scheme).willReturn("https")
-        given(origin.serverHost).willReturn("example.com")
-        given(origin.serverPort).willReturn(443)
-
-        val actual = clientCredentialsTokenGenerator.generateTokens(
-            params = mapOf(
-                "client_id" to clientId.toString(),
-                "client_secret" to "valid_client_secret"
-            ),
-            call = call
-        )
-
-        assertTrue(actual is Result.Success)
-        val successResult = actual as Result.Success
-        val response = successResult.outcome
-        assertEquals(accessToken, response["access_token"])
-    }
-
-    @Test
-    fun `generateTokens() returns failure when client is public`() = runTest {
-        val clientIdentifier = UUID.randomUUID()
-        val clientId = UUID.randomUUID()
-
-        given(oauthClientService.findByClientId(clientId.toString(), call))
-            .willReturn(
-                OAuthClientDTO(
-                    id = clientIdentifier,
-                    clientName = "Test Client",
-                    clientId = clientId.toString(),
-                    clientSecret = "valid_client_secret",
-                    clientType = "public",
-                    grantTypes = listOf("client_credentials"),
-                    scopes = listOf("read", "write"),
-                    redirectUris = listOf("https://example.com/callback")
-                )
+        clientCredentialsTokenGenerator =
+            DefaultClientCredentialsTokenGenerator(
+                oauthClientService,
+                oauthTokenService,
+                jwksProvider,
             )
-
-        val actual = clientCredentialsTokenGenerator.generateTokens(
-            params = mapOf(
-                "client_id" to clientId.toString(),
-                "client_secret" to "valid_client_secret"
-            ),
-            call = call
-        )
-
-        assertTrue(actual is Result.Failure)
-        val failureResult = actual as Result.Failure
-        val error = failureResult.errorBody
-        assertTrue(error.containsKey("error"))
-        assertTrue(error["error"].toString().contains("Unauthorized"))
     }
 
     @Test
-    fun `generateTokens() returns failure when client_id is missing`() = runTest {
-        val actual = clientCredentialsTokenGenerator.generateTokens(
-            params = mapOf(
-                "client_secret" to "some_secret"
-            ),
-            call = call
-        )
-
-        assertTrue(actual is Result.Failure)
-        val failureResult = actual as Result.Failure
-        val error = failureResult.errorBody
-        assertTrue(error.containsKey("error"))
-        assertTrue(error["error"].toString().contains("Missing client_id"))
-    }
-
-    @Test
-    fun `generateTokens() returns failure when client_secret is missing`() = runTest {
-        val actual = clientCredentialsTokenGenerator.generateTokens(
-            params = mapOf(
-                "client_id" to "some_client_id"
-            ),
-            call = call
-        )
-
-        assertTrue(actual is Result.Failure)
-        val failureResult = actual as Result.Failure
-        val error = failureResult.errorBody
-        assertTrue(error.containsKey("error"))
-        assertTrue(error["error"].toString().contains("Missing client_secret"))
-    }
-
-    @Test
-    fun `generateTokens() returns failure when client_id is invalid`() = runTest {
-        given(oauthClientService.findByClientId("invalid_client_id", call))
-            .willReturn(null)
-
-        val actual = clientCredentialsTokenGenerator.generateTokens(
-            params = mapOf(
-                "client_id" to "invalid_client_id",
-                "client_secret" to "some_secret"
-            ),
-            call = call
-        )
-
-        assertTrue(actual is Result.Failure)
-        val failureResult = actual as Result.Failure
-        val error = failureResult.errorBody
-        assertTrue(error.containsKey("error"))
-        assertTrue(error["error"].toString().contains("Invalid client_id"))
-    }
-
-    @Test
-    fun `generateTokens() returns failure when client_secret is invalid for confidential client`() = runTest {
-        val clientIdentifier = UUID.randomUUID()
-        val clientId = UUID.randomUUID()
-
-        given(oauthClientService.findByClientId(clientId.toString(), call))
-            .willReturn(
+    fun `generateTokens() returns generated code successfully`() =
+        runTest {
+            val clientIdentifier = UUID.randomUUID()
+            val clientId = UUID.randomUUID()
+            val client =
                 OAuthClientDTO(
                     id = clientIdentifier,
                     clientName = "Test Client",
@@ -211,56 +72,219 @@ class DefaultClientCredentialsTokenGeneratorTest {
                     clientType = "confidential",
                     grantTypes = listOf("client_credentials"),
                     scopes = listOf("read", "write"),
-                    redirectUris = listOf("https://example.com/callback")
+                    redirectUris = listOf("https://example.com/callback"),
                 )
-            )
+            val accessToken = "generated_access_token"
 
-        val actual = clientCredentialsTokenGenerator.generateTokens(
-            params = mapOf(
-                "client_id" to clientId.toString(),
-                "client_secret" to "invalid_secret"
-            ),
-            call = call
-        )
+            given(oauthClientService.findByClientId(clientId.toString(), call))
+                .willReturn(client)
 
-        assertTrue(actual is Result.Failure)
-        val failureResult = actual as Result.Failure
-        val error = failureResult.errorBody
-        assertTrue(error.containsKey("error"))
-        assertTrue(error["error"].toString().contains("Unauthorized"))
-    }
+            given(
+                jwksProvider.generateJwt(
+                    subject = clientId.toString(),
+                    audience = "",
+                    scopes = client.scopes,
+                    issuer = "https://example.com",
+                    expiresInSeconds = client.accessTokenValidity,
+                    client = client,
+                    tokenType = TokenType.ACCESS_TOKEN,
+                    call = call,
+                ),
+            ).willReturn(accessToken)
+
+            given(call.request).willReturn(request)
+            given(request.call).willReturn(call)
+            given(call.attributes).willReturn(attributes)
+            given(request.origin).willReturn(origin)
+            given(origin.scheme).willReturn("https")
+            given(origin.serverHost).willReturn("example.com")
+            given(origin.serverPort).willReturn(443)
+
+            val actual =
+                clientCredentialsTokenGenerator.generateTokens(
+                    params =
+                        mapOf(
+                            "client_id" to clientId.toString(),
+                            "client_secret" to "valid_client_secret",
+                        ),
+                    call = call,
+                )
+
+            assertTrue(actual is Result.Success)
+            val successResult = actual as Result.Success
+            val response = successResult.outcome
+            assertEquals(accessToken, response["access_token"])
+        }
 
     @Test
-    fun `generateTokens() returns failure when grant type is not permitted`() = runTest {
-        val clientIdentifier = UUID.randomUUID()
-        val clientId = UUID.randomUUID()
+    fun `generateTokens() returns failure when client is public`() =
+        runTest {
+            val clientIdentifier = UUID.randomUUID()
+            val clientId = UUID.randomUUID()
 
-        given(oauthClientService.findByClientId(clientId.toString(), call))
-            .willReturn(
-                OAuthClientDTO(
-                    id = clientIdentifier,
-                    clientName = "Test Client",
-                    clientId = clientId.toString(),
-                    clientSecret = "valid_client_secret",
-                    clientType = "confidential",
-                    grantTypes = listOf("authorization_code"),
-                    scopes = listOf("read", "write"),
-                    redirectUris = listOf("https://example.com/callback")
+            given(oauthClientService.findByClientId(clientId.toString(), call))
+                .willReturn(
+                    OAuthClientDTO(
+                        id = clientIdentifier,
+                        clientName = "Test Client",
+                        clientId = clientId.toString(),
+                        clientSecret = "valid_client_secret",
+                        clientType = "public",
+                        grantTypes = listOf("client_credentials"),
+                        scopes = listOf("read", "write"),
+                        redirectUris = listOf("https://example.com/callback"),
+                    ),
                 )
-            )
 
-        val actual = clientCredentialsTokenGenerator.generateTokens(
-            params = mapOf(
-                "client_id" to clientId.toString(),
-                "client_secret" to "valid_client_secret"
-            ),
-            call = call
-        )
+            val actual =
+                clientCredentialsTokenGenerator.generateTokens(
+                    params =
+                        mapOf(
+                            "client_id" to clientId.toString(),
+                            "client_secret" to "valid_client_secret",
+                        ),
+                    call = call,
+                )
 
-        assertTrue(actual is Result.Failure)
-        val failureResult = actual as Result.Failure
-        val error = failureResult.errorBody
-        assertTrue(error.containsKey("error"))
-        assertTrue(error["error"].toString().contains("Grant type not permitted"))
-    }
+            assertTrue(actual is Result.Failure)
+            val failureResult = actual as Result.Failure
+            val error = failureResult.errorBody
+            assertTrue(error.containsKey("error"))
+            assertTrue(error["error"].toString().contains("Unauthorized"))
+        }
+
+    @Test
+    fun `generateTokens() returns failure when client_id is missing`() =
+        runTest {
+            val actual =
+                clientCredentialsTokenGenerator.generateTokens(
+                    params =
+                        mapOf(
+                            "client_secret" to "some_secret",
+                        ),
+                    call = call,
+                )
+
+            assertTrue(actual is Result.Failure)
+            val failureResult = actual as Result.Failure
+            val error = failureResult.errorBody
+            assertTrue(error.containsKey("error"))
+            assertTrue(error["error"].toString().contains("Missing client_id"))
+        }
+
+    @Test
+    fun `generateTokens() returns failure when client_secret is missing`() =
+        runTest {
+            val actual =
+                clientCredentialsTokenGenerator.generateTokens(
+                    params =
+                        mapOf(
+                            "client_id" to "some_client_id",
+                        ),
+                    call = call,
+                )
+
+            assertTrue(actual is Result.Failure)
+            val failureResult = actual as Result.Failure
+            val error = failureResult.errorBody
+            assertTrue(error.containsKey("error"))
+            assertTrue(error["error"].toString().contains("Missing client_secret"))
+        }
+
+    @Test
+    fun `generateTokens() returns failure when client_id is invalid`() =
+        runTest {
+            given(oauthClientService.findByClientId("invalid_client_id", call))
+                .willReturn(null)
+
+            val actual =
+                clientCredentialsTokenGenerator.generateTokens(
+                    params =
+                        mapOf(
+                            "client_id" to "invalid_client_id",
+                            "client_secret" to "some_secret",
+                        ),
+                    call = call,
+                )
+
+            assertTrue(actual is Result.Failure)
+            val failureResult = actual as Result.Failure
+            val error = failureResult.errorBody
+            assertTrue(error.containsKey("error"))
+            assertTrue(error["error"].toString().contains("Invalid client_id"))
+        }
+
+    @Test
+    fun `generateTokens() returns failure when client_secret is invalid for confidential client`() =
+        runTest {
+            val clientIdentifier = UUID.randomUUID()
+            val clientId = UUID.randomUUID()
+
+            given(oauthClientService.findByClientId(clientId.toString(), call))
+                .willReturn(
+                    OAuthClientDTO(
+                        id = clientIdentifier,
+                        clientName = "Test Client",
+                        clientId = clientId.toString(),
+                        clientSecret = "valid_client_secret",
+                        clientType = "confidential",
+                        grantTypes = listOf("client_credentials"),
+                        scopes = listOf("read", "write"),
+                        redirectUris = listOf("https://example.com/callback"),
+                    ),
+                )
+
+            val actual =
+                clientCredentialsTokenGenerator.generateTokens(
+                    params =
+                        mapOf(
+                            "client_id" to clientId.toString(),
+                            "client_secret" to "invalid_secret",
+                        ),
+                    call = call,
+                )
+
+            assertTrue(actual is Result.Failure)
+            val failureResult = actual as Result.Failure
+            val error = failureResult.errorBody
+            assertTrue(error.containsKey("error"))
+            assertTrue(error["error"].toString().contains("Unauthorized"))
+        }
+
+    @Test
+    fun `generateTokens() returns failure when grant type is not permitted`() =
+        runTest {
+            val clientIdentifier = UUID.randomUUID()
+            val clientId = UUID.randomUUID()
+
+            given(oauthClientService.findByClientId(clientId.toString(), call))
+                .willReturn(
+                    OAuthClientDTO(
+                        id = clientIdentifier,
+                        clientName = "Test Client",
+                        clientId = clientId.toString(),
+                        clientSecret = "valid_client_secret",
+                        clientType = "confidential",
+                        grantTypes = listOf("authorization_code"),
+                        scopes = listOf("read", "write"),
+                        redirectUris = listOf("https://example.com/callback"),
+                    ),
+                )
+
+            val actual =
+                clientCredentialsTokenGenerator.generateTokens(
+                    params =
+                        mapOf(
+                            "client_id" to clientId.toString(),
+                            "client_secret" to "valid_client_secret",
+                        ),
+                    call = call,
+                )
+
+            assertTrue(actual is Result.Failure)
+            val failureResult = actual as Result.Failure
+            val error = failureResult.errorBody
+            assertTrue(error.containsKey("error"))
+            assertTrue(error["error"].toString().contains("Grant type not permitted"))
+        }
 }

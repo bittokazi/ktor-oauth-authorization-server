@@ -12,9 +12,8 @@ class DefaultTokenGeneratorFactory(
     private val clientCredentialsTokenGenerator: TokenGenerator,
     private val authorizationCodeTokenGenerator: TokenGenerator,
     private val refreshTokenGenerator: TokenGenerator,
-    private val deviceCodeTokenGenerator: TokenGenerator
+    private val deviceCodeTokenGenerator: TokenGenerator,
 ) : TokenGeneratorFactory {
-
     /**
      * Get the appropriate token generator for the given grant type.
      */

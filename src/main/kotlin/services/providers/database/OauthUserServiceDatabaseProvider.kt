@@ -26,16 +26,15 @@ object OAuthUsers : Table("oauth_users") {
 }
 
 class OauthUserServiceDatabaseProvider(
-    val oauthDatabaseConfiguration: OauthDatabaseConfiguration
-): OauthUserService {
-
+    val oauthDatabaseConfiguration: OauthDatabaseConfiguration,
+) : OauthUserService {
     fun createUser(
         username: String,
         password: String,
         email: String?,
         firstName: String?,
         lastName: String?,
-        call: ApplicationCall
+        call: ApplicationCall,
     ): OAuthUserDTO =
         oauthDatabaseConfiguration.dbQuery(call) {
             val id = UUID.randomUUID().toString()
@@ -52,39 +51,41 @@ class OauthUserServiceDatabaseProvider(
 
     override fun findByUsername(
         username: String,
-        call: ApplicationCall
-    ): OAuthUserDTO? = oauthDatabaseConfiguration.dbQuery(call) {
-        OAuthUsers.selectAll().where { OAuthUsers.username eq username }
-            .map {
-                OAuthUserDTO(
-                    it[OAuthUsers.id],
-                    it[OAuthUsers.username],
-                    it[OAuthUsers.email],
-                    it[OAuthUsers.firstName],
-                    it[OAuthUsers.lastName],
-                    it[OAuthUsers.isActive],
-                    it[OAuthUsers.passwordHash]
-                )
-            }.singleOrNull()
-    }
+        call: ApplicationCall,
+    ): OAuthUserDTO? =
+        oauthDatabaseConfiguration.dbQuery(call) {
+            OAuthUsers.selectAll().where { OAuthUsers.username eq username }
+                .map {
+                    OAuthUserDTO(
+                        it[OAuthUsers.id],
+                        it[OAuthUsers.username],
+                        it[OAuthUsers.email],
+                        it[OAuthUsers.firstName],
+                        it[OAuthUsers.lastName],
+                        it[OAuthUsers.isActive],
+                        it[OAuthUsers.passwordHash],
+                    )
+                }.singleOrNull()
+        }
 
     override fun findById(
         id: String,
-        call: ApplicationCall
-    ): OAuthUserDTO? = oauthDatabaseConfiguration.dbQuery(call) {
-        OAuthUsers.selectAll().where { OAuthUsers.id eq id }
-            .map {
-                OAuthUserDTO(
-                    it[OAuthUsers.id],
-                    it[OAuthUsers.username],
-                    it[OAuthUsers.email],
-                    it[OAuthUsers.firstName],
-                    it[OAuthUsers.lastName],
-                    it[OAuthUsers.isActive],
-                    it[OAuthUsers.passwordHash]
-                )
-            }.singleOrNull()
-    }
+        call: ApplicationCall,
+    ): OAuthUserDTO? =
+        oauthDatabaseConfiguration.dbQuery(call) {
+            OAuthUsers.selectAll().where { OAuthUsers.id eq id }
+                .map {
+                    OAuthUserDTO(
+                        it[OAuthUsers.id],
+                        it[OAuthUsers.username],
+                        it[OAuthUsers.email],
+                        it[OAuthUsers.firstName],
+                        it[OAuthUsers.lastName],
+                        it[OAuthUsers.isActive],
+                        it[OAuthUsers.passwordHash],
+                    )
+                }.singleOrNull()
+        }
 
     fun updateUser(
         userId: String,
@@ -92,7 +93,7 @@ class OauthUserServiceDatabaseProvider(
         email: String?,
         firstName: String?,
         lastName: String?,
-        call: ApplicationCall
+        call: ApplicationCall,
     ): Boolean =
         oauthDatabaseConfiguration.dbQuery(call) {
             OAuthUsers.update({ OAuthUsers.id eq userId }) {
@@ -106,7 +107,7 @@ class OauthUserServiceDatabaseProvider(
     fun updateUserPassword(
         userId: String,
         password: String,
-        call: ApplicationCall
+        call: ApplicationCall,
     ): Boolean =
         oauthDatabaseConfiguration.dbQuery(call) {
             OAuthUsers.update({ OAuthUsers.id eq userId }) {
@@ -114,7 +115,10 @@ class OauthUserServiceDatabaseProvider(
             } > 0
         }
 
-    fun <T> runQuery(call: ApplicationCall, query: (OAuthUsers) -> T): T {
+    fun <T> runQuery(
+        call: ApplicationCall,
+        query: (OAuthUsers) -> T,
+    ): T {
         return oauthDatabaseConfiguration.dbQuery(call) {
             query(OAuthUsers)
         }

@@ -6,6 +6,6 @@ import io.ktor.server.application.ApplicationCall
 interface TokenRevokeService {
     suspend fun revoke(
         token: String,
-        call: ApplicationCall
+        call: ApplicationCall,
     ): Result<Map<String, Any?>, Map<String, Any?>>
 }

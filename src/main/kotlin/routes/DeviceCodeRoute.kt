@@ -24,7 +24,6 @@ import java.time.Instant
 import java.util.UUID
 
 fun Application.deviceCodeRoute() {
-
     val oauthClientService: OauthClientService by dependencies
     val oauthLoginOptionService: OauthLoginOptionService by dependencies
     val oauthDeviceCodeService: OauthDeviceCodeService by dependencies
@@ -33,28 +32,31 @@ fun Application.deviceCodeRoute() {
     routing {
         post("/oauth/device_authorization") {
             val params = call.receiveParameters()
-            val clientId = params["client_id"]
-                ?: return@post call.respond(
-                    HttpStatusCode.BadRequest,
-                    mutableMapOf("error" to "Missing client_id")
-                )
+            val clientId =
+                params["client_id"]
+                    ?: return@post call.respond(
+                        HttpStatusCode.BadRequest,
+                        mutableMapOf("error" to "Missing client_id"),
+                    )
 
-            val scope = params["scope"]
-                ?: return@post call.respond(
-                    HttpStatusCode.BadRequest,
-                    mutableMapOf("error" to "Missing scope")
-                )
+            val scope =
+                params["scope"]
+                    ?: return@post call.respond(
+                        HttpStatusCode.BadRequest,
+                        mutableMapOf("error" to "Missing scope"),
+                    )
 
-            val client = oauthClientService.findByClientId(clientId, call)
-                ?: return@post call.respond(
-                    HttpStatusCode.BadRequest,
-                    mutableMapOf("message" to "Invalid client_id")
-                )
+            val client =
+                oauthClientService.findByClientId(clientId, call)
+                    ?: return@post call.respond(
+                        HttpStatusCode.BadRequest,
+                        mutableMapOf("message" to "Invalid client_id"),
+                    )
 
             if (!client.scopes.containsAll(scope.split(" ").toList())) {
                 return@post call.respond(
                     HttpStatusCode.BadRequest,
-                    mutableMapOf("message" to "Invalid scopes")
+                    mutableMapOf("message" to "Invalid scopes"),
                 )
             }
 
@@ -68,19 +70,20 @@ fun Application.deviceCodeRoute() {
                 expiresAt,
                 call,
                 deviceCode,
-                userCode
+                userCode,
             )
 
             call.respond(
                 status = HttpStatusCode.OK,
-                message = mapOf(
-                    "device_code" to deviceCode,
-                    "user_code" to userCode,
-                    "verification_uri" to "${call.getBaseUrl()}/oauth/device-verification",
-                    "verification_uri_complete" to "${call.getBaseUrl()}/oauth/device-verification?user_code=${userCode}",
-                    "expires_in" to 1200,
-                    "interval" to 5
-                )
+                message =
+                    mapOf(
+                        "device_code" to deviceCode,
+                        "user_code" to userCode,
+                        "verification_uri" to "${call.getBaseUrl()}/oauth/device-verification",
+                        "verification_uri_complete" to "${call.getBaseUrl()}/oauth/device-verification?user_code=$userCode",
+                        "expires_in" to 1200,
+                        "interval" to 5,
+                    ),
             )
         }
 
@@ -103,10 +106,15 @@ fun Application.deviceCodeRoute() {
             }
 
             val templateData = templateCustomizer?.addExtraData(call) ?: mapOf()
-            call.respond(MustacheContent("oauth_templates/device_verification.hbs", mapOf(
-                "result" to false,
-                "userCode" to userCode
-            ).plus(templateData)))
+            call.respond(
+                MustacheContent(
+                    "oauth_templates/device_verification.hbs",
+                    mapOf(
+                        "result" to false,
+                        "userCode" to userCode,
+                    ).plus(templateData),
+                ),
+            )
         }
 
         post("/oauth/device-verification") {
@@ -129,28 +137,40 @@ fun Application.deviceCodeRoute() {
 
             val templateData = templateCustomizer?.addExtraData(call) ?: mapOf()
 
-            val userCode = params["user_code"]
-                ?: return@post call.respond(MustacheContent("oauth_templates/device_verification.hbs", mapOf(
-                    "result" to true,
-                    "isInvalid" to true
-                ).plus(templateData)))
+            val userCode =
+                params["user_code"]
+                    ?: return@post call.respond(
+                        MustacheContent(
+                            "oauth_templates/device_verification.hbs",
+                            mapOf(
+                                "result" to true,
+                                "isInvalid" to true,
+                            ).plus(templateData),
+                        ),
+                    )
 
             val oauthDeviceCodeEntity =
                 oauthDeviceCodeService.findByUserCode(userCode, call) ?: return@post call.respond(
                     MustacheContent(
-                        "oauth_templates/device_verification.hbs", mapOf(
+                        "oauth_templates/device_verification.hbs",
+                        mapOf(
                             "result" to true,
-                            "isInvalid" to true
-                        ).plus(templateData)
-                    )
+                            "isInvalid" to true,
+                        ).plus(templateData),
+                    ),
                 )
 
             oauthDeviceCodeService.authorizeDevice(oauthDeviceCodeEntity.deviceCode, session.userId, call)
 
-            return@post call.respond(MustacheContent("oauth_templates/device_verification.hbs", mapOf(
-                "result" to true,
-                "isSuccess" to true
-            ).plus(templateData)))
+            return@post call.respond(
+                MustacheContent(
+                    "oauth_templates/device_verification.hbs",
+                    mapOf(
+                        "result" to true,
+                        "isSuccess" to true,
+                    ).plus(templateData),
+                ),
+            )
         }
     }
 }

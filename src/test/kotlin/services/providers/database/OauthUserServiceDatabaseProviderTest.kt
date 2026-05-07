@@ -5,13 +5,12 @@ import com.bittokazi.ktor.auth.services.providers.database.OauthUserServiceDatab
 import config.TestOauthDatabaseConfiguration
 import io.ktor.server.application.ApplicationCall
 import org.junit.After
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import org.junit.Assert.*
 import org.mockito.Mockito
 
 class OauthUserServiceDatabaseProviderTest {
-
     private lateinit var databaseConfiguration: TestOauthDatabaseConfiguration
     private lateinit var userService: OauthUserServiceDatabaseProvider
     private val mockCall = Mockito.mock(ApplicationCall::class.java)
@@ -29,14 +28,15 @@ class OauthUserServiceDatabaseProviderTest {
 
     @Test
     fun `createUser successfully creates a new user`() {
-        val user = userService.createUser(
-            username = "testuser",
-            password = "password123",
-            email = "test@example.com",
-            firstName = "Test",
-            lastName = "User",
-            call = mockCall
-        )
+        val user =
+            userService.createUser(
+                username = "testuser",
+                password = "password123",
+                email = "test@example.com",
+                firstName = "Test",
+                lastName = "User",
+                call = mockCall,
+            )
 
         assertNotNull(user)
         assertEquals("testuser", user.username)
@@ -54,7 +54,7 @@ class OauthUserServiceDatabaseProviderTest {
             email = "test@example.com",
             firstName = "Test",
             lastName = "User",
-            call = mockCall
+            call = mockCall,
         )
 
         val result = userService.findByUsername("testuser", mockCall)
@@ -71,14 +71,15 @@ class OauthUserServiceDatabaseProviderTest {
 
     @Test
     fun `findById returns user when exists`() {
-        val created = userService.createUser(
-            username = "testuser",
-            password = "password123",
-            email = "test@example.com",
-            firstName = "Test",
-            lastName = "User",
-            call = mockCall
-        )
+        val created =
+            userService.createUser(
+                username = "testuser",
+                password = "password123",
+                email = "test@example.com",
+                firstName = "Test",
+                lastName = "User",
+                call = mockCall,
+            )
 
         val result = userService.findById(created.id, mockCall)
         assertNotNull(result)
@@ -94,14 +95,15 @@ class OauthUserServiceDatabaseProviderTest {
 
     @Test
     fun `createUser hashes password with bcrypt`() {
-        val user = userService.createUser(
-            username = "testuser",
-            password = "password123",
-            email = "test@example.com",
-            firstName = "Test",
-            lastName = "User",
-            call = mockCall
-        )
+        val user =
+            userService.createUser(
+                username = "testuser",
+                password = "password123",
+                email = "test@example.com",
+                firstName = "Test",
+                lastName = "User",
+                call = mockCall,
+            )
 
         val result = userService.findByUsername("testuser", mockCall)
         assertNotNull(result?.passwordHash)
@@ -112,23 +114,25 @@ class OauthUserServiceDatabaseProviderTest {
 
     @Test
     fun `updateUser successfully updates user properties`() {
-        val created = userService.createUser(
-            username = "testuser",
-            password = "password123",
-            email = "test@example.com",
-            firstName = "Test",
-            lastName = "User",
-            call = mockCall
-        )
+        val created =
+            userService.createUser(
+                username = "testuser",
+                password = "password123",
+                email = "test@example.com",
+                firstName = "Test",
+                lastName = "User",
+                call = mockCall,
+            )
 
-        val updateResult = userService.updateUser(
-            userId = created.id,
-            username = "updateduser",
-            email = "updated@example.com",
-            firstName = "Updated",
-            lastName = "Name",
-            call = mockCall
-        )
+        val updateResult =
+            userService.updateUser(
+                userId = created.id,
+                username = "updateduser",
+                email = "updated@example.com",
+                firstName = "Updated",
+                lastName = "Name",
+                call = mockCall,
+            )
 
         assertTrue(updateResult)
 
@@ -141,36 +145,39 @@ class OauthUserServiceDatabaseProviderTest {
 
     @Test
     fun `updateUser returns false for nonexistent user`() {
-        val result = userService.updateUser(
-            userId = "nonexistent",
-            username = "newname",
-            email = "new@example.com",
-            firstName = "New",
-            lastName = "User",
-            call = mockCall
-        )
+        val result =
+            userService.updateUser(
+                userId = "nonexistent",
+                username = "newname",
+                email = "new@example.com",
+                firstName = "New",
+                lastName = "User",
+                call = mockCall,
+            )
 
         assertFalse(result)
     }
 
     @Test
     fun `updateUserPassword changes password hash`() {
-        val created = userService.createUser(
-            username = "testuser",
-            password = "oldpassword",
-            email = "test@example.com",
-            firstName = "Test",
-            lastName = "User",
-            call = mockCall
-        )
+        val created =
+            userService.createUser(
+                username = "testuser",
+                password = "oldpassword",
+                email = "test@example.com",
+                firstName = "Test",
+                lastName = "User",
+                call = mockCall,
+            )
 
         val oldPasswordHash = userService.findById(created.id, mockCall)?.passwordHash
 
-        val updateResult = userService.updateUserPassword(
-            userId = created.id,
-            password = "newpassword",
-            call = mockCall
-        )
+        val updateResult =
+            userService.updateUserPassword(
+                userId = created.id,
+                password = "newpassword",
+                call = mockCall,
+            )
 
         assertTrue(updateResult)
 
@@ -182,25 +189,27 @@ class OauthUserServiceDatabaseProviderTest {
 
     @Test
     fun `updateUserPassword returns false for nonexistent user`() {
-        val result = userService.updateUserPassword(
-            userId = "nonexistent",
-            password = "newpassword",
-            call = mockCall
-        )
+        val result =
+            userService.updateUserPassword(
+                userId = "nonexistent",
+                password = "newpassword",
+                call = mockCall,
+            )
 
         assertFalse(result)
     }
 
     @Test
     fun `createUser with null optional fields`() {
-        val user = userService.createUser(
-            username = "testuser",
-            password = "password123",
-            email = null,
-            firstName = null,
-            lastName = null,
-            call = mockCall
-        )
+        val user =
+            userService.createUser(
+                username = "testuser",
+                password = "password123",
+                email = null,
+                firstName = null,
+                lastName = null,
+                call = mockCall,
+            )
 
         val result = userService.findByUsername("testuser", mockCall)
         assertNull(result?.email)
@@ -217,7 +226,7 @@ class OauthUserServiceDatabaseProviderTest {
                 email = "user$i@example.com",
                 firstName = "User",
                 lastName = "Number$i",
-                call = mockCall
+                call = mockCall,
             )
         }
 
@@ -231,23 +240,25 @@ class OauthUserServiceDatabaseProviderTest {
 
     @Test
     fun `updating one user does not affect others`() {
-        val user1 = userService.createUser(
-            username = "user_1",
-            password = "password",
-            email = "user1@example.com",
-            firstName = "User",
-            lastName = "One",
-            call = mockCall
-        )
+        val user1 =
+            userService.createUser(
+                username = "user_1",
+                password = "password",
+                email = "user1@example.com",
+                firstName = "User",
+                lastName = "One",
+                call = mockCall,
+            )
 
-        val user2 = userService.createUser(
-            username = "user_2",
-            password = "password",
-            email = "user2@example.com",
-            firstName = "User",
-            lastName = "Two",
-            call = mockCall
-        )
+        val user2 =
+            userService.createUser(
+                username = "user_2",
+                password = "password",
+                email = "user2@example.com",
+                firstName = "User",
+                lastName = "Two",
+                call = mockCall,
+            )
 
         userService.updateUser(
             userId = user1.id,
@@ -255,7 +266,7 @@ class OauthUserServiceDatabaseProviderTest {
             email = "updated1@example.com",
             firstName = "Updated",
             lastName = "One",
-            call = mockCall
+            call = mockCall,
         )
 
         val result2 = userService.findById(user2.id, mockCall)

@@ -7,7 +7,6 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
 
 class TestOauthDatabaseConfiguration : OauthDatabaseConfiguration {
-
     private val postgresContainer: PostgreSQLContainer<*> =
         PostgreSQLContainer(DockerImageName.parse("postgres:15-alpine"))
             .withDatabaseName("test_oauth")
@@ -19,20 +18,24 @@ class TestOauthDatabaseConfiguration : OauthDatabaseConfiguration {
     init {
         postgresContainer.start()
 
-        oauthDatabaseConfiguration = DefaultOauthDatabaseConfiguration(
-            url = postgresContainer.jdbcUrl,
-            username = postgresContainer.username,
-            password = postgresContainer.password,
-            driver = postgresContainer.driverClassName,
-            schema = "public"
-        )
+        oauthDatabaseConfiguration =
+            DefaultOauthDatabaseConfiguration(
+                url = postgresContainer.jdbcUrl,
+                username = postgresContainer.username,
+                password = postgresContainer.password,
+                driver = postgresContainer.driverClassName,
+                schema = "public",
+            )
     }
 
     fun stop() {
         postgresContainer.stop()
     }
 
-    override fun <T> dbQuery(call: ApplicationCall?, block: () -> T): T {
+    override fun <T> dbQuery(
+        call: ApplicationCall?,
+        block: () -> T,
+    ): T {
         return oauthDatabaseConfiguration.dbQuery(call) { block() }
     }
 }
