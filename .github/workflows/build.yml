@@ -52,4 +52,4 @@ jobs:
 
       - name: Build Ktor Oauth Library
         run: gradle build
-        if: steps.tests.outcome == 'success' && steps.jacoco.outcome == 'success'`
+        if: steps.tests.outcome == 'success' && steps.jacoco.outcome == 'success'
