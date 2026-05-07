@@ -10,6 +10,9 @@ plugins {
 
     // for code coverage
     jacoco
+
+    // linter
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
 }
 
 group = "com.bittokazi.sonartype"
