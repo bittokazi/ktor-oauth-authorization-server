@@ -10,7 +10,7 @@ fun Application.configureOauth2AuthorizationServer(
     defaultTokenRoute: Boolean = true,
     defaultConsentRoute: Boolean = true,
     defaultDeviceAuthorizationRoute: Boolean = true,
-    configureForwardHeaderAndDefaultHeadersPlugin: Boolean = true
+    configureForwardHeaderAndDefaultHeadersPlugin: Boolean = true,
 ) {
     if (configureSerialization) {
         configureSerialization()
@@ -27,6 +27,6 @@ fun Application.configureOauth2AuthorizationServer(
         defaultOidcRoute = defaultOidcRoute,
         defaultTokenRoute = defaultTokenRoute,
         defaultConsentRoute = defaultConsentRoute,
-        defaultDeviceAuthorizationRoute = defaultDeviceAuthorizationRoute
+        defaultDeviceAuthorizationRoute = defaultDeviceAuthorizationRoute,
     )
 }

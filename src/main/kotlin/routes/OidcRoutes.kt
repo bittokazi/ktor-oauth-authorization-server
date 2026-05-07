@@ -19,32 +19,39 @@ fun Application.oidcRoutes() {
     val jwtVerifier: JwtVerifier by dependencies
 
     routing {
-
         authenticate {
             get("/oauth/userinfo") {
-                val authHeader = call.request.headers["Authorization"] ?: return@get call.respond(
-                    HttpStatusCode.Unauthorized, mapOf(
-                        "error" to "No Authorization Provided"
+                val authHeader =
+                    call.request.headers["Authorization"] ?: return@get call.respond(
+                        HttpStatusCode.Unauthorized,
+                        mapOf(
+                            "error" to "No Authorization Provided",
+                        ),
                     )
-                )
-                if (!authHeader.startsWith("Bearer ")) return@get call.respond(
-                    HttpStatusCode.Unauthorized, mapOf(
-                        "error" to "Invalid authorization token"
+                if (!authHeader.startsWith("Bearer ")) {
+                    return@get call.respond(
+                        HttpStatusCode.Unauthorized,
+                        mapOf(
+                            "error" to "Invalid authorization token",
+                        ),
                     )
-                )
+                }
 
                 val token = authHeader.removePrefix("Bearer ").trim()
-                val signedJWT = jwtVerifier.verify(token) ?: return@get call.respond(
-                    HttpStatusCode.Unauthorized, mapOf(
-                        "error" to "Unauthorized"
+                val signedJWT =
+                    jwtVerifier.verify(token) ?: return@get call.respond(
+                        HttpStatusCode.Unauthorized,
+                        mapOf(
+                            "error" to "Unauthorized",
+                        ),
                     )
-                )
 
                 if (signedJWT.jwtClaimsSet.getStringClaim("token_type") != TokenType.ACCESS_TOKEN.name) {
                     return@get call.respond(
-                        HttpStatusCode.Unauthorized, mapOf(
-                            "error" to "Unauthorized"
-                        )
+                        HttpStatusCode.Unauthorized,
+                        mapOf(
+                            "error" to "Unauthorized",
+                        ),
                     )
                 }
 
@@ -54,12 +61,14 @@ fun Application.oidcRoutes() {
                 val scopes = claims.getStringClaim("scope")?.split(" ") ?: emptyList()
 
                 // Optional: only return claims that the token scopes allow
-                val response = mutableMapOf(
-                    "sub" to sub
-                )
+                val response =
+                    mutableMapOf(
+                        "sub" to sub,
+                    )
                 if ("openid" in scopes) {
-                    val user = oauthUserService.findById(sub, call)
-                        ?: return@get call.respond(HttpStatusCode.NotFound, mapOf("error" to "User not found"))
+                    val user =
+                        oauthUserService.findById(sub, call)
+                            ?: return@get call.respond(HttpStatusCode.NotFound, mapOf("error" to "User not found"))
                     if ("email" in scopes) {
                         response["email"] = user.email as String
                     }
@@ -77,34 +86,37 @@ fun Application.oidcRoutes() {
             val issuer = call.getBaseUrl()
             val baseUrl = "${call.getBaseUrl()}/oauth"
 
-            val metadata = mapOf(
-                "issuer" to issuer,
-                "authorization_endpoint" to "$baseUrl/authorize",
-                "device_authorization_endpoint" to "$baseUrl/device_authorization",
-                "token_endpoint" to "$baseUrl/token",
-                "userinfo_endpoint" to "$baseUrl/userinfo",
-                "revocation_endpoint" to "$baseUrl/revoke",
-                "introspection_endpoint" to "$baseUrl/introspect",
-                "jwks_uri" to "$issuer/.well-known/jwks.json",
-                "response_types_supported" to listOf("code", "token", "id_token", "code id_token"),
-                "grant_types_supported" to listOf(
-                    "authorization_code",
-                    "refresh_token"
-                ),
-                "subject_types_supported" to listOf("public"),
-                "id_token_signing_alg_values_supported" to listOf("RS256"),
-                "scopes_supported" to listOf("openid", "profile", "email"),
-                "token_endpoint_auth_methods_supported" to listOf("client_secret_post"),
-                "code_challenge_methods_supported" to listOf("S256", "plain")
-            )
+            val metadata =
+                mapOf(
+                    "issuer" to issuer,
+                    "authorization_endpoint" to "$baseUrl/authorize",
+                    "device_authorization_endpoint" to "$baseUrl/device_authorization",
+                    "token_endpoint" to "$baseUrl/token",
+                    "userinfo_endpoint" to "$baseUrl/userinfo",
+                    "revocation_endpoint" to "$baseUrl/revoke",
+                    "introspection_endpoint" to "$baseUrl/introspect",
+                    "jwks_uri" to "$issuer/.well-known/jwks.json",
+                    "response_types_supported" to listOf("code", "token", "id_token", "code id_token"),
+                    "grant_types_supported" to
+                        listOf(
+                            "authorization_code",
+                            "refresh_token",
+                        ),
+                    "subject_types_supported" to listOf("public"),
+                    "id_token_signing_alg_values_supported" to listOf("RS256"),
+                    "scopes_supported" to listOf("openid", "profile", "email"),
+                    "token_endpoint_auth_methods_supported" to listOf("client_secret_post"),
+                    "code_challenge_methods_supported" to listOf("S256", "plain"),
+                )
 
             call.respond(metadata)
         }
 
         get("/.well-known/jwks.json") {
-            val jwkSet = mapOf(
-                "keys" to listOf(jwksProvider.getPublicJwk())
-            )
+            val jwkSet =
+                mapOf(
+                    "keys" to listOf(jwksProvider.getPublicJwk()),
+                )
             call.respond(jwkSet)
         }
     }

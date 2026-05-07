@@ -1,17 +1,17 @@
-package com.bittokazi.ktor.auth.services.providers.database
+package services.providers.database
 
-import com.bittokazi.ktor.auth.config.TestOauthDatabaseConfiguration
+import com.bittokazi.ktor.auth.services.providers.database.OauthAuthorizationCodeServiceDatabaseProvider
+import config.TestOauthDatabaseConfiguration
 import io.ktor.server.application.ApplicationCall
 import org.junit.After
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import org.junit.Assert.*
 import org.mockito.Mockito
 import java.time.Instant
 import java.util.UUID
 
 class OauthAuthorizationCodeServiceDatabaseProviderTest {
-
     private lateinit var databaseConfiguration: TestOauthDatabaseConfiguration
     private lateinit var codeService: OauthAuthorizationCodeServiceDatabaseProvider
     private val mockCall = Mockito.mock(ApplicationCall::class.java)
@@ -31,17 +31,18 @@ class OauthAuthorizationCodeServiceDatabaseProviderTest {
 
     @Test
     fun `createCode successfully creates authorization code`() {
-        val result = codeService.createCode(
-            code = "auth_code_123",
-            clientId = clientId,
-            userId = "user_1",
-            redirectUri = "https://example.com/callback",
-            scopes = listOf("read", "write"),
-            expiresAt = expiresAt,
-            challenge = "challenge_value",
-            challengeMethod = "S256",
-            call = mockCall
-        )
+        val result =
+            codeService.createCode(
+                code = "auth_code_123",
+                clientId = clientId,
+                userId = "user_1",
+                redirectUri = "https://example.com/callback",
+                scopes = listOf("read", "write"),
+                expiresAt = expiresAt,
+                challenge = "challenge_value",
+                challengeMethod = "S256",
+                call = mockCall,
+            )
 
         assertTrue(result)
         val retrieved = codeService.findByCode("auth_code_123", mockCall)
@@ -61,7 +62,7 @@ class OauthAuthorizationCodeServiceDatabaseProviderTest {
             expiresAt = expiresAt,
             challenge = null,
             challengeMethod = null,
-            call = mockCall
+            call = mockCall,
         )
 
         val result = codeService.findByCode("auth_code_123", mockCall)
@@ -90,7 +91,7 @@ class OauthAuthorizationCodeServiceDatabaseProviderTest {
             expiresAt = expiresAt,
             challenge = null,
             challengeMethod = null,
-            call = mockCall
+            call = mockCall,
         )
 
         val consumeResult = codeService.consumeCode("auth_code_123", mockCall)
@@ -118,7 +119,7 @@ class OauthAuthorizationCodeServiceDatabaseProviderTest {
             expiresAt = expiresAt,
             challenge = codeChallenge,
             challengeMethod = "S256",
-            call = mockCall
+            call = mockCall,
         )
 
         val result = codeService.findByCode("auth_code_pkce", mockCall)
@@ -138,7 +139,7 @@ class OauthAuthorizationCodeServiceDatabaseProviderTest {
             expiresAt = expiresAt,
             challenge = null,
             challengeMethod = null,
-            call = mockCall
+            call = mockCall,
         )
 
         val result = codeService.findByCode("auth_code_scopes", mockCall)
@@ -158,7 +159,7 @@ class OauthAuthorizationCodeServiceDatabaseProviderTest {
                 expiresAt = expiresAt,
                 challenge = null,
                 challengeMethod = null,
-                call = mockCall
+                call = mockCall,
             )
         }
 
@@ -180,7 +181,7 @@ class OauthAuthorizationCodeServiceDatabaseProviderTest {
             expiresAt = expiresAt,
             challenge = null,
             challengeMethod = null,
-            call = mockCall
+            call = mockCall,
         )
 
         codeService.createCode(
@@ -192,7 +193,7 @@ class OauthAuthorizationCodeServiceDatabaseProviderTest {
             expiresAt = expiresAt,
             challenge = null,
             challengeMethod = null,
-            call = mockCall
+            call = mockCall,
         )
 
         codeService.consumeCode("code_1", mockCall)

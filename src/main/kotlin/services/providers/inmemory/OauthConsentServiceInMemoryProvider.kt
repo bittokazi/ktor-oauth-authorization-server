@@ -7,19 +7,28 @@ import java.util.UUID
 data class ConsentRecord(
     val userId: String,
     val clientId: UUID,
-    val scopes: List<String>
+    val scopes: List<String>,
 )
 
 class OauthConsentServiceInMemoryProvider : OauthConsentService {
     private val consents = mutableListOf<ConsentRecord>()
 
-    override fun grantConsent(userId: String, clientId: UUID, scopes: List<String>, call: ApplicationCall): Boolean {
+    override fun grantConsent(
+        userId: String,
+        clientId: UUID,
+        scopes: List<String>,
+        call: ApplicationCall,
+    ): Boolean {
         consents.removeIf { it.userId == userId && it.clientId == clientId }
         consents.add(ConsentRecord(userId, clientId, scopes))
         return true
     }
 
-    override fun getConsent(userId: String, clientId: UUID, call: ApplicationCall): List<String>? {
+    override fun getConsent(
+        userId: String,
+        clientId: UUID,
+        call: ApplicationCall,
+    ): List<String>? {
         return consents.find { it.userId == userId && it.clientId == clientId }?.scopes
     }
 }

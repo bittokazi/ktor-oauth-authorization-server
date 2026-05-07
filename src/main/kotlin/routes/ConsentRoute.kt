@@ -19,7 +19,6 @@ import io.ktor.server.sessions.get
 import io.ktor.server.sessions.sessions
 
 fun Application.consentRoute() {
-
     val oauthClientService: OauthClientService by dependencies
     val oauthConsentService: OauthConsentService by dependencies
     val oauthLoginOptionService: OauthLoginOptionService by dependencies
@@ -48,28 +47,39 @@ fun Application.consentRoute() {
                 return@get
             }
 
-            val client = oauthClientService.findByClientId(clientId, call)
-                ?: return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid client_id"))
+            val client =
+                oauthClientService.findByClientId(clientId, call)
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid client_id"))
 
             if (client.consentRequired) {
                 val templateData = templateCustomizer?.addExtraData(call) ?: mapOf()
 
                 when (val consents = oauthConsentService.getConsent(userId = session.userId, clientId = client.id, call)) {
                     null -> {
-                        call.respond(MustacheContent("oauth_templates/consent.hbs", mapOf(
-                            "clientName" to client.clientName,
-                            "scopes" to client.scopes,
-                            "clientId" to client.clientId
-                        ).plus(templateData)))
+                        call.respond(
+                            MustacheContent(
+                                "oauth_templates/consent.hbs",
+                                mapOf(
+                                    "clientName" to client.clientName,
+                                    "scopes" to client.scopes,
+                                    "clientId" to client.clientId,
+                                ).plus(templateData),
+                            ),
+                        )
                         return@get
                     }
                     else -> {
                         if (!consents.containsAll(client.scopes)) {
-                            call.respond(MustacheContent("oauth_templates/consent.hbs", mapOf(
-                                "clientName" to client.clientName,
-                                "scopes" to client.scopes,
-                                "clientId" to client.clientId
-                            ).plus(templateData)))
+                            call.respond(
+                                MustacheContent(
+                                    "oauth_templates/consent.hbs",
+                                    mapOf(
+                                        "clientName" to client.clientName,
+                                        "scopes" to client.scopes,
+                                        "clientId" to client.clientId,
+                                    ).plus(templateData),
+                                ),
+                            )
                             return@get
                         }
                         // Retrieve saved original request URL
@@ -83,7 +93,6 @@ fun Application.consentRoute() {
         }
 
         post("/oauth/consent") {
-
             val session = call.sessions.get<OauthUserSession>()
             if (session == null || session.expiresAt < System.currentTimeMillis()) {
                 call.sessions.clear("OAUTH_USER_SESSION")
@@ -93,8 +102,9 @@ fun Application.consentRoute() {
 
             val params = call.receiveParameters()
 
-            val clientIdParam = call.request.queryParameters["client_id"]
-                ?: params["client_id"]
+            val clientIdParam =
+                call.request.queryParameters["client_id"]
+                    ?: params["client_id"]
 
             val action = params["action"]
 
@@ -103,8 +113,9 @@ fun Application.consentRoute() {
                 return@post
             }
 
-            val client = oauthClientService.findByClientId(clientIdParam, call)
-                ?: return@post call.respond(HttpStatusCode.BadRequest, mapOf("message" to "Invalid client_id"))
+            val client =
+                oauthClientService.findByClientId(clientIdParam, call)
+                    ?: return@post call.respond(HttpStatusCode.BadRequest, mapOf("message" to "Invalid client_id"))
 
             val templateData = templateCustomizer?.addExtraData(call) ?: mapOf()
 
@@ -114,7 +125,7 @@ fun Application.consentRoute() {
                         userId = session.userId,
                         clientId = client.id,
                         scopes = client.scopes,
-                        call
+                        call,
                     )
 
                     // Redirect back to original URL (authorization endpoint)
@@ -129,9 +140,9 @@ fun Application.consentRoute() {
                             "oauth_templates/consent_denied.hbs",
                             mapOf(
                                 "error" to "access_denied",
-                                "error_description" to "You have denied access to the application."
-                            ).plus(templateData)
-                        )
+                                "error_description" to "You have denied access to the application.",
+                            ).plus(templateData),
+                        ),
                     )
                 }
                 else -> {

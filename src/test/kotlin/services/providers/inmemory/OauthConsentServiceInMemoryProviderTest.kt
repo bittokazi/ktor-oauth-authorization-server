@@ -1,5 +1,6 @@
-package com.bittokazi.ktor.auth.services.providers.inmemory
+package services.providers.inmemory
 
+import com.bittokazi.ktor.auth.services.providers.inmemory.OauthConsentServiceInMemoryProvider
 import io.ktor.server.application.ApplicationCall
 import org.junit.Assert.*
 import org.junit.Before
@@ -8,7 +9,6 @@ import org.mockito.Mockito
 import java.util.UUID
 
 class OauthConsentServiceInMemoryProviderTest {
-
     private lateinit var provider: OauthConsentServiceInMemoryProvider
     private val mockCall = Mockito.mock(ApplicationCall::class.java)
     private val clientId = UUID.randomUUID()
@@ -20,12 +20,13 @@ class OauthConsentServiceInMemoryProviderTest {
 
     @Test
     fun `grantConsent adds consent successfully`() {
-        val result = provider.grantConsent(
-            userId = "user_1",
-            clientId = clientId,
-            scopes = listOf("read", "write"),
-            call = mockCall
-        )
+        val result =
+            provider.grantConsent(
+                userId = "user_1",
+                clientId = clientId,
+                scopes = listOf("read", "write"),
+                call = mockCall,
+            )
 
         assertTrue(result)
     }
@@ -37,7 +38,7 @@ class OauthConsentServiceInMemoryProviderTest {
             userId = "user_1",
             clientId = clientId,
             scopes = scopes,
-            call = mockCall
+            call = mockCall,
         )
 
         val result = provider.getConsent("user_1", clientId, mockCall)
@@ -58,7 +59,7 @@ class OauthConsentServiceInMemoryProviderTest {
             userId = "user_1",
             clientId = clientId,
             scopes = listOf("read"),
-            call = mockCall
+            call = mockCall,
         )
 
         val result = provider.getConsent("user_2", clientId, mockCall)
@@ -71,7 +72,7 @@ class OauthConsentServiceInMemoryProviderTest {
             userId = "user_1",
             clientId = clientId,
             scopes = listOf("read"),
-            call = mockCall
+            call = mockCall,
         )
 
         val result = provider.getConsent("user_1", UUID.randomUUID(), mockCall)
@@ -165,4 +166,3 @@ class OauthConsentServiceInMemoryProviderTest {
         assertEquals("write", result2?.get(0))
     }
 }
-

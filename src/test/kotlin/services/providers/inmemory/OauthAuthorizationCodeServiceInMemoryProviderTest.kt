@@ -1,6 +1,6 @@
-package com.bittokazi.ktor.auth.services.providers.inmemory
+package services.providers.inmemory
 
-import com.bittokazi.ktor.auth.services.providers.AuthorizationCodeDTO
+import com.bittokazi.ktor.auth.services.providers.inmemory.OauthAuthorizationCodeServiceInMemoryProvider
 import io.ktor.server.application.ApplicationCall
 import org.junit.Assert.*
 import org.junit.Before
@@ -10,7 +10,6 @@ import java.time.Instant
 import java.util.UUID
 
 class OauthAuthorizationCodeServiceInMemoryProviderTest {
-
     private lateinit var provider: OauthAuthorizationCodeServiceInMemoryProvider
     private val mockCall = Mockito.mock(ApplicationCall::class.java)
     private val clientId = UUID.randomUUID()
@@ -23,17 +22,18 @@ class OauthAuthorizationCodeServiceInMemoryProviderTest {
 
     @Test
     fun `createCode adds authorization code successfully`() {
-        val result = provider.createCode(
-            code = "auth_code_123",
-            clientId = clientId,
-            userId = "user_1",
-            redirectUri = "https://example.com/callback",
-            scopes = listOf("read", "write"),
-            expiresAt = expiresAt,
-            challenge = "challenge_value",
-            challengeMethod = "S256",
-            call = mockCall
-        )
+        val result =
+            provider.createCode(
+                code = "auth_code_123",
+                clientId = clientId,
+                userId = "user_1",
+                redirectUri = "https://example.com/callback",
+                scopes = listOf("read", "write"),
+                expiresAt = expiresAt,
+                challenge = "challenge_value",
+                challengeMethod = "S256",
+                call = mockCall,
+            )
 
         assertTrue(result)
         assertEquals(1, provider.codes.size)
@@ -51,7 +51,7 @@ class OauthAuthorizationCodeServiceInMemoryProviderTest {
             expiresAt = expiresAt,
             challenge = null,
             challengeMethod = null,
-            call = mockCall
+            call = mockCall,
         )
 
         val result = provider.findByCode("auth_code_123", mockCall)
@@ -77,7 +77,7 @@ class OauthAuthorizationCodeServiceInMemoryProviderTest {
             expiresAt = expiresAt,
             challenge = null,
             challengeMethod = null,
-            call = mockCall
+            call = mockCall,
         )
 
         // New codes are created with consumed = false
@@ -102,7 +102,7 @@ class OauthAuthorizationCodeServiceInMemoryProviderTest {
             expiresAt = expiresAt,
             challenge = "E9Mrozoa2owUednMd1jWfJM5CKvbZ5X4P8f7sB5gdk",
             challengeMethod = "S256",
-            call = mockCall
+            call = mockCall,
         )
 
         val code = provider.codes[0]
@@ -120,4 +120,3 @@ class OauthAuthorizationCodeServiceInMemoryProviderTest {
         // No exception should be thrown
     }
 }
-

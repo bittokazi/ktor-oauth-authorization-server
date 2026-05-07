@@ -24,7 +24,6 @@ import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
 
 fun Application.loginRoutes() {
-
     val oauthUserService: OauthUserService by dependencies
     val oauthAuthorizationCodeService: OauthAuthorizationCodeService by dependencies
     val oauthTokenService: OauthTokenService by dependencies
@@ -46,10 +45,11 @@ fun Application.loginRoutes() {
                 }
 
                 if (session.expiresAt > System.currentTimeMillis()) {
-                    val ttlSeconds = when (session.rememberMe) {
-                        true -> 31536000
-                        else -> sessionCustomizer.timeout ?: 3200
-                    }
+                    val ttlSeconds =
+                        when (session.rememberMe) {
+                            true -> 31536000
+                            else -> sessionCustomizer.timeout ?: 3200
+                        }
                     val expiresAt = System.currentTimeMillis() + (ttlSeconds * 1000)
                     call.sessions.set(OauthUserSession(session.userId, session.username, expiresAt, session.rememberMe))
                 }
@@ -74,18 +74,24 @@ fun Application.loginRoutes() {
 
                 if (user == null || !BCrypt.verifyer().verify(password.toCharArray(), user.passwordHash).verified) {
                     // Invalid login
-                    call.respond(MustacheContent("oauth_templates/login.hbs", mutableMapOf<String, Any>(
-                        "error" to "invalidLogin",
-                        "errorMessage" to "Login credentials do not match"
-                    ).plus(templateData)))
+                    call.respond(
+                        MustacheContent(
+                            "oauth_templates/login.hbs",
+                            mutableMapOf<String, Any>(
+                                "error" to "invalidLogin",
+                                "errorMessage" to "Login credentials do not match",
+                            ).plus(templateData),
+                        ),
+                    )
                     return@post
                 }
 
                 // Create session
-                val ttlSeconds = when (rememberMe) {
-                    true -> 31536000
-                    else -> sessionCustomizer.timeout ?: 3200
-                }
+                val ttlSeconds =
+                    when (rememberMe) {
+                        true -> 31536000
+                        else -> sessionCustomizer.timeout ?: 3200
+                    }
                 val expiresAt = System.currentTimeMillis() + (ttlSeconds * 1000)
                 val userSession = OauthUserSession(user.id, user.username, expiresAt, rememberMe)
                 call.sessions.set(userSession)

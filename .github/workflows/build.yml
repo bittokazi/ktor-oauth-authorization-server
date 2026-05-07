@@ -10,6 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
+      pull-requests: write
       contents: read
       checks: write
     steps:
@@ -21,21 +22,61 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+        uses: gradle/actions/setup-gradle@v4
 
-      - name: Run Tests
+      - name: Run Tests & Generate Coverage Report
         id: tests
-        run: gradle check
+        run: gradle test jacocoTestReport
+
+      - name: JaCoCo Code Coverage Report
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.6.1
+        if: always()
+        with:
+          paths: ${{ github.workspace }}/build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 80
+          min-coverage-changed-files: 80
+          title: 📊 Code Coverage Report
+          continue-on-error: true   # allow us to handle failure manually
+
+      - name: Enforce Coverage Threshold
+        if: always()
+        run: |
+          echo "Overall coverage: ${{ steps.jacoco.outputs.coverage-overall }}%"
+          echo "Changed files coverage: ${{ steps.jacoco.outputs.coverage-changed-files }}%"
+
+          overall=${{ steps.jacoco.outputs.coverage-overall }}
+          changed=${{ steps.jacoco.outputs.coverage-changed-files }}
+
+          fail=false
+
+          if (( $(echo "$overall < 80" | bc -l) )); then
+            echo "❌ Overall coverage is below 80%"
+            fail=true
+          fi
+
+          if (( $(echo "$changed < 80" | bc -l) )); then
+            echo "❌ Changed files coverage is below 80%"
+            fail=true
+          fi
+
+          if [ "$fail" = true ]; then
+            echo "🚨 Coverage check failed"
+            exit 1
+          else
+            echo "✅ Coverage check passed"
+          fi
 
       - name: Test Report
         uses: dorny/test-reporter@v1
-        if: success() || failure()
+        if: always()
         with:
-          name: JUnit Tests
+          name: 🧪 JUnit Tests
           path: '**/build/test-results/test/*.xml'
           reporter: java-junit
+          fail-on-error: false
+          comment-mode: always
 
       - name: Build Ktor Oauth Library
         run: gradle build
-        if: steps.tests.outcome == 'success'
-

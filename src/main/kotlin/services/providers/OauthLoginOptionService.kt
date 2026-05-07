@@ -7,8 +7,16 @@ import io.ktor.server.sessions.sessions
 
 interface OauthLoginOptionService {
     val fallbackAfterLoginRedirectUrl: String
-    suspend fun isAfterLoginCheckCompleted(oauthUserSession: OauthUserSession, call: ApplicationCall): Boolean
-    suspend fun onSuccessfulLogin(oauthUserSession: OauthUserSession, call: ApplicationCall)
+
+    suspend fun isAfterLoginCheckCompleted(
+        oauthUserSession: OauthUserSession,
+        call: ApplicationCall,
+    ): Boolean
+
+    suspend fun onSuccessfulLogin(
+        oauthUserSession: OauthUserSession,
+        call: ApplicationCall,
+    )
 
     suspend fun completeLogin(call: ApplicationCall) {
         val originalUrl = call.sessions.get("OAUTH_ORIGINAL_URL")
@@ -22,16 +30,15 @@ interface OauthLoginOptionService {
 }
 
 class DefaultOauthLoginOptionService(
-    override val fallbackAfterLoginRedirectUrl: String = "/"
+    override val fallbackAfterLoginRedirectUrl: String = "/",
 ) : OauthLoginOptionService {
-
     override suspend fun isAfterLoginCheckCompleted(
         oauthUserSession: OauthUserSession,
-        call: ApplicationCall
+        call: ApplicationCall,
     ): Boolean = true
 
     override suspend fun onSuccessfulLogin(
         oauthUserSession: OauthUserSession,
-        call: ApplicationCall
+        call: ApplicationCall,
     ) {}
 }

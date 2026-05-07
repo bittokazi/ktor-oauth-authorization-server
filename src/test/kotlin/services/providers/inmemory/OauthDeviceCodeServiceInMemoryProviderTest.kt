@@ -1,6 +1,6 @@
-package com.bittokazi.ktor.auth.services.providers.inmemory
+package services.providers.inmemory
 
-import com.bittokazi.ktor.auth.services.providers.OauthDeviceCodeDTO
+import com.bittokazi.ktor.auth.services.providers.inmemory.OauthDeviceCodeServiceInMemoryProvider
 import io.ktor.server.application.ApplicationCall
 import org.junit.Assert.*
 import org.junit.Before
@@ -10,7 +10,6 @@ import java.time.Instant
 import java.util.UUID
 
 class OauthDeviceCodeServiceInMemoryProviderTest {
-
     private lateinit var provider: OauthDeviceCodeServiceInMemoryProvider
     private val mockCall = Mockito.mock(ApplicationCall::class.java)
     private val clientId = UUID.randomUUID()
@@ -23,14 +22,15 @@ class OauthDeviceCodeServiceInMemoryProviderTest {
 
     @Test
     fun `createCode adds device code successfully`() {
-        val result = provider.createCode(
-            clientId = clientId,
-            scopes = listOf("read", "write"),
-            expiresAt = expiresAt,
-            call = mockCall,
-            deviceCode = "DEVICE_CODE_123",
-            userCode = "USER_CODE_ABC"
-        )
+        val result =
+            provider.createCode(
+                clientId = clientId,
+                scopes = listOf("read", "write"),
+                expiresAt = expiresAt,
+                call = mockCall,
+                deviceCode = "DEVICE_CODE_123",
+                userCode = "USER_CODE_ABC",
+            )
 
         assertTrue(result)
         assertEquals(1, provider.codes.size)
@@ -48,7 +48,7 @@ class OauthDeviceCodeServiceInMemoryProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = "DEVICE_CODE_123",
-            userCode = "USER_CODE_ABC"
+            userCode = "USER_CODE_ABC",
         )
 
         val result = provider.findByUserCode("USER_CODE_ABC", mockCall)
@@ -64,7 +64,7 @@ class OauthDeviceCodeServiceInMemoryProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = "DEVICE_CODE_123",
-            userCode = "USER_CODE_ABC"
+            userCode = "USER_CODE_ABC",
         )
         provider.authorizeDevice("DEVICE_CODE_123", "user_1", mockCall)
 
@@ -80,7 +80,7 @@ class OauthDeviceCodeServiceInMemoryProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = "DEVICE_CODE_123",
-            userCode = "USER_CODE_ABC"
+            userCode = "USER_CODE_ABC",
         )
         provider.consumeDeviceCode("DEVICE_CODE_123", mockCall)
 
@@ -96,7 +96,7 @@ class OauthDeviceCodeServiceInMemoryProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = "DEVICE_CODE_123",
-            userCode = "USER_CODE_ABC"
+            userCode = "USER_CODE_ABC",
         )
 
         val result = provider.findByDeviceCode("USER_CODE_ABC", false, false, mockCall)
@@ -113,7 +113,7 @@ class OauthDeviceCodeServiceInMemoryProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = "DEVICE_CODE_123",
-            userCode = "USER_CODE_ABC"
+            userCode = "USER_CODE_ABC",
         )
 
         val result = provider.findByDeviceCode("USER_CODE_ABC", true, false, mockCall)
@@ -128,7 +128,7 @@ class OauthDeviceCodeServiceInMemoryProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = "DEVICE_CODE_123",
-            userCode = "USER_CODE_ABC"
+            userCode = "USER_CODE_ABC",
         )
 
         val result = provider.consumeDeviceCode("DEVICE_CODE_123", mockCall)
@@ -144,7 +144,7 @@ class OauthDeviceCodeServiceInMemoryProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = "DEVICE_CODE_123",
-            userCode = "USER_CODE_ABC"
+            userCode = "USER_CODE_ABC",
         )
 
         val result = provider.authorizeDevice("DEVICE_CODE_123", "user_1", mockCall)
@@ -162,7 +162,7 @@ class OauthDeviceCodeServiceInMemoryProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = "DEVICE_CODE_123",
-            userCode = "USER_CODE_ABC"
+            userCode = "USER_CODE_ABC",
         )
 
         val code = provider.codes[0]
@@ -196,7 +196,7 @@ class OauthDeviceCodeServiceInMemoryProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = "DEVICE_CODE_1",
-            userCode = "USER_CODE_A"
+            userCode = "USER_CODE_A",
         )
         provider.createCode(
             clientId = clientId,
@@ -204,7 +204,7 @@ class OauthDeviceCodeServiceInMemoryProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = "DEVICE_CODE_2",
-            userCode = "USER_CODE_B"
+            userCode = "USER_CODE_B",
         )
 
         assertEquals(2, provider.codes.size)
@@ -217,4 +217,3 @@ class OauthDeviceCodeServiceInMemoryProviderTest {
         assertEquals("USER_CODE_B", code2?.userCode)
     }
 }
-

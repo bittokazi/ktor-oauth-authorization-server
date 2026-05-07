@@ -10,7 +10,7 @@ import com.nimbusds.jwt.proc.ConfigurableJWTProcessor
 import com.nimbusds.jwt.proc.DefaultJWTProcessor
 
 class JwtVerifier(
-    jwksProvider: JwksProvider
+    jwksProvider: JwksProvider,
 ) {
     private val jwtProcessor: ConfigurableJWTProcessor<SecurityContext> = DefaultJWTProcessor()
 
@@ -23,7 +23,7 @@ class JwtVerifier(
     fun verify(token: String): SignedJWT? {
         return try {
             val signedJWT = SignedJWT.parse(token)
-            jwtProcessor.process(signedJWT, null)  // throws exception if invalid
+            jwtProcessor.process(signedJWT, null) // throws exception if invalid
             signedJWT
         } catch (e: Exception) {
             null

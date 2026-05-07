@@ -1,17 +1,17 @@
-package com.bittokazi.ktor.auth.services.providers.database
+package services.providers.database
 
-import com.bittokazi.ktor.auth.config.TestOauthDatabaseConfiguration
+import com.bittokazi.ktor.auth.services.providers.database.OauthDeviceCodeServiceDatabaseProvider
+import config.TestOauthDatabaseConfiguration
 import io.ktor.server.application.ApplicationCall
 import org.junit.After
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import org.junit.Assert.*
 import org.mockito.Mockito
 import java.time.Instant
 import java.util.UUID
 
 class OauthDeviceCodeServiceDatabaseProviderTest {
-
     private lateinit var databaseConfiguration: TestOauthDatabaseConfiguration
     private lateinit var deviceCodeService: OauthDeviceCodeServiceDatabaseProvider
     private val mockCall = Mockito.mock(ApplicationCall::class.java)
@@ -36,14 +36,15 @@ class OauthDeviceCodeServiceDatabaseProviderTest {
         val deviceCode = uniqueCode("DEVICE")
         val userCode = uniqueCode("USER")
 
-        val result = deviceCodeService.createCode(
-            clientId = clientId,
-            scopes = listOf("read", "write"),
-            expiresAt = expiresAt,
-            call = mockCall,
-            deviceCode = deviceCode,
-            userCode = userCode
-        )
+        val result =
+            deviceCodeService.createCode(
+                clientId = clientId,
+                scopes = listOf("read", "write"),
+                expiresAt = expiresAt,
+                call = mockCall,
+                deviceCode = deviceCode,
+                userCode = userCode,
+            )
 
         assertTrue(result)
         val retrieved = deviceCodeService.findByUserCode(userCode, mockCall)
@@ -62,7 +63,7 @@ class OauthDeviceCodeServiceDatabaseProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = deviceCode,
-            userCode = userCode
+            userCode = userCode,
         )
 
         val result = deviceCodeService.findByUserCode(userCode, mockCall)
@@ -83,7 +84,7 @@ class OauthDeviceCodeServiceDatabaseProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = deviceCode,
-            userCode = userCode
+            userCode = userCode,
         )
 
         deviceCodeService.authorizeDevice(deviceCode, "user_1", mockCall)
@@ -103,7 +104,7 @@ class OauthDeviceCodeServiceDatabaseProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = deviceCode,
-            userCode = userCode
+            userCode = userCode,
         )
 
         deviceCodeService.consumeDeviceCode(deviceCode, mockCall)
@@ -123,7 +124,7 @@ class OauthDeviceCodeServiceDatabaseProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = deviceCode,
-            userCode = userCode
+            userCode = userCode,
         )
 
         val result = deviceCodeService.findByDeviceCode(deviceCode, false, false, mockCall)
@@ -143,7 +144,7 @@ class OauthDeviceCodeServiceDatabaseProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = deviceCode,
-            userCode = userCode
+            userCode = userCode,
         )
 
         val result = deviceCodeService.findByDeviceCode(deviceCode, true, false, mockCall)
@@ -161,7 +162,7 @@ class OauthDeviceCodeServiceDatabaseProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = deviceCode,
-            userCode = userCode
+            userCode = userCode,
         )
 
         val result = deviceCodeService.consumeDeviceCode(deviceCode, mockCall)
@@ -182,7 +183,7 @@ class OauthDeviceCodeServiceDatabaseProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = deviceCode,
-            userCode = userCode
+            userCode = userCode,
         )
 
         val result = deviceCodeService.authorizeDevice(deviceCode, "user_1", mockCall)
@@ -205,7 +206,7 @@ class OauthDeviceCodeServiceDatabaseProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = deviceCode,
-            userCode = userCode
+            userCode = userCode,
         )
 
         val result = deviceCodeService.findByUserCode(userCode, mockCall)
@@ -237,7 +238,7 @@ class OauthDeviceCodeServiceDatabaseProviderTest {
                 expiresAt = expiresAt,
                 call = mockCall,
                 deviceCode = deviceCode,
-                userCode = userCode
+                userCode = userCode,
             )
         }
 
@@ -258,7 +259,7 @@ class OauthDeviceCodeServiceDatabaseProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = deviceCode1,
-            userCode = userCode1
+            userCode = userCode1,
         )
 
         deviceCodeService.createCode(
@@ -267,7 +268,7 @@ class OauthDeviceCodeServiceDatabaseProviderTest {
             expiresAt = expiresAt,
             call = mockCall,
             deviceCode = deviceCode2,
-            userCode = userCode2
+            userCode = userCode2,
         )
 
         deviceCodeService.consumeDeviceCode(deviceCode1, mockCall)

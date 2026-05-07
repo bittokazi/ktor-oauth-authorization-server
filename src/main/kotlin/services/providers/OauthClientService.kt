@@ -15,10 +15,14 @@ data class OAuthClientDTO(
     var accessTokenValidity: Long = 300,
     var refreshTokenValidity: Long = 7200,
     var isDefault: Boolean = false,
-    var consentRequired: Boolean = true
+    var consentRequired: Boolean = true,
 )
 
 interface OauthClientService {
-    fun findByClientId(clientId: String, call: ApplicationCall): OAuthClientDTO?
+    fun findByClientId(
+        clientId: String,
+        call: ApplicationCall,
+    ): OAuthClientDTO?
+
     fun findDefaultClient(call: ApplicationCall): OAuthClientDTO?
 }

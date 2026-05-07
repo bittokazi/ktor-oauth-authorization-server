@@ -18,6 +18,7 @@ import kotlin.uuid.toKotlinUuid
 
 object OAuthAuthorizationCodes : Table("oauth_authorization_codes") {
     val code = varchar("code", 255)
+
     @OptIn(ExperimentalUuidApi::class)
     val clientId = uuid("client_id")
     val userId = varchar("user_id", 255)
@@ -30,9 +31,8 @@ object OAuthAuthorizationCodes : Table("oauth_authorization_codes") {
 }
 
 class OauthAuthorizationCodeServiceDatabaseProvider(
-    val oauthDatabaseConfiguration: OauthDatabaseConfiguration
-): OauthAuthorizationCodeService {
-
+    val oauthDatabaseConfiguration: OauthDatabaseConfiguration,
+) : OauthAuthorizationCodeService {
     @OptIn(ExperimentalUuidApi::class)
     override fun createCode(
         code: String,
@@ -43,50 +43,59 @@ class OauthAuthorizationCodeServiceDatabaseProvider(
         expiresAt: Instant,
         challenge: String?,
         challengeMethod: String?,
-        call: ApplicationCall
-    ): Boolean = oauthDatabaseConfiguration.dbQuery(call) {
-        OAuthAuthorizationCodes.insert {
-            it[OAuthAuthorizationCodes.code] = code
-            it[OAuthAuthorizationCodes.clientId] = clientId.toKotlinUuid()
-            it[OAuthAuthorizationCodes.userId] = userId
-            it[OAuthAuthorizationCodes.redirectUri] = redirectUri
-            it[OAuthAuthorizationCodes.scopes] = scopes.joinToString(",")
-            it[OAuthAuthorizationCodes.codeChallenge] = challenge
-            it[OAuthAuthorizationCodes.codeChallengeMethod] = challengeMethod
-            it[OAuthAuthorizationCodes.expiresAt] = expiresAt
-        }.insertedCount > 0
-    }
+        call: ApplicationCall,
+    ): Boolean =
+        oauthDatabaseConfiguration.dbQuery(call) {
+            OAuthAuthorizationCodes.insert {
+                it[OAuthAuthorizationCodes.code] = code
+                it[OAuthAuthorizationCodes.clientId] = clientId.toKotlinUuid()
+                it[OAuthAuthorizationCodes.userId] = userId
+                it[OAuthAuthorizationCodes.redirectUri] = redirectUri
+                it[OAuthAuthorizationCodes.scopes] = scopes.joinToString(",")
+                it[OAuthAuthorizationCodes.codeChallenge] = challenge
+                it[OAuthAuthorizationCodes.codeChallengeMethod] = challengeMethod
+                it[OAuthAuthorizationCodes.expiresAt] = expiresAt
+            }.insertedCount > 0
+        }
 
     @OptIn(ExperimentalUuidApi::class)
     override fun findByCode(
         code: String,
-        call: ApplicationCall
-    ): AuthorizationCodeDTO? = oauthDatabaseConfiguration.dbQuery(call) {
-        OAuthAuthorizationCodes
-            .selectAll()
-            .where { OAuthAuthorizationCodes.code eq code }
-            .map {
-                AuthorizationCodeDTO(
-                    code = it[OAuthAuthorizationCodes.code],
-                    clientId = it[OAuthAuthorizationCodes.clientId].toJavaUuid(),
-                    userId = it[OAuthAuthorizationCodes.userId],
-                    redirectUri = it[OAuthAuthorizationCodes.redirectUri],
-                    scopes = it[OAuthAuthorizationCodes.scopes].split(","),
-                    codeChallenge = it[OAuthAuthorizationCodes.codeChallenge],
-                    codeChallengeMethod = it[OAuthAuthorizationCodes.codeChallengeMethod],
-                    expiresAt = it[OAuthAuthorizationCodes.expiresAt],
-                    consumed = it[OAuthAuthorizationCodes.consumed]
-                )
-            }.singleOrNull()
-    }
+        call: ApplicationCall,
+    ): AuthorizationCodeDTO? =
+        oauthDatabaseConfiguration.dbQuery(call) {
+            OAuthAuthorizationCodes
+                .selectAll()
+                .where { OAuthAuthorizationCodes.code eq code }
+                .map {
+                    AuthorizationCodeDTO(
+                        code = it[OAuthAuthorizationCodes.code],
+                        clientId = it[OAuthAuthorizationCodes.clientId].toJavaUuid(),
+                        userId = it[OAuthAuthorizationCodes.userId],
+                        redirectUri = it[OAuthAuthorizationCodes.redirectUri],
+                        scopes = it[OAuthAuthorizationCodes.scopes].split(","),
+                        codeChallenge = it[OAuthAuthorizationCodes.codeChallenge],
+                        codeChallengeMethod = it[OAuthAuthorizationCodes.codeChallengeMethod],
+                        expiresAt = it[OAuthAuthorizationCodes.expiresAt],
+                        consumed = it[OAuthAuthorizationCodes.consumed],
+                    )
+                }.singleOrNull()
+        }
 
-    override fun consumeCode(code: String, call: ApplicationCall): Boolean = oauthDatabaseConfiguration.dbQuery(call) {
-        OAuthAuthorizationCodes.update({ OAuthAuthorizationCodes.code eq code }) {
-            it[consumed] = true
-        } > 0
-    }
+    override fun consumeCode(
+        code: String,
+        call: ApplicationCall,
+    ): Boolean =
+        oauthDatabaseConfiguration.dbQuery(call) {
+            OAuthAuthorizationCodes.update({ OAuthAuthorizationCodes.code eq code }) {
+                it[consumed] = true
+            } > 0
+        }
 
-    override fun logoutAction(userId: String, clientId: String?, call: ApplicationCall) {
-
+    override fun logoutAction(
+        userId: String,
+        clientId: String?,
+        call: ApplicationCall,
+    ) {
     }
 }

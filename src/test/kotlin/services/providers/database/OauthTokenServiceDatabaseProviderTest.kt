@@ -1,17 +1,17 @@
-package com.bittokazi.ktor.auth.services.providers.database
+package services.providers.database
 
-import com.bittokazi.ktor.auth.config.TestOauthDatabaseConfiguration
+import com.bittokazi.ktor.auth.services.providers.database.OauthTokenServiceDatabaseProvider
+import config.TestOauthDatabaseConfiguration
 import io.ktor.server.application.ApplicationCall
 import org.junit.After
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import org.junit.Assert.*
 import org.mockito.Mockito
 import java.time.Instant
 import java.util.UUID
 
 class OauthTokenServiceDatabaseProviderTest {
-
     private lateinit var databaseConfiguration: TestOauthDatabaseConfiguration
     private lateinit var tokenService: OauthTokenServiceDatabaseProvider
     private val mockCall = Mockito.mock(ApplicationCall::class.java)
@@ -32,14 +32,15 @@ class OauthTokenServiceDatabaseProviderTest {
 
     @Test
     fun `storeAccessToken successfully stores token`() {
-        val result = tokenService.storeAccessToken(
-            token = "access_token_123",
-            clientId = clientId,
-            userId = "user_1",
-            scopes = listOf("read", "write"),
-            expiresAt = accessTokenExpiresAt,
-            call = mockCall
-        )
+        val result =
+            tokenService.storeAccessToken(
+                token = "access_token_123",
+                clientId = clientId,
+                userId = "user_1",
+                scopes = listOf("read", "write"),
+                expiresAt = accessTokenExpiresAt,
+                call = mockCall,
+            )
 
         assertTrue(result)
         val retrieved = tokenService.findByAccessToken("access_token_123", mockCall)
@@ -55,7 +56,7 @@ class OauthTokenServiceDatabaseProviderTest {
             userId = "user_1",
             scopes = listOf("read"),
             expiresAt = accessTokenExpiresAt,
-            call = mockCall
+            call = mockCall,
         )
 
         val result = tokenService.findByAccessToken("access_token_123", mockCall)
@@ -80,7 +81,7 @@ class OauthTokenServiceDatabaseProviderTest {
             userId = "user_1",
             scopes = listOf("read"),
             expiresAt = accessTokenExpiresAt,
-            call = mockCall
+            call = mockCall,
         )
 
         val revokeResult = tokenService.revokeAccessToken("access_token_123", mockCall)
@@ -92,14 +93,15 @@ class OauthTokenServiceDatabaseProviderTest {
 
     @Test
     fun `storeRefreshToken successfully stores token and returns UUID`() {
-        val tokenId = tokenService.storeRefreshToken(
-            token = "refresh_token_123",
-            clientId = clientId,
-            userId = "user_1",
-            scopes = listOf("read", "write"),
-            expiresAt = refreshTokenExpiresAt,
-            call = mockCall
-        )
+        val tokenId =
+            tokenService.storeRefreshToken(
+                token = "refresh_token_123",
+                clientId = clientId,
+                userId = "user_1",
+                scopes = listOf("read", "write"),
+                expiresAt = refreshTokenExpiresAt,
+                call = mockCall,
+            )
 
         assertNotNull(tokenId)
         val retrieved = tokenService.findByRefreshToken("refresh_token_123", mockCall)
@@ -114,7 +116,7 @@ class OauthTokenServiceDatabaseProviderTest {
             userId = "user_1",
             scopes = listOf("read"),
             expiresAt = refreshTokenExpiresAt,
-            call = mockCall
+            call = mockCall,
         )
 
         val result = tokenService.findByRefreshToken("refresh_token_123", mockCall)
@@ -138,7 +140,7 @@ class OauthTokenServiceDatabaseProviderTest {
             userId = "user_1",
             scopes = listOf("read"),
             expiresAt = refreshTokenExpiresAt,
-            call = mockCall
+            call = mockCall,
         )
 
         val revokeResult = tokenService.revokeRefreshToken("refresh_token_123", mockCall)
@@ -150,21 +152,23 @@ class OauthTokenServiceDatabaseProviderTest {
 
     @Test
     fun `rotateRefreshToken creates new token and revokes old`() {
-        val oldTokenId = tokenService.storeRefreshToken(
-            token = "refresh_token_old",
-            clientId = clientId,
-            userId = "user_1",
-            scopes = listOf("read"),
-            expiresAt = refreshTokenExpiresAt,
-            call = mockCall
-        )
+        val oldTokenId =
+            tokenService.storeRefreshToken(
+                token = "refresh_token_old",
+                clientId = clientId,
+                userId = "user_1",
+                scopes = listOf("read"),
+                expiresAt = refreshTokenExpiresAt,
+                call = mockCall,
+            )
 
-        val rotateResult = tokenService.rotateRefreshToken(
-            oldToken = "refresh_token_old",
-            newToken = "refresh_token_new",
-            expiresAt = refreshTokenExpiresAt.plusSeconds(3600),
-            call = mockCall
-        )
+        val rotateResult =
+            tokenService.rotateRefreshToken(
+                oldToken = "refresh_token_old",
+                newToken = "refresh_token_new",
+                expiresAt = refreshTokenExpiresAt.plusSeconds(3600),
+                call = mockCall,
+            )
 
         assertTrue(rotateResult)
 
@@ -180,14 +184,15 @@ class OauthTokenServiceDatabaseProviderTest {
 
     @Test
     fun `storeAccessToken with null userId for client credentials`() {
-        val result = tokenService.storeAccessToken(
-            token = "client_token",
-            clientId = clientId,
-            userId = null,
-            scopes = listOf("client_scope"),
-            expiresAt = accessTokenExpiresAt,
-            call = mockCall
-        )
+        val result =
+            tokenService.storeAccessToken(
+                token = "client_token",
+                clientId = clientId,
+                userId = null,
+                scopes = listOf("client_scope"),
+                expiresAt = accessTokenExpiresAt,
+                call = mockCall,
+            )
 
         assertTrue(result)
         val retrieved = tokenService.findByAccessToken("client_token", mockCall)
@@ -203,7 +208,7 @@ class OauthTokenServiceDatabaseProviderTest {
                 userId = "user_$i",
                 scopes = listOf("read"),
                 expiresAt = accessTokenExpiresAt,
-                call = mockCall
+                call = mockCall,
             )
         }
 
@@ -222,7 +227,7 @@ class OauthTokenServiceDatabaseProviderTest {
             userId = "user_1",
             scopes = listOf("read"),
             expiresAt = accessTokenExpiresAt,
-            call = mockCall
+            call = mockCall,
         )
 
         tokenService.storeAccessToken(
@@ -231,7 +236,7 @@ class OauthTokenServiceDatabaseProviderTest {
             userId = "user_2",
             scopes = listOf("write"),
             expiresAt = accessTokenExpiresAt,
-            call = mockCall
+            call = mockCall,
         )
 
         tokenService.revokeAccessToken("access_token_1", mockCall)

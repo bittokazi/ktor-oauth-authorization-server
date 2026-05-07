@@ -13,7 +13,7 @@ data class OauthDeviceCodeDTO(
     var consumed: Boolean,
     var isDeviceAuthorized: Boolean,
     val deviceCode: String,
-    val userCode: String
+    val userCode: String,
 )
 
 interface OauthDeviceCodeService {
@@ -23,16 +23,35 @@ interface OauthDeviceCodeService {
         expiresAt: Instant,
         call: ApplicationCall,
         deviceCode: String,
-        userCode: String
+        userCode: String,
     ): Boolean
 
-    fun findByUserCode(code: String, call: ApplicationCall): OauthDeviceCodeDTO?
+    fun findByUserCode(
+        code: String,
+        call: ApplicationCall,
+    ): OauthDeviceCodeDTO?
 
-    fun findByDeviceCode(code: String, isAuthorized: Boolean, consumed: Boolean, call: ApplicationCall): OauthDeviceCodeDTO?
+    fun findByDeviceCode(
+        code: String,
+        isAuthorized: Boolean,
+        consumed: Boolean,
+        call: ApplicationCall,
+    ): OauthDeviceCodeDTO?
 
-    fun consumeDeviceCode(code: String, call: ApplicationCall): Boolean
+    fun consumeDeviceCode(
+        code: String,
+        call: ApplicationCall,
+    ): Boolean
 
-    fun authorizeDevice(code: String, userId: String, call: ApplicationCall): Boolean
+    fun authorizeDevice(
+        code: String,
+        userId: String,
+        call: ApplicationCall,
+    ): Boolean
 
-    fun logoutAction(userId: String, clientId: String?, call: ApplicationCall)
+    fun logoutAction(
+        userId: String,
+        clientId: String?,
+        call: ApplicationCall,
+    )
 }

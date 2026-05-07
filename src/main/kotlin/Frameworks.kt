@@ -1,7 +1,7 @@
 package com.bittokazi.ktor.auth
 
-import com.bittokazi.ktor.auth.database.OauthDatabaseConfiguration
 import com.bittokazi.ktor.auth.database.DefaultOauthDatabaseConfiguration
+import com.bittokazi.ktor.auth.database.OauthDatabaseConfiguration
 import com.bittokazi.ktor.auth.services.JwksProvider
 import com.bittokazi.ktor.auth.services.JwtTokenCustomizer
 import com.bittokazi.ktor.auth.services.JwtVerifier
@@ -18,10 +18,10 @@ fun Application.configureFrameworks(
     oauthClientService: OauthClientService,
     oauthAuthorizationCodeService: OauthAuthorizationCodeService,
     oauthTokenService: OauthTokenService,
-    jwtTokenCustomizer: JwtTokenCustomizer? = null
+    jwtTokenCustomizer: JwtTokenCustomizer? = null,
 ) {
     dependencies {
-        if(configureDatabase) {
+        if (configureDatabase) {
             provide<OauthDatabaseConfiguration>(DefaultOauthDatabaseConfiguration::class)
         }
         if (jwtTokenCustomizer != null) {

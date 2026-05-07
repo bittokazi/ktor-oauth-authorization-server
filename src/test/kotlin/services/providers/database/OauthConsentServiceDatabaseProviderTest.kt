@@ -1,16 +1,16 @@
-package com.bittokazi.ktor.auth.services.providers.database
+package services.providers.database
 
-import com.bittokazi.ktor.auth.config.TestOauthDatabaseConfiguration
+import com.bittokazi.ktor.auth.services.providers.database.OauthConsentServiceDatabaseProvider
+import config.TestOauthDatabaseConfiguration
 import io.ktor.server.application.ApplicationCall
 import org.junit.After
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import org.junit.Assert.*
 import org.mockito.Mockito
 import java.util.UUID
 
 class OauthConsentServiceDatabaseProviderTest {
-
     private lateinit var databaseConfiguration: TestOauthDatabaseConfiguration
     private lateinit var consentService: OauthConsentServiceDatabaseProvider
     private val mockCall = Mockito.mock(ApplicationCall::class.java)
@@ -29,12 +29,13 @@ class OauthConsentServiceDatabaseProviderTest {
 
     @Test
     fun `grantConsent adds consent successfully`() {
-        val result = consentService.grantConsent(
-            userId = "user_1",
-            clientId = clientId,
-            scopes = listOf("read", "write"),
-            call = mockCall
-        )
+        val result =
+            consentService.grantConsent(
+                userId = "user_1",
+                clientId = clientId,
+                scopes = listOf("read", "write"),
+                call = mockCall,
+            )
 
         assertTrue(result)
         val retrieved = consentService.getConsent("user_1", clientId, mockCall)
@@ -48,7 +49,7 @@ class OauthConsentServiceDatabaseProviderTest {
             userId = "user_1",
             clientId = clientId,
             scopes = scopes,
-            call = mockCall
+            call = mockCall,
         )
 
         val result = consentService.getConsent("user_1", clientId, mockCall)
@@ -69,7 +70,7 @@ class OauthConsentServiceDatabaseProviderTest {
             userId = "user_1",
             clientId = clientId,
             scopes = listOf("read"),
-            call = mockCall
+            call = mockCall,
         )
 
         val result = consentService.getConsent("user_2", clientId, mockCall)
@@ -82,7 +83,7 @@ class OauthConsentServiceDatabaseProviderTest {
             userId = "user_1",
             clientId = clientId,
             scopes = listOf("read"),
-            call = mockCall
+            call = mockCall,
         )
 
         val result = consentService.getConsent("user_1", UUID.randomUUID(), mockCall)

@@ -7,6 +7,12 @@ plugins {
     id("signing")
     id("maven-publish")
     id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
+
+    // for code coverage
+    jacoco
+
+    // linter
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
 }
 
 group = "com.bittokazi.sonartype"
@@ -47,8 +53,36 @@ dependencies {
     testImplementation(libs.ktor.server.test.host)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockito.junit.jupiter)
     testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.testcontainers.junit.jupiter)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.jupiter.params)
+    testRuntimeOnly(libs.junit.vintage.engine)
+    testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+tasks.test {
+    useJUnitPlatform {
+        includeEngines("junit-jupiter", "junit-vintage")
+    }
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
+}
+
+ktlint {
+    reporters {
+        reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
+    }
 }
 
 java {

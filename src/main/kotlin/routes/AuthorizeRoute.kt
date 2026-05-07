@@ -23,7 +23,6 @@ import java.time.Instant
 import java.util.UUID
 
 fun Application.authorizeRoute() {
-
     val oauthClientService: OauthClientService by dependencies
     val oauthUserService: OauthUserService by dependencies
     val oauthAuthorizationCodeService: OauthAuthorizationCodeService by dependencies
@@ -47,17 +46,20 @@ fun Application.authorizeRoute() {
                 return@get
             }
 
-            val client = oauthClientService.findByClientId(clientId, call)
-                ?: return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid client_id"))
+            val client =
+                oauthClientService.findByClientId(clientId, call)
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid client_id"))
 
             if (!client.isDefault && !client.redirectUris.contains(redirectUri)) {
                 return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid redirect_uri"))
             }
 
             if (client.isDefault && call.getBaseUrl()
-                .replace("http://", "").replace("https://", "").replace("www.", "") != redirectUri
+                    .replace("http://", "").replace("https://", "").replace("www.", "") !=
+                redirectUri
                     .replace("http://", "").replace("https://", "").replace("www.", "")
-                    .split("/").firstOrNull()) {
+                    .split("/").firstOrNull()
+            ) {
                 return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid redirect_uri"))
             }
 
@@ -65,7 +67,7 @@ fun Application.authorizeRoute() {
                 return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid scopes"))
             }
 
-            if(!client.grantTypes.contains("authorization_code")) {
+            if (!client.grantTypes.contains("authorization_code")) {
                 return@get call.respond(HttpStatusCode.Unauthorized, mutableMapOf("message" to "Unauthorized"))
             }
 
@@ -99,34 +101,36 @@ fun Application.authorizeRoute() {
 
             if (client.consentRequired) {
                 when (val consents = oauthConsentService.getConsent(userId = session.userId, clientId = client.id, call)) {
-                   null -> {
-                       val authRequestUrl = call.request.uri
-                       call.sessions.set("OAUTH_ORIGINAL_URL", authRequestUrl)
-                       call.respondRedirect("/oauth/consent?client_id=${client.clientId}")
-                       return@get
-                   }
-                   else -> {
-                       if (!consents.containsAll(client.scopes)) {
-                           val authRequestUrl = call.request.uri
-                           call.sessions.set("OAUTH_ORIGINAL_URL", authRequestUrl)
-                           call.respondRedirect("/oauth/consent?client_id=${client.clientId}")
-                           return@get
-                       }
-                   }
-               }
+                    null -> {
+                        val authRequestUrl = call.request.uri
+                        call.sessions.set("OAUTH_ORIGINAL_URL", authRequestUrl)
+                        call.respondRedirect("/oauth/consent?client_id=${client.clientId}")
+                        return@get
+                    }
+                    else -> {
+                        if (!consents.containsAll(client.scopes)) {
+                            val authRequestUrl = call.request.uri
+                            call.sessions.set("OAUTH_ORIGINAL_URL", authRequestUrl)
+                            call.respondRedirect("/oauth/consent?client_id=${client.clientId}")
+                            return@get
+                        }
+                    }
+                }
             }
 
             // User is logged in → issue authorization code
-            val user = oauthUserService.findByUsername(session.username, call)
-                ?: return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "User not found"))
+            val user =
+                oauthUserService.findByUsername(session.username, call)
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "User not found"))
 
             if (session.expiresAt > System.currentTimeMillis()) {
-                val ttlSeconds = when (session.rememberMe) {
-                    true -> 31536000
-                    else -> sessionCustomizer.timeout ?: 3200
-                }
+                val ttlSeconds =
+                    when (session.rememberMe) {
+                        true -> 31536000
+                        else -> sessionCustomizer.timeout ?: 3200
+                    }
                 val expiresAt = System.currentTimeMillis() + (ttlSeconds * 1000)
-                    call.sessions.set(OauthUserSession(session.userId, session.username, expiresAt, session.rememberMe))
+                call.sessions.set(OauthUserSession(session.userId, session.username, expiresAt, session.rememberMe))
             }
 
             val code = UUID.randomUUID().toString()
@@ -141,7 +145,7 @@ fun Application.authorizeRoute() {
                 expiresAt,
                 codeChallenge,
                 codeChallengeMethod,
-                call
+                call,
             )
 
             val redirectUrl = "$redirectUri?code=$code${if (state != null) "&state=$state" else ""}"

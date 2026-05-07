@@ -23,14 +23,13 @@ object OAuthConsents : Table("oauth_consents") {
 
 @OptIn(ExperimentalUuidApi::class)
 class OauthConsentServiceDatabaseProvider(
-    val oauthDatabaseConfiguration: OauthDatabaseConfiguration
-): OauthConsentService {
-
+    val oauthDatabaseConfiguration: OauthDatabaseConfiguration,
+) : OauthConsentService {
     override fun grantConsent(
         userId: String,
         clientId: UUID,
         scopes: List<String>,
-        call: ApplicationCall
+        call: ApplicationCall,
     ) = oauthDatabaseConfiguration.dbQuery(call) {
         OAuthConsents.deleteWhere {
             (OAuthConsents.userId eq userId)
@@ -49,12 +48,13 @@ class OauthConsentServiceDatabaseProvider(
     override fun getConsent(
         userId: String,
         clientId: UUID,
-        call: ApplicationCall
-    ): List<String>? = oauthDatabaseConfiguration.dbQuery(call) {
-        OAuthConsents
-            .selectAll()
-            .where { (OAuthConsents.userId eq userId) and (OAuthConsents.clientId eq clientId.toKotlinUuid()) }
-            .map { it[OAuthConsents.scopes].split(",").map(String::trim) }
-            .singleOrNull()
-    }
+        call: ApplicationCall,
+    ): List<String>? =
+        oauthDatabaseConfiguration.dbQuery(call) {
+            OAuthConsents
+                .selectAll()
+                .where { (OAuthConsents.userId eq userId) and (OAuthConsents.clientId eq clientId.toKotlinUuid()) }
+                .map { it[OAuthConsents.scopes].split(",").map(String::trim) }
+                .singleOrNull()
+        }
 }

@@ -14,7 +14,7 @@ fun Application.configureRouting(
     defaultOidcRoute: Boolean = true,
     defaultTokenRoute: Boolean = true,
     defaultConsentRoute: Boolean = true,
-    defaultDeviceAuthorizationRoute: Boolean = true
+    defaultDeviceAuthorizationRoute: Boolean = true,
 ) {
     if (defaultAuthorizeRoute) authorizeRoute()
     if (defaultLoginRoutes) loginRoutes()

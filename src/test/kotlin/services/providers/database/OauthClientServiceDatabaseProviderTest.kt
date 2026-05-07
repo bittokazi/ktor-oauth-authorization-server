@@ -1,7 +1,8 @@
-package com.bittokazi.ktor.auth.services.providers.database
+package services.providers.database
 
-import com.bittokazi.ktor.auth.config.TestOauthDatabaseConfiguration
-import com.bittokazi.ktor.auth.services.providers.database.OAuthClients.isDefault
+import com.bittokazi.ktor.auth.services.providers.database.OAuthClients
+import com.bittokazi.ktor.auth.services.providers.database.OauthClientServiceDatabaseProvider
+import config.TestOauthDatabaseConfiguration
 import io.ktor.server.application.*
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
@@ -13,7 +14,6 @@ import org.junit.Test
 import org.mockito.Mockito
 
 class OauthClientServiceDatabaseProviderTest {
-
     private lateinit var databaseConfiguration: TestOauthDatabaseConfiguration
     private lateinit var clientService: OauthClientServiceDatabaseProvider
     private val mockCall = Mockito.mock(ApplicationCall::class.java)
@@ -31,19 +31,20 @@ class OauthClientServiceDatabaseProviderTest {
 
     @Test
     fun `createClient successfully creates a new client`() {
-        val client = clientService.createClient(
-            clientId = "test_client_1",
-            clientSecret = "test_secret",
-            name = "Test Client",
-            type = "confidential",
-            redirectUris = listOf("https://example.com/callback"),
-            scopes = listOf("openid", "profile"),
-            grantTypes = listOf("authorization_code", "refresh_token"),
-            accessTokenValidity = 3600,
-            refreshTokenValidity = 86400,
-            consentRequired = true,
-            call = mockCall
-        )
+        val client =
+            clientService.createClient(
+                clientId = "test_client_1",
+                clientSecret = "test_secret",
+                name = "Test Client",
+                type = "confidential",
+                redirectUris = listOf("https://example.com/callback"),
+                scopes = listOf("openid", "profile"),
+                grantTypes = listOf("authorization_code", "refresh_token"),
+                accessTokenValidity = 3600,
+                refreshTokenValidity = 86400,
+                consentRequired = true,
+                call = mockCall,
+            )
 
         assertNotNull(client)
         assertEquals("test_client_1", client.clientId)
@@ -63,7 +64,7 @@ class OauthClientServiceDatabaseProviderTest {
             redirectUris = listOf("https://example.com/callback"),
             scopes = listOf("read", "write"),
             grantTypes = listOf("authorization_code"),
-            call = mockCall
+            call = mockCall,
         )
 
         val result = clientService.findByClientId("test_client_1", mockCall)
@@ -90,20 +91,21 @@ class OauthClientServiceDatabaseProviderTest {
             redirectUris = listOf("https://example.com/callback"),
             scopes = listOf("read"),
             grantTypes = listOf("authorization_code"),
-            call = mockCall
+            call = mockCall,
         )
 
         // Update the client
-        val updateResult = clientService.updateClient(
-            clientId = "test_client_1",
-            name = "Updated Name",
-            type = "public",
-            redirectUris = listOf("https://example.com/callback", "https://example.com/callback2"),
-            scopes = listOf("read", "write", "admin"),
-            grantTypes = listOf("authorization_code", "implicit"),
-            consentRequired = false,
-            call = mockCall
-        )
+        val updateResult =
+            clientService.updateClient(
+                clientId = "test_client_1",
+                name = "Updated Name",
+                type = "public",
+                redirectUris = listOf("https://example.com/callback", "https://example.com/callback2"),
+                scopes = listOf("read", "write", "admin"),
+                grantTypes = listOf("authorization_code", "implicit"),
+                consentRequired = false,
+                call = mockCall,
+            )
 
         assertTrue(updateResult)
 
@@ -119,15 +121,16 @@ class OauthClientServiceDatabaseProviderTest {
 
     @Test
     fun `updateClient returns false for nonexistent client`() {
-        val result = clientService.updateClient(
-            clientId = "nonexistent",
-            name = "Name",
-            type = "confidential",
-            redirectUris = listOf("https://example.com"),
-            scopes = listOf("read"),
-            grantTypes = listOf("authorization_code"),
-            call = mockCall
-        )
+        val result =
+            clientService.updateClient(
+                clientId = "nonexistent",
+                name = "Name",
+                type = "confidential",
+                redirectUris = listOf("https://example.com"),
+                scopes = listOf("read"),
+                grantTypes = listOf("authorization_code"),
+                call = mockCall,
+            )
 
         assertFalse(result)
     }
@@ -142,14 +145,15 @@ class OauthClientServiceDatabaseProviderTest {
             redirectUris = listOf("https://example.com/callback"),
             scopes = listOf("read"),
             grantTypes = listOf("authorization_code"),
-            call = mockCall
+            call = mockCall,
         )
 
-        val updateResult = clientService.updateClientSecret(
-            clientId = "test_client_1",
-            clientSecret = "new_secret",
-            call = mockCall
-        )
+        val updateResult =
+            clientService.updateClientSecret(
+                clientId = "test_client_1",
+                clientSecret = "new_secret",
+                call = mockCall,
+            )
 
         assertTrue(updateResult)
 
@@ -159,11 +163,12 @@ class OauthClientServiceDatabaseProviderTest {
 
     @Test
     fun `updateClientSecret returns false for nonexistent client`() {
-        val result = clientService.updateClientSecret(
-            clientId = "nonexistent",
-            clientSecret = "new_secret",
-            call = mockCall
-        )
+        val result =
+            clientService.updateClientSecret(
+                clientId = "nonexistent",
+                clientSecret = "new_secret",
+                call = mockCall,
+            )
 
         assertFalse(result)
     }
@@ -185,7 +190,7 @@ class OauthClientServiceDatabaseProviderTest {
             accessTokenValidity = 7200,
             refreshTokenValidity = 604800,
             consentRequired = false,
-            call = mockCall
+            call = mockCall,
         )
 
         val result = clientService.findByClientId("full_client", mockCall)
@@ -213,7 +218,7 @@ class OauthClientServiceDatabaseProviderTest {
                 redirectUris = listOf("https://example.com/callback"),
                 scopes = listOf("read"),
                 grantTypes = listOf("implicit"),
-                call = mockCall
+                call = mockCall,
             )
         }
     }
@@ -228,7 +233,7 @@ class OauthClientServiceDatabaseProviderTest {
             redirectUris = listOf("https://example.com/callback"),
             scopes = listOf("read"),
             grantTypes = listOf("authorization_code"),
-            call = mockCall
+            call = mockCall,
         )
 
         val result = clientService.findByClientId("default_validity_client", mockCall)
@@ -254,7 +259,7 @@ class OauthClientServiceDatabaseProviderTest {
                 redirectUris = listOf("https://app$i.com/callback"),
                 scopes = listOf("scope_$i"),
                 grantTypes = listOf("authorization_code"),
-                call = mockCall
+                call = mockCall,
             )
         }
 
@@ -277,7 +282,7 @@ class OauthClientServiceDatabaseProviderTest {
             redirectUris = listOf("https://app1.com/callback"),
             scopes = listOf("read"),
             grantTypes = listOf("authorization_code"),
-            call = mockCall
+            call = mockCall,
         )
 
         clientService.createClient(
@@ -288,7 +293,7 @@ class OauthClientServiceDatabaseProviderTest {
             redirectUris = listOf("https://app2.com/callback"),
             scopes = listOf("write"),
             grantTypes = listOf("implicit"),
-            call = mockCall
+            call = mockCall,
         )
 
         // Update first client
@@ -299,7 +304,7 @@ class OauthClientServiceDatabaseProviderTest {
             redirectUris = listOf("https://updated.com/callback"),
             scopes = listOf("admin"),
             grantTypes = listOf("client_credentials"),
-            call = mockCall
+            call = mockCall,
         )
 
         // Verify second client is unchanged
@@ -311,11 +316,12 @@ class OauthClientServiceDatabaseProviderTest {
 
     @Test
     fun `client creation stores all redirect URIs correctly`() {
-        val redirectUris = listOf(
-            "https://app.example.com/callback",
-            "https://app.example.com/callback2",
-            "https://mobile.example.com/callback"
-        )
+        val redirectUris =
+            listOf(
+                "https://app.example.com/callback",
+                "https://app.example.com/callback2",
+                "https://mobile.example.com/callback",
+            )
 
         clientService.createClient(
             clientId = "multi_redirect",
@@ -325,7 +331,7 @@ class OauthClientServiceDatabaseProviderTest {
             redirectUris = redirectUris,
             scopes = listOf("read"),
             grantTypes = listOf("authorization_code"),
-            call = mockCall
+            call = mockCall,
         )
 
         val result = clientService.findByClientId("multi_redirect", mockCall)
@@ -345,7 +351,7 @@ class OauthClientServiceDatabaseProviderTest {
             redirectUris = listOf("https://example.com/callback"),
             scopes = scopes,
             grantTypes = listOf("authorization_code"),
-            call = mockCall
+            call = mockCall,
         )
 
         val result = clientService.findByClientId("multi_scope", mockCall)
@@ -355,13 +361,14 @@ class OauthClientServiceDatabaseProviderTest {
 
     @Test
     fun `client creation stores all grant types correctly`() {
-        val grantTypes = listOf(
-            "authorization_code",
-            "refresh_token",
-            "client_credentials",
-            "implicit",
-            "password"
-        )
+        val grantTypes =
+            listOf(
+                "authorization_code",
+                "refresh_token",
+                "client_credentials",
+                "implicit",
+                "password",
+            )
 
         clientService.createClient(
             clientId = "multi_grant",
@@ -371,7 +378,7 @@ class OauthClientServiceDatabaseProviderTest {
             redirectUris = listOf("https://example.com/callback"),
             scopes = listOf("read"),
             grantTypes = grantTypes,
-            call = mockCall
+            call = mockCall,
         )
 
         val result = clientService.findByClientId("multi_grant", mockCall)
@@ -389,7 +396,7 @@ class OauthClientServiceDatabaseProviderTest {
             redirectUris = listOf("https://example.com/callback"),
             scopes = listOf("read"),
             grantTypes = listOf("authorization_code"),
-            call = mockCall
+            call = mockCall,
         )
 
         assertThrows(ExposedSQLException::class.java) {

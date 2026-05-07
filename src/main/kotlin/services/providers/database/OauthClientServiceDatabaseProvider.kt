@@ -35,9 +35,8 @@ object OAuthClients : Table("oauth_clients") {
 
 @OptIn(ExperimentalUuidApi::class)
 class OauthClientServiceDatabaseProvider(
-    val oauthDatabaseConfiguration: OauthDatabaseConfiguration
-): OauthClientService {
-
+    val oauthDatabaseConfiguration: OauthDatabaseConfiguration,
+) : OauthClientService {
     fun createClient(
         clientId: String,
         clientSecret: String?,
@@ -49,66 +48,72 @@ class OauthClientServiceDatabaseProvider(
         accessTokenValidity: Long = 300,
         refreshTokenValidity: Long = 7200,
         consentRequired: Boolean = true,
-        call: ApplicationCall
-    ): OAuthClientDTO = oauthDatabaseConfiguration.dbQuery(call) {
-        val id = UUID.randomUUID()
-        OAuthClients.insert {
-            it[OAuthClients.id] = id.toKotlinUuid()
-            it[OAuthClients.clientId] = clientId
-            it[OAuthClients.clientSecret] = clientSecret
-            it[OAuthClients.clientName] = name
-            it[OAuthClients.clientType] = type
-            it[OAuthClients.redirectUris] = redirectUris.joinToString(",")
-            it[OAuthClients.scopes] = scopes.joinToString(",")
-            it[OAuthClients.grantTypes] = grantTypes.joinToString(",")
-            it[OAuthClients.tokenEndpointAuthMethod] = "client_secret_post"
-            it[OAuthClients.accessTokenValidity] = accessTokenValidity
-            it[OAuthClients.refreshTokenValidity] = refreshTokenValidity
-            it[OAuthClients.isDefault] = false
-            it[OAuthClients.consentRequired] = consentRequired
+        call: ApplicationCall,
+    ): OAuthClientDTO =
+        oauthDatabaseConfiguration.dbQuery(call) {
+            val id = UUID.randomUUID()
+            OAuthClients.insert {
+                it[OAuthClients.id] = id.toKotlinUuid()
+                it[OAuthClients.clientId] = clientId
+                it[OAuthClients.clientSecret] = clientSecret
+                it[OAuthClients.clientName] = name
+                it[OAuthClients.clientType] = type
+                it[OAuthClients.redirectUris] = redirectUris.joinToString(",")
+                it[OAuthClients.scopes] = scopes.joinToString(",")
+                it[OAuthClients.grantTypes] = grantTypes.joinToString(",")
+                it[OAuthClients.tokenEndpointAuthMethod] = "client_secret_post"
+                it[OAuthClients.accessTokenValidity] = accessTokenValidity
+                it[OAuthClients.refreshTokenValidity] = refreshTokenValidity
+                it[OAuthClients.isDefault] = false
+                it[OAuthClients.consentRequired] = consentRequired
+            }
+            OAuthClientDTO(id, clientId, name, type, redirectUris, scopes, grantTypes)
         }
-        OAuthClientDTO(id, clientId, name, type, redirectUris, scopes, grantTypes)
-    }
 
-    override fun findByClientId(clientId: String, call: ApplicationCall): OAuthClientDTO? = oauthDatabaseConfiguration.dbQuery(call) {
-        OAuthClients.selectAll().where { OAuthClients.clientId eq clientId }
-            .map {
-                OAuthClientDTO(
-                    it[OAuthClients.id].toJavaUuid(),
-                    it[OAuthClients.clientId],
-                    it[OAuthClients.clientName],
-                    it[OAuthClients.clientType],
-                    it[OAuthClients.redirectUris].split(","),
-                    it[OAuthClients.scopes].split(","),
-                    it[OAuthClients.grantTypes].split(","),
-                    it[OAuthClients.clientSecret],
-                    accessTokenValidity = it[OAuthClients.accessTokenValidity],
-                    refreshTokenValidity = it[OAuthClients.refreshTokenValidity],
-                    isDefault = it[OAuthClients.isDefault],
-                    consentRequired = it[OAuthClients.consentRequired]
-                )
-            }.singleOrNull()
-    }
+    override fun findByClientId(
+        clientId: String,
+        call: ApplicationCall,
+    ): OAuthClientDTO? =
+        oauthDatabaseConfiguration.dbQuery(call) {
+            OAuthClients.selectAll().where { OAuthClients.clientId eq clientId }
+                .map {
+                    OAuthClientDTO(
+                        it[OAuthClients.id].toJavaUuid(),
+                        it[OAuthClients.clientId],
+                        it[OAuthClients.clientName],
+                        it[OAuthClients.clientType],
+                        it[OAuthClients.redirectUris].split(","),
+                        it[OAuthClients.scopes].split(","),
+                        it[OAuthClients.grantTypes].split(","),
+                        it[OAuthClients.clientSecret],
+                        accessTokenValidity = it[OAuthClients.accessTokenValidity],
+                        refreshTokenValidity = it[OAuthClients.refreshTokenValidity],
+                        isDefault = it[OAuthClients.isDefault],
+                        consentRequired = it[OAuthClients.consentRequired],
+                    )
+                }.singleOrNull()
+        }
 
-    override fun findDefaultClient(call: ApplicationCall): OAuthClientDTO?  = oauthDatabaseConfiguration.dbQuery(call) {
-        OAuthClients.selectAll().where { OAuthClients.isDefault eq true }
-            .map {
-                OAuthClientDTO(
-                    it[OAuthClients.id].toJavaUuid(),
-                    it[OAuthClients.clientId],
-                    it[OAuthClients.clientName],
-                    it[OAuthClients.clientType],
-                    it[OAuthClients.redirectUris].split(","),
-                    it[OAuthClients.scopes].split(","),
-                    it[OAuthClients.grantTypes].split(","),
-                    it[OAuthClients.clientSecret],
-                    accessTokenValidity = it[OAuthClients.accessTokenValidity],
-                    refreshTokenValidity = it[OAuthClients.refreshTokenValidity],
-                    isDefault = it[OAuthClients.isDefault],
-                    consentRequired = it[OAuthClients.consentRequired]
-                )
-            }.singleOrNull()
-    }
+    override fun findDefaultClient(call: ApplicationCall): OAuthClientDTO? =
+        oauthDatabaseConfiguration.dbQuery(call) {
+            OAuthClients.selectAll().where { OAuthClients.isDefault eq true }
+                .map {
+                    OAuthClientDTO(
+                        it[OAuthClients.id].toJavaUuid(),
+                        it[OAuthClients.clientId],
+                        it[OAuthClients.clientName],
+                        it[OAuthClients.clientType],
+                        it[OAuthClients.redirectUris].split(","),
+                        it[OAuthClients.scopes].split(","),
+                        it[OAuthClients.grantTypes].split(","),
+                        it[OAuthClients.clientSecret],
+                        accessTokenValidity = it[OAuthClients.accessTokenValidity],
+                        refreshTokenValidity = it[OAuthClients.refreshTokenValidity],
+                        isDefault = it[OAuthClients.isDefault],
+                        consentRequired = it[OAuthClients.consentRequired],
+                    )
+                }.singleOrNull()
+        }
 
     fun updateClient(
         clientId: String,
@@ -120,32 +125,37 @@ class OauthClientServiceDatabaseProvider(
         accessTokenValidity: Long = 300,
         refreshTokenValidity: Long = 7200,
         consentRequired: Boolean = true,
-        call: ApplicationCall
-    ): Boolean = oauthDatabaseConfiguration.dbQuery(call) {
-        OAuthClients.update({ OAuthClients.clientId eq clientId }) {
-            it[OAuthClients.clientName] = name
-            it[OAuthClients.clientType] = type
-            it[OAuthClients.redirectUris] = redirectUris.joinToString(",")
-            it[OAuthClients.scopes] = scopes.joinToString(",")
-            it[OAuthClients.grantTypes] = grantTypes.joinToString(",")
-            it[tokenEndpointAuthMethod] = "client_secret_post"
-            it[OAuthClients.accessTokenValidity] = accessTokenValidity
-            it[OAuthClients.refreshTokenValidity] = refreshTokenValidity
-            it[OAuthClients.consentRequired] = consentRequired
-        } > 0
-    }
+        call: ApplicationCall,
+    ): Boolean =
+        oauthDatabaseConfiguration.dbQuery(call) {
+            OAuthClients.update({ OAuthClients.clientId eq clientId }) {
+                it[OAuthClients.clientName] = name
+                it[OAuthClients.clientType] = type
+                it[OAuthClients.redirectUris] = redirectUris.joinToString(",")
+                it[OAuthClients.scopes] = scopes.joinToString(",")
+                it[OAuthClients.grantTypes] = grantTypes.joinToString(",")
+                it[tokenEndpointAuthMethod] = "client_secret_post"
+                it[OAuthClients.accessTokenValidity] = accessTokenValidity
+                it[OAuthClients.refreshTokenValidity] = refreshTokenValidity
+                it[OAuthClients.consentRequired] = consentRequired
+            } > 0
+        }
 
     fun updateClientSecret(
         clientId: String,
         clientSecret: String?,
-        call: ApplicationCall
-    ): Boolean = oauthDatabaseConfiguration.dbQuery(call) {
-        OAuthClients.update({ OAuthClients.clientId eq clientId }) {
-            it[OAuthClients.clientSecret] = clientSecret
-        } > 0
-    }
+        call: ApplicationCall,
+    ): Boolean =
+        oauthDatabaseConfiguration.dbQuery(call) {
+            OAuthClients.update({ OAuthClients.clientId eq clientId }) {
+                it[OAuthClients.clientSecret] = clientSecret
+            } > 0
+        }
 
-    fun <T> runQuery(call: ApplicationCall, query: (OAuthClients) -> T): T {
+    fun <T> runQuery(
+        call: ApplicationCall,
+        query: (OAuthClients) -> T,
+    ): T {
         return oauthDatabaseConfiguration.dbQuery(call) {
             query(OAuthClients)
         }
