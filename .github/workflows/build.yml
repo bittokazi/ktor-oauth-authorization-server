@@ -23,13 +23,21 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
-      - name: Run Tests
+      - name: Run Tests & Generate Coverage Report
         id: tests
-        run: gradle check
+        run: gradle check jacocoTestReport
 
-      - name: Generate Coverage Report
-        run: gradle jacocoTestReport
-        if: success() || failure()
+      - name: JaCoCo Code Coverage Report
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: ${{ github.workspace }}/build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 80
+          min-coverage-changed-files: 80
+          title: Coverage Report
+          fail-if-coverage-less-than-min: true
+          continue-on-error: false
 
       - name: Test Report
         uses: dorny/test-reporter@v1
@@ -39,17 +47,6 @@ jobs:
           path: '**/build/test-results/test/*.xml'
           reporter: java-junit
 
-      - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v3
-        if: success() || failure()
-        with:
-          files: '**/build/reports/jacoco/test/jacocoTestReport.xml'
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
-          verbose: true
-
       - name: Build Ktor Oauth Library
         run: gradle build
-        if: steps.tests.outcome == 'success'
-
+        if: steps.tests.outcome == 'success' && steps.jacoco.outcome == 'success'
