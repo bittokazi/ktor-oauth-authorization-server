@@ -1,13 +1,7 @@
 package com.bittokazi.ktor.auth.routes
 
-import com.bittokazi.ktor.auth.OauthUserSession
-import com.bittokazi.ktor.auth.services.SessionCustomizer
-import com.bittokazi.ktor.auth.services.providers.OauthAuthorizationCodeService
-import com.bittokazi.ktor.auth.services.providers.OauthClientService
-import com.bittokazi.ktor.auth.services.providers.OauthConsentService
-import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
-import com.bittokazi.ktor.auth.services.providers.OauthUserService
-import com.bittokazi.ktor.auth.utils.getBaseUrl
+import com.bittokazi.ktor.auth.domains.rest.Result
+import com.bittokazi.ktor.auth.services.authorization.OauthAuthorizationProcessService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
@@ -16,19 +10,10 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
-import io.ktor.server.sessions.get
 import io.ktor.server.sessions.sessions
-import io.ktor.server.sessions.set
-import java.time.Instant
-import java.util.UUID
 
 fun Application.authorizeRoute() {
-    val oauthClientService: OauthClientService by dependencies
-    val oauthUserService: OauthUserService by dependencies
-    val oauthAuthorizationCodeService: OauthAuthorizationCodeService by dependencies
-    val sessionCustomizer: SessionCustomizer by dependencies
-    val oauthConsentService: OauthConsentService by dependencies
-    val oauthLoginOptionService: OauthLoginOptionService by dependencies
+    val oauthAuthorizationProcessService: OauthAuthorizationProcessService by dependencies
 
     routing {
         get("/oauth/authorize") {
@@ -40,116 +25,65 @@ fun Application.authorizeRoute() {
             val codeChallenge = call.request.queryParameters["code_challenge"]
             val codeChallengeMethod = call.request.queryParameters["code_challenge_method"]
 
-            // Validate request
-            if (clientId == null || redirectUri == null || responseType != "code") {
+            // Validate that required parameters are present
+            if (clientId == null || redirectUri == null) {
                 call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid request"))
                 return@get
             }
 
-            val client =
-                oauthClientService.findByClientId(clientId, call)
-                    ?: return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid client_id"))
+            // Call the authorization service
+            val result =
+                oauthAuthorizationProcessService
+                    .authorize(
+                        clientId = clientId,
+                        redirectUri = redirectUri,
+                        responseType = responseType ?: "",
+                        scope = scope,
+                        state = state,
+                        codeChallenge = codeChallenge,
+                        codeChallengeMethod = codeChallengeMethod,
+                        call = call,
+                    )
 
-            if (!client.isDefault && !client.redirectUris.contains(redirectUri)) {
-                return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid redirect_uri"))
-            }
+            when (result) {
+                is Result.Success -> {
+                    // Check for special cases
+                    val authorizationCode = result.outcome
+                    val code = authorizationCode["code"] as String
+                    val resultState = authorizationCode["state"]
 
-            if (client.isDefault && call.getBaseUrl()
-                    .replace("http://", "").replace("https://", "").replace("www.", "") !=
-                redirectUri
-                    .replace("http://", "").replace("https://", "").replace("www.", "")
-                    .split("/").firstOrNull()
-            ) {
-                return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid redirect_uri"))
-            }
-
-            if (!client.scopes.containsAll(scope?.split(" ")?.toList() ?: emptyList())) {
-                return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid scopes"))
-            }
-
-            if (!client.grantTypes.contains("authorization_code")) {
-                return@get call.respond(HttpStatusCode.Unauthorized, mutableMapOf("message" to "Unauthorized"))
-            }
-
-            if (client.clientType == "public") {
-                if (codeChallenge == null || codeChallengeMethod == null) {
-                    return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Missing code challenge properties"))
+                    val redirectUrl = "$redirectUri?code=$code${if (resultState != null) "&state=$resultState" else ""}"
+                    call.respondRedirect(redirectUrl)
                 }
-                if (!listOf("S256", "plain").contains(codeChallengeMethod)) {
-                    return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid code challenge method"))
-                }
-            }
 
-            // Check user session
-            val session = call.sessions.get<OauthUserSession>()
-            if (session == null || session.expiresAt < System.currentTimeMillis()) {
-                // No session/expired: save original request so we can come back later
-                call.sessions.clear("OAUTH_USER_SESSION")
-                val authRequestUrl = call.request.uri
-                call.sessions.set("OAUTH_ORIGINAL_URL", authRequestUrl)
-                call.respondRedirect("/oauth/login")
-                return@get
-            }
+                is Result.Failure -> {
+                    val errorBody = result.errorBody
+                    val statusCode = (errorBody["statusCode"] as? HttpStatusCode) ?: HttpStatusCode.BadRequest
+                    val requiresLogin = errorBody["requiresLogin"] as? Boolean ?: false
+                    val requiresConsent = errorBody["requiresConsent"] as? Boolean ?: false
 
-            val authRequestUrl = call.request.uri
-            call.sessions.set("OAUTH_ORIGINAL_URL", authRequestUrl)
-            if (!oauthLoginOptionService.isAfterLoginCheckCompleted(session, call)) {
-                return@get
-            } else {
-                call.sessions.clear("OAUTH_ORIGINAL_URL")
-            }
+                    when {
+                        requiresLogin -> {
+                            // Save original URL and redirect to login
+                            call.sessions.clear("OAUTH_USER_SESSION")
+                            call.sessions.set("OAUTH_ORIGINAL_URL", call.request.uri)
+                            call.respondRedirect("/oauth/login")
+                        }
 
-            if (client.consentRequired) {
-                when (val consents = oauthConsentService.getConsent(userId = session.userId, clientId = client.id, call)) {
-                    null -> {
-                        val authRequestUrl = call.request.uri
-                        call.sessions.set("OAUTH_ORIGINAL_URL", authRequestUrl)
-                        call.respondRedirect("/oauth/consent?client_id=${client.clientId}")
-                        return@get
-                    }
-                    else -> {
-                        if (!consents.containsAll(client.scopes)) {
-                            val authRequestUrl = call.request.uri
-                            call.sessions.set("OAUTH_ORIGINAL_URL", authRequestUrl)
-                            call.respondRedirect("/oauth/consent?client_id=${client.clientId}")
-                            return@get
+                        requiresConsent -> {
+                            // Redirect to consent screen
+                            val clientIdForConsent = errorBody["clientId"] as String
+                            call.sessions.set("OAUTH_ORIGINAL_URL", call.request.uri)
+                            call.respondRedirect("/oauth/consent?client_id=$clientIdForConsent")
+                        }
+
+                        else -> {
+                            // Return error response
+                            call.respond(statusCode, errorBody)
                         }
                     }
                 }
             }
-
-            // User is logged in → issue authorization code
-            val user =
-                oauthUserService.findByUsername(session.username, call)
-                    ?: return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "User not found"))
-
-            if (session.expiresAt > System.currentTimeMillis()) {
-                val ttlSeconds =
-                    when (session.rememberMe) {
-                        true -> 31536000
-                        else -> sessionCustomizer.timeout ?: 3200
-                    }
-                val expiresAt = System.currentTimeMillis() + (ttlSeconds * 1000)
-                call.sessions.set(OauthUserSession(session.userId, session.username, expiresAt, session.rememberMe))
-            }
-
-            val code = UUID.randomUUID().toString()
-            val expiresAt = Instant.now().plusSeconds(300)
-
-            oauthAuthorizationCodeService.createCode(
-                code,
-                client.id,
-                user.id,
-                redirectUri,
-                scope?.split(" ") ?: emptyList(),
-                expiresAt,
-                codeChallenge,
-                codeChallengeMethod,
-                call,
-            )
-
-            val redirectUrl = "$redirectUri?code=$code${if (state != null) "&state=$state" else ""}"
-            call.respondRedirect(redirectUrl)
         }
     }
 }

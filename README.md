@@ -2,6 +2,7 @@
 
 [![Build Passing](https://github.com/bittokazi/ktor-oauth-authorization-server/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/bittokazi/ktor-oauth-authorization-server/actions/workflows/build.yml)
 [![Lint](https://github.com/bittokazi/ktor-oauth-authorization-server/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/bittokazi/ktor-oauth-authorization-server/actions/workflows/lint.yml)
+[![Release: Maven Central](https://github.com/bittokazi/ktor-oauth-authorization-server/actions/workflows/gradle-publish.yml/badge.svg)](https://github.com/bittokazi/ktor-oauth-authorization-server/actions/workflows/gradle-publish.yml)
 
 A **Kotlin + Ktor** implementation of a self-hosted OAuth 2.0 Authorization Server with OpenID Connect (OIDC) support.  
 This library provides core features you'd expect from an OAuth / OIDC server: clients, tokens, consent, JWT issuance.

@@ -7,14 +7,15 @@ import com.bittokazi.ktor.auth.services.token.TokenGenerator
 import com.bittokazi.ktor.auth.services.token.TokenGeneratorFactory
 import com.bittokazi.ktor.auth.services.token.TokenIntrospectService
 import com.bittokazi.ktor.auth.services.token.TokenRevokeService
-import io.ktor.client.request.*
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.formUrlEncode
 import io.ktor.server.plugins.di.dependencies
-import io.ktor.server.testing.*
+import io.ktor.server.testing.testApplication
 import org.junit.Test
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.extension.ExtendWith

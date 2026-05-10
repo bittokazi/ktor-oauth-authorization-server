@@ -81,8 +81,8 @@ class DefaultClientCredentialsTokenGenerator(
 
         val accessToken =
             jwksProvider.generateJwt(
-                subject = clientId, // no user
-                audience = "", // or a specific resource server
+                subject = clientId,
+                audience = "",
                 scopes = scopes,
                 issuer = issuer,
                 expiresInSeconds = client.accessTokenValidity,

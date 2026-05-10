@@ -4,7 +4,11 @@ import com.bittokazi.ktor.auth.services.providers.database.OauthAuthorizationCod
 import config.TestOauthDatabaseConfiguration
 import io.ktor.server.application.ApplicationCall
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
