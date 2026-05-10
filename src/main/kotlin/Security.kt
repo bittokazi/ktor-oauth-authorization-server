@@ -3,15 +3,20 @@ package com.bittokazi.ktor.auth
 import com.auth0.jwk.JwkProviderBuilder
 import com.bittokazi.ktor.auth.services.SessionCustomizer
 import com.bittokazi.ktor.auth.services.SessionExtender
+import com.bittokazi.ktor.auth.services.session.DefaultSessionProvider
+import com.bittokazi.ktor.auth.services.session.SessionProvider
 import com.bittokazi.ktor.auth.utils.getBaseUrl
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.*
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
 import io.ktor.server.auth.AuthenticationConfig
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.response.respond
-import io.ktor.server.sessions.*
+import io.ktor.server.sessions.SessionTransportTransformerEncrypt
+import io.ktor.server.sessions.Sessions
+import io.ktor.server.sessions.cookie
 import io.ktor.util.hex
 import kotlinx.serialization.Serializable
 import java.net.URL
@@ -30,6 +35,10 @@ fun Application.configureSecurity() {
     if (sessionCustomizer.encryptionKey != null || sessionCustomizer.signingKey != null) {
         secretEncryptKey = hex(sessionCustomizer.encryptionKey!!)
         secretSignKey = hex(sessionCustomizer.signingKey!!)
+    }
+
+    dependencies {
+        provide<SessionProvider>(DefaultSessionProvider::class)
     }
 
     install(Sessions) {

@@ -9,8 +9,8 @@ import com.bittokazi.ktor.auth.services.providers.OauthAuthorizationCodeService
 import com.bittokazi.ktor.auth.services.providers.OauthClientService
 import com.bittokazi.ktor.auth.services.providers.OauthTokenService
 import com.bittokazi.ktor.auth.services.providers.OauthUserService
-import io.ktor.server.application.*
-import io.ktor.server.plugins.di.*
+import io.ktor.server.application.Application
+import io.ktor.server.plugins.di.dependencies
 
 fun Application.configureFrameworks(
     configureDatabase: Boolean = false,

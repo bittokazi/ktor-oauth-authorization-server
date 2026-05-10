@@ -1,6 +1,6 @@
 package com.bittokazi.ktor.auth
 
-import io.ktor.server.application.*
+import io.ktor.server.application.Application
 
 fun Application.configureOauth2AuthorizationServer(
     configureSerialization: Boolean = false,

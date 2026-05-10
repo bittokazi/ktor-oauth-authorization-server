@@ -6,7 +6,7 @@ import com.bittokazi.ktor.auth.routes.deviceCodeRoute
 import com.bittokazi.ktor.auth.routes.loginRoutes
 import com.bittokazi.ktor.auth.routes.oidcRoutes
 import com.bittokazi.ktor.auth.routes.tokenRoutes
-import io.ktor.server.application.*
+import io.ktor.server.application.Application
 
 fun Application.configureRouting(
     defaultLoginRoutes: Boolean = true,

@@ -3,7 +3,9 @@ package services.providers.inmemory
 import com.bittokazi.ktor.auth.services.providers.OAuthUserDTO
 import com.bittokazi.ktor.auth.services.providers.inmemory.OauthUserServiceInMemoryProvider
 import io.ktor.server.application.ApplicationCall
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Test
 import org.mockito.Mockito
 
