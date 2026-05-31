@@ -5,9 +5,14 @@ import com.bittokazi.ktor.auth.domains.rest.Result
 import com.bittokazi.ktor.auth.routes.deviceCodeRoute
 import com.bittokazi.ktor.auth.services.device.code.DeviceCodeProcessService
 import com.bittokazi.ktor.auth.services.device.code.VerificationFailure
-import io.ktor.client.request.*
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.*
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.testing.testApplication
 import org.junit.Test

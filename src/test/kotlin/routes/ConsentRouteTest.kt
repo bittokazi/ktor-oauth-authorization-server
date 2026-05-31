@@ -9,9 +9,14 @@ import com.bittokazi.ktor.auth.services.consent.ConsentFailure
 import com.bittokazi.ktor.auth.services.consent.ConsentProcessService
 import com.bittokazi.ktor.auth.services.providers.DefaultOauthLoginOptionService
 import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
-import io.ktor.client.request.*
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.*
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.testing.testApplication
@@ -29,7 +34,6 @@ import org.mockito.kotlin.given
 @RunWith(MockitoJUnitRunner::class)
 @ExtendWith(MockitoExtension::class)
 class ConsentRouteTest {
-
     @Mock
     lateinit var consentProcessService: ConsentProcessService
 
@@ -93,7 +97,7 @@ class ConsentRouteTest {
                 ),
             ).willReturn(
                 Result.Success(
-                    outcome = null
+                    outcome = null,
                 ),
             )
 
@@ -354,7 +358,7 @@ class ConsentRouteTest {
                 consentProcessService.processConsent(any(), any(), any()),
             ).willReturn(
                 Result.Success(
-                    outcome = null
+                    outcome = null,
                 ),
             )
 

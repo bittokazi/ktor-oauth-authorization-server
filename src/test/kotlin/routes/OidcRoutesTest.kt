@@ -8,13 +8,16 @@ import com.bittokazi.ktor.auth.domains.rest.Result
 import com.bittokazi.ktor.auth.routes.oidcRoutes
 import com.bittokazi.ktor.auth.services.SessionCustomizer
 import com.bittokazi.ktor.auth.services.oidc.OidcService
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
-import io.ktor.server.plugins.di.*
-import io.ktor.server.testing.*
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.auth.AuthenticationConfig
+import io.ktor.server.auth.authentication
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.jwt.jwt
+import io.ktor.server.plugins.di.dependencies
+import io.ktor.server.testing.testApplication
 import org.junit.Test
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.extension.ExtendWith
@@ -28,7 +31,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.given
-import java.util.*
+import java.util.Date
 
 @RunWith(MockitoJUnitRunner::class)
 @ExtendWith(MockitoExtension::class)
