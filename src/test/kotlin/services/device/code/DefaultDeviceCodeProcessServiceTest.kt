@@ -155,11 +155,6 @@ class DefaultDeviceCodeProcessServiceTest {
     fun `createDeviceAuthorization returns error when grant type not found`() =
         runTest {
             val client = mock<OAuthClientDTO>()
-            val clientId = UUID.randomUUID()
-
-            given(client.id).willReturn(clientId)
-            given(client.scopes).willReturn(listOf("openid", "profile"))
-            given(client.grantTypes).willReturn(listOf("client_credentials"))
 
             given(oauthClientService.findByClientId("client", call)).willReturn(client)
 
