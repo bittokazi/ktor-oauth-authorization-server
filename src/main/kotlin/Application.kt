@@ -37,42 +37,42 @@ fun Application.configureOauth2AuthorizationServer(
         provide<SessionProvider>(DefaultSessionProvider::class)
     }
     val oauthAuthorizationProcessService: OauthAuthorizationProcessService? by dependencies
-    if(oauthAuthorizationProcessService == null) {
+    if (oauthAuthorizationProcessService == null) {
         dependencies {
             provide<OauthAuthorizationProcessService>(DefaultOauthAuthorizationProcessService::class)
         }
     }
 
     val tokenIntrospectService: TokenIntrospectService? by dependencies
-    if(tokenIntrospectService == null) {
+    if (tokenIntrospectService == null) {
         dependencies {
             provide<TokenIntrospectService>(DefaultTokenIntrospectService::class)
         }
     }
 
     val oidcService: OidcService? by dependencies
-    if(oidcService == null) {
+    if (oidcService == null) {
         dependencies {
             provide<OidcService>(DefaultOidcService::class)
         }
     }
 
     val tokenRevokeService: TokenRevokeService? by dependencies
-    if(tokenRevokeService == null) {
+    if (tokenRevokeService == null) {
         dependencies {
             provide<TokenRevokeService>(DefaultTokenRevokeService::class)
         }
     }
 
     val consentProcessService: ConsentProcessService? by dependencies
-    if(consentProcessService == null) {
+    if (consentProcessService == null) {
         dependencies {
             provide<ConsentProcessService>(DefaultConsentProcessService::class)
         }
     }
 
     val deviceCodeProcessService: DeviceCodeProcessService? by dependencies
-    if(deviceCodeProcessService == null) {
+    if (deviceCodeProcessService == null) {
         dependencies {
             provide<DeviceCodeProcessService>(DefaultDeviceCodeProcessService::class)
         }
@@ -97,7 +97,7 @@ fun Application.configureOauth2AuthorizationServer(
                     clientCredentialsTokenGenerator = defaultClientCredentialsTokenGenerator,
                     authorizationCodeTokenGenerator = defaultAuthorizationCodeTokenGenerator,
                     refreshTokenGenerator = defaultRefreshTokenGenerator,
-                    deviceCodeTokenGenerator = defaultDeviceCodeTokenGenerator
+                    deviceCodeTokenGenerator = defaultDeviceCodeTokenGenerator,
                 )
             }
         }
