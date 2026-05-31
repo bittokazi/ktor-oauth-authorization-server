@@ -3,8 +3,6 @@ package com.bittokazi.ktor.auth
 import com.auth0.jwk.JwkProviderBuilder
 import com.bittokazi.ktor.auth.services.SessionCustomizer
 import com.bittokazi.ktor.auth.services.SessionExtender
-import com.bittokazi.ktor.auth.services.session.DefaultSessionProvider
-import com.bittokazi.ktor.auth.services.session.SessionProvider
 import com.bittokazi.ktor.auth.utils.getBaseUrl
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
@@ -35,10 +33,6 @@ fun Application.configureSecurity() {
     if (sessionCustomizer.encryptionKey != null || sessionCustomizer.signingKey != null) {
         secretEncryptKey = hex(sessionCustomizer.encryptionKey!!)
         secretSignKey = hex(sessionCustomizer.signingKey!!)
-    }
-
-    dependencies {
-        provide<SessionProvider>(DefaultSessionProvider::class)
     }
 
     install(Sessions) {

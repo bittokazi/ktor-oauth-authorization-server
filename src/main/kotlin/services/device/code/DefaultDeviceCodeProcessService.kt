@@ -63,6 +63,15 @@ class DefaultDeviceCodeProcessService(
             )
         }
 
+        if (!client.grantTypes.contains("urn:ietf:params:oauth:grant-type:device_code")) {
+            return Result.Failure(
+                Pair(
+                    401,
+                    mutableMapOf("message" to "Client is not authorized for device code"),
+                ),
+            )
+        }
+
         val userCode = Utils.generateUserCode()
         val deviceCode = UUID.randomUUID().toString()
         val expiresAt = Instant.now().plusSeconds(1200)
@@ -88,7 +97,7 @@ class DefaultDeviceCodeProcessService(
         )
     }
 
-    override suspend fun getDeviceVerificationPage(call: ApplicationCall): Result<Map<String, Any>, VerificationFailure> {
+    override suspend fun getDeviceVerificationPage(call: ApplicationCall): Result<Map<String, Any?>, VerificationFailure> {
         val userCode = call.request.queryParameters["user_code"]
 
         val session = sessionProvider.getSession(call).get<OauthUserSession>()
@@ -113,7 +122,7 @@ class DefaultDeviceCodeProcessService(
         return Result.Success(
             mapOf(
                 "result" to false,
-                "userCode" to userCode!!,
+                "userCode" to userCode,
             ).plus(templateData),
         )
     }
