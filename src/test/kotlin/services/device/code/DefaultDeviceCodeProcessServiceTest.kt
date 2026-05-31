@@ -41,8 +41,6 @@ class DefaultDeviceCodeProcessServiceTest {
 
     @Mock lateinit var request: ApplicationRequest
 
-    @Mock lateinit var sessions: CurrentSession
-
     @Mock lateinit var attributes: Attributes
 
     @Mock lateinit var origin: RequestConnectionPoint
