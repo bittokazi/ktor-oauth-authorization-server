@@ -136,6 +136,7 @@ class DefaultDeviceCodeProcessServiceTest {
 
             given(client.id).willReturn(clientId)
             given(client.scopes).willReturn(listOf("openid", "profile"))
+            given(client.grantTypes).willReturn(listOf("urn:ietf:params:oauth:grant-type:device_code"))
 
             given(oauthClientService.findByClientId("client", call)).willReturn(client)
 
@@ -148,6 +149,23 @@ class DefaultDeviceCodeProcessServiceTest {
             assertTrue(data.containsKey("user_code"))
             assertEquals(1200, data["expires_in"])
             assertEquals(5, data["interval"])
+        }
+
+    @Test
+    fun `createDeviceAuthorization returns error when grant type not found`() =
+        runTest {
+            val client = mock<OAuthClientDTO>()
+            val clientId = UUID.randomUUID()
+
+            given(client.id).willReturn(clientId)
+            given(client.scopes).willReturn(listOf("openid", "profile"))
+            given(client.grantTypes).willReturn(listOf("client_credentials"))
+
+            given(oauthClientService.findByClientId("client", call)).willReturn(client)
+
+            val result = service.createDeviceAuthorization("client", "openid profile", call)
+
+            assertTrue(result is Result.Failure)
         }
 
     // -------------------------
