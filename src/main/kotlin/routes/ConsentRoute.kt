@@ -1,9 +1,8 @@
 package com.bittokazi.ktor.auth.routes
 
-import com.bittokazi.ktor.auth.OauthUserSession
-import com.bittokazi.ktor.auth.services.TemplateCustomizer
-import com.bittokazi.ktor.auth.services.providers.OauthClientService
-import com.bittokazi.ktor.auth.services.providers.OauthConsentService
+import com.bittokazi.ktor.auth.domains.rest.Result
+import com.bittokazi.ktor.auth.services.consent.ConsentFailure
+import com.bittokazi.ktor.auth.services.consent.ConsentProcessService
 import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
@@ -15,138 +14,80 @@ import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
-import io.ktor.server.sessions.get
-import io.ktor.server.sessions.sessions
 
 fun Application.consentRoute() {
-    val oauthClientService: OauthClientService by dependencies
-    val oauthConsentService: OauthConsentService by dependencies
+    val consentProcessService: ConsentProcessService by dependencies
     val oauthLoginOptionService: OauthLoginOptionService by dependencies
-    val templateCustomizer: TemplateCustomizer? by dependencies
 
     routing {
         get("/oauth/consent") {
             val clientId = call.request.queryParameters["client_id"]
 
-            // Check user session
-            val session = call.sessions.get<OauthUserSession>()
-            if (session == null || session.expiresAt < System.currentTimeMillis()) {
-                // No session/expired: save original request so we can come back later
-                call.sessions.clear("OAUTH_USER_SESSION")
-                call.respondRedirect("/oauth/login")
-                return@get
-            }
-
-            if (!oauthLoginOptionService.isAfterLoginCheckCompleted(session, call)) {
-                return@get
-            }
-
-            // Validate request
-            if (clientId == null) {
-                call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid request"))
-                return@get
-            }
-
-            val client =
-                oauthClientService.findByClientId(clientId, call)
-                    ?: return@get call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid client_id"))
-
-            if (client.consentRequired) {
-                val templateData = templateCustomizer?.addExtraData(call) ?: mapOf()
-
-                when (val consents = oauthConsentService.getConsent(userId = session.userId, clientId = client.id, call)) {
-                    null -> {
-                        call.respond(
-                            MustacheContent(
-                                "oauth_templates/consent.hbs",
-                                mapOf(
-                                    "clientName" to client.clientName,
-                                    "scopes" to client.scopes,
-                                    "clientId" to client.clientId,
-                                ).plus(templateData),
-                            ),
-                        )
-                        return@get
-                    }
-                    else -> {
-                        if (!consents.containsAll(client.scopes)) {
-                            call.respond(
-                                MustacheContent(
-                                    "oauth_templates/consent.hbs",
-                                    mapOf(
-                                        "clientName" to client.clientName,
-                                        "scopes" to client.scopes,
-                                        "clientId" to client.clientId,
-                                    ).plus(templateData),
-                                ),
-                            )
-                            return@get
-                        }
-                        // Retrieve saved original request URL
-                        oauthLoginOptionService.completeLogin(call)
+            when (
+                val result =
+                    consentProcessService.getConsentPage(
+                        clientId,
+                        call,
+                    )
+            ) {
+                is Result.Success -> {
+                    when (val outcome = result.outcome) {
+                        is MustacheContent -> call.respond(outcome)
+                        else -> oauthLoginOptionService.completeLogin(call)
                     }
                 }
-            } else {
-                // Retrieve saved original request URL
-                oauthLoginOptionService.completeLogin(call)
+
+                is Result.Failure -> {
+                    when (result.errorBody) {
+                        ConsentFailure.LoginRequired -> call.respondRedirect("/oauth/login")
+                        ConsentFailure.BadRequest -> call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid request"))
+                        ConsentFailure.InvalidAction -> call.respond(HttpStatusCode.BadRequest, mapOf("message" to "Invalid action"))
+                        ConsentFailure.InvalidClient ->
+                            call.respond(
+                                HttpStatusCode.BadRequest,
+                                mutableMapOf("message" to "Invalid client_id"),
+                            )
+                        is ConsentFailure.Template -> call.respond(HttpStatusCode.BadRequest, mapOf("message" to "Template not found"))
+                    }
+                }
             }
         }
 
         post("/oauth/consent") {
-            val session = call.sessions.get<OauthUserSession>()
-            if (session == null || session.expiresAt < System.currentTimeMillis()) {
-                call.sessions.clear("OAUTH_USER_SESSION")
-                call.respondRedirect("/oauth/login")
-                return@post
-            }
-
             val params = call.receiveParameters()
 
-            val clientIdParam =
-                call.request.queryParameters["client_id"]
-                    ?: params["client_id"]
+            val clientId =
+                call.request.queryParameters["client_id"] ?: params["client_id"]
 
             val action = params["action"]
 
-            if (clientIdParam == null || action == null) {
-                call.respond(HttpStatusCode.BadRequest, mapOf("message" to "Invalid request"))
-                return@post
-            }
-
-            val client =
-                oauthClientService.findByClientId(clientIdParam, call)
-                    ?: return@post call.respond(HttpStatusCode.BadRequest, mapOf("message" to "Invalid client_id"))
-
-            val templateData = templateCustomizer?.addExtraData(call) ?: mapOf()
-
-            when (action) {
-                "approve" -> {
-                    oauthConsentService.grantConsent(
-                        userId = session.userId,
-                        clientId = client.id,
-                        scopes = client.scopes,
+            when (
+                val result =
+                    consentProcessService.processConsent(
+                        clientId,
+                        action,
                         call,
                     )
-
-                    // Redirect back to original URL (authorization endpoint)
-                    oauthLoginOptionService.completeLogin(call)
+            ) {
+                is Result.Success -> {
+                    when (val outcome = result.outcome) {
+                        is MustacheContent -> call.respond(outcome)
+                        else -> oauthLoginOptionService.completeLogin(call)
+                    }
                 }
-                "deny" -> {
-                    call.sessions.clear("OAUTH_ORIGINAL_URL")
 
-                    call.respond(
-                        HttpStatusCode.Forbidden,
-                        MustacheContent(
-                            "oauth_templates/consent_denied.hbs",
-                            mapOf(
-                                "error" to "access_denied",
-                                "error_description" to "You have denied access to the application.",
-                            ).plus(templateData),
-                        ),
-                    )
-                }
-                else -> {
-                    call.respond(HttpStatusCode.BadRequest, mapOf("message" to "Invalid action"))
+                is Result.Failure -> {
+                    when (result.errorBody) {
+                        ConsentFailure.LoginRequired -> call.respondRedirect("/oauth/login")
+                        ConsentFailure.BadRequest -> call.respond(HttpStatusCode.BadRequest, mutableMapOf("message" to "Invalid request"))
+                        ConsentFailure.InvalidAction -> call.respond(HttpStatusCode.BadRequest, mapOf("message" to "Invalid action"))
+                        ConsentFailure.InvalidClient ->
+                            call.respond(
+                                HttpStatusCode.BadRequest,
+                                mutableMapOf("message" to "Invalid client_id"),
+                            )
+                        is ConsentFailure.Template -> call.respond(HttpStatusCode.BadRequest, mapOf("message" to "Template not found"))
+                    }
                 }
             }
         }
