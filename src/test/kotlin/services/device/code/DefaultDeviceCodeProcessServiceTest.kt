@@ -5,14 +5,20 @@ import com.bittokazi.ktor.auth.domains.rest.Result
 import com.bittokazi.ktor.auth.services.TemplateCustomizer
 import com.bittokazi.ktor.auth.services.device.code.DefaultDeviceCodeProcessService
 import com.bittokazi.ktor.auth.services.device.code.VerificationFailure
-import com.bittokazi.ktor.auth.services.providers.*
+import com.bittokazi.ktor.auth.services.providers.OAuthClientDTO
+import com.bittokazi.ktor.auth.services.providers.OauthClientService
+import com.bittokazi.ktor.auth.services.providers.OauthDeviceCodeDTO
+import com.bittokazi.ktor.auth.services.providers.OauthDeviceCodeService
+import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
 import com.bittokazi.ktor.auth.services.session.SessionProvider
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.plugins.*
-import io.ktor.server.request.*
-import io.ktor.server.sessions.*
-import io.ktor.util.*
+import io.ktor.http.RequestConnectionPoint
+import io.ktor.http.parametersOf
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.plugins.origin
+import io.ktor.server.request.ApplicationRequest
+import io.ktor.server.sessions.CurrentSession
+import io.ktor.server.sessions.get
+import io.ktor.util.Attributes
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -23,7 +29,7 @@ import org.mockito.Mockito
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
-import java.util.*
+import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -79,7 +85,7 @@ class DefaultDeviceCodeProcessServiceTest {
             val result = service.createDeviceAuthorization(null, "openid", call)
 
             assertTrue(result is Result.Failure)
-            val error = (result as Result.Failure).errorBody
+            val error = result.errorBody
             assertEquals(400, error.first)
             assertEquals("Missing client_id", (error.second as Map<*, *>)["error"])
         }
@@ -90,7 +96,7 @@ class DefaultDeviceCodeProcessServiceTest {
             val result = service.createDeviceAuthorization("client", null, call)
 
             assertTrue(result is Result.Failure)
-            val error = (result as Result.Failure).errorBody
+            val error = result.errorBody
             assertEquals(400, error.first)
             assertEquals("Missing scope", (error.second as Map<*, *>)["error"])
         }
@@ -103,7 +109,7 @@ class DefaultDeviceCodeProcessServiceTest {
             val result = service.createDeviceAuthorization("client", "openid", call)
 
             assertTrue(result is Result.Failure)
-            val error = (result as Result.Failure).errorBody
+            val error = result.errorBody
             assertEquals("Invalid client_id", (error.second as Map<*, *>)["message"])
         }
 
@@ -118,7 +124,7 @@ class DefaultDeviceCodeProcessServiceTest {
             val result = service.createDeviceAuthorization("client", "openid profile", call)
 
             assertTrue(result is Result.Failure)
-            val error = (result as Result.Failure).errorBody
+            val error = result.errorBody
             assertEquals("Invalid scopes", (error.second as Map<*, *>)["message"])
         }
 
@@ -136,7 +142,7 @@ class DefaultDeviceCodeProcessServiceTest {
             val result = service.createDeviceAuthorization("client", "openid profile", call)
 
             assertTrue(result is Result.Success)
-            val data = (result as Result.Success).outcome
+            val data = result.outcome
 
             assertTrue(data.containsKey("device_code"))
             assertTrue(data.containsKey("user_code"))
@@ -178,7 +184,7 @@ class DefaultDeviceCodeProcessServiceTest {
             val result = service.getDeviceVerificationPage(call)
 
             assertTrue(result is Result.Failure)
-            assertEquals(VerificationFailure.LoginRequired, (result as Result.Failure).errorBody)
+            assertEquals(VerificationFailure.LoginRequired, result.errorBody)
         }
 
     @Test
@@ -195,7 +201,7 @@ class DefaultDeviceCodeProcessServiceTest {
             val result = service.getDeviceVerificationPage(call)
 
             assertTrue(result is Result.Failure)
-            assertEquals(VerificationFailure.LoginRequired, (result as Result.Failure).errorBody)
+            assertEquals(VerificationFailure.LoginRequired, result.errorBody)
         }
 
     @Test
@@ -236,7 +242,7 @@ class DefaultDeviceCodeProcessServiceTest {
             val result = service.getDeviceVerificationPage(call)
 
             assertTrue(result is Result.Success)
-            val data = (result as Result.Success).outcome
+            val data = result.outcome
 
             assertEquals(false, data["result"])
             assertEquals("dark", data["theme"])
@@ -256,7 +262,7 @@ class DefaultDeviceCodeProcessServiceTest {
             val result = service.verifyDeviceCode("code", call)
 
             assertTrue(result is Result.Failure)
-            assertEquals(VerificationFailure.LoginRequired, (result as Result.Failure).errorBody)
+            assertEquals(VerificationFailure.LoginRequired, result.errorBody)
         }
 
     @Test
@@ -284,7 +290,7 @@ class DefaultDeviceCodeProcessServiceTest {
 
             assertTrue(result is Result.Failure)
             val failure = result.errorBody as VerificationFailure.Template
-            assertTrue(failure.data["isInvalid"] == true)
+            assertEquals(failure.data["isInvalid"], true)
         }
 
     @Test
@@ -299,7 +305,7 @@ class DefaultDeviceCodeProcessServiceTest {
 
             assertTrue(result is Result.Failure)
             val failure = result.errorBody as VerificationFailure.Template
-            assertTrue(failure.data["isInvalid"] == true)
+            assertEquals(failure.data["isInvalid"], true)
         }
 
     @Test
@@ -316,7 +322,7 @@ class DefaultDeviceCodeProcessServiceTest {
             val result = service.verifyDeviceCode("code", call)
 
             assertTrue(result is Result.Success)
-            val data = (result as Result.Success).outcome
+            val data = result.outcome
 
             assertEquals(true, data["isSuccess"])
         }

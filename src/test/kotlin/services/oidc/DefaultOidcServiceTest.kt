@@ -9,7 +9,7 @@ import com.bittokazi.ktor.auth.services.providers.OAuthUserDTO
 import com.bittokazi.ktor.auth.services.providers.OauthUserService
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
-import io.ktor.server.application.*
+import io.ktor.server.application.ApplicationCall
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test

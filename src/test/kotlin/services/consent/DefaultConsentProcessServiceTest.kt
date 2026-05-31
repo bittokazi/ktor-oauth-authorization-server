@@ -23,7 +23,7 @@ import org.mockito.Mockito
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
-import java.util.*
+import java.util.UUID
 import kotlin.test.assertTrue
 
 @RunWith(MockitoJUnitRunner::class)
