@@ -9,11 +9,11 @@ import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
 import com.bittokazi.ktor.auth.services.session.SessionProvider
 import com.bittokazi.ktor.auth.utils.Utils
 import com.bittokazi.ktor.auth.utils.getBaseUrl
-import io.ktor.server.application.*
-import io.ktor.server.request.*
-import io.ktor.server.sessions.*
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.request.uri
+import io.ktor.server.sessions.get
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 class DefaultDeviceCodeProcessService(
     private val oauthClientService: OauthClientService,

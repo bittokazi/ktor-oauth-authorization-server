@@ -3,13 +3,16 @@ package com.bittokazi.ktor.auth.routes
 import com.bittokazi.ktor.auth.domains.rest.Result
 import com.bittokazi.ktor.auth.services.device.code.DeviceCodeProcessService
 import com.bittokazi.ktor.auth.services.device.code.VerificationFailure
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.mustache.*
-import io.ktor.server.plugins.di.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.mustache.MustacheContent
+import io.ktor.server.plugins.di.dependencies
+import io.ktor.server.request.receiveParameters
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondRedirect
+import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import io.ktor.server.routing.routing
 
 fun Application.deviceCodeRoute() {
     val deviceCodeProcessService: DeviceCodeProcessService by dependencies
