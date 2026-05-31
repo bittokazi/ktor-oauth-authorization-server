@@ -10,7 +10,7 @@ interface DeviceCodeProcessService {
         call: ApplicationCall,
     ): Result<Map<String, Any>, Pair<Int, Any>>
 
-    suspend fun getDeviceVerificationPage(call: ApplicationCall): Result<Map<String, Any>, VerificationFailure>
+    suspend fun getDeviceVerificationPage(call: ApplicationCall): Result<Map<String, Any?>, VerificationFailure>
 
     suspend fun verifyDeviceCode(
         userCode: String?,

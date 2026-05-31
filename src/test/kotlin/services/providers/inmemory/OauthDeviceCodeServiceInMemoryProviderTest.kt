@@ -103,10 +103,10 @@ class OauthDeviceCodeServiceInMemoryProviderTest {
             userCode = "USER_CODE_ABC",
         )
 
-        val result = provider.findByDeviceCode("USER_CODE_ABC", false, false, mockCall)
+        val result = provider.findByDeviceCode("DEVICE_CODE_123", false, false, mockCall)
         assertNotNull(result)
-        assertFalse(result?.isDeviceAuthorized ?: true)
-        assertFalse(result?.consumed ?: true)
+        assertTrue(result?.isDeviceAuthorized == false)
+        assertTrue(result?.consumed == false)
     }
 
     @Test

@@ -49,7 +49,7 @@ class OauthDeviceCodeServiceInMemoryProvider : OauthDeviceCodeService {
         call: ApplicationCall,
     ): OauthDeviceCodeDTO? {
         return codes.find {
-            it.userCode == code && it.isDeviceAuthorized == isAuthorized && it.consumed == consumed
+            it.deviceCode == code && it.isDeviceAuthorized == isAuthorized && it.consumed == consumed
         }
     }
 
