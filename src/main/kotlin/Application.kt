@@ -20,6 +20,7 @@ import com.bittokazi.ktor.auth.services.token.providers.DefaultRefreshTokenGener
 import com.bittokazi.ktor.auth.services.token.providers.DefaultTokenGeneratorFactory
 import com.bittokazi.ktor.auth.services.token.providers.DefaultTokenIntrospectService
 import com.bittokazi.ktor.auth.services.token.providers.DefaultTokenRevokeService
+import com.bittokazi.ktor.auth.utils.configureIssuerProvider
 import io.ktor.server.application.Application
 import io.ktor.server.plugins.di.dependencies
 
@@ -102,6 +103,8 @@ fun Application.configureOauth2AuthorizationServer(
             }
         }
     }
+
+    configureIssuerProvider()
 
     if (configureSerialization) {
         configureSerialization()
