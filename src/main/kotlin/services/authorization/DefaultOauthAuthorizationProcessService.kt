@@ -166,8 +166,8 @@ class DefaultOauthAuthorizationProcessService(
 
         // Get user
         val user =
-            oauthUserService.findByUsername(
-                session.username,
+            oauthUserService.findById(
+                session.userId,
                 call,
             )
                 ?: return Result.Failure(
