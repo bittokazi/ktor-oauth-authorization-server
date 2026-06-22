@@ -150,7 +150,7 @@ class DefaultOauthAuthorizationProcessServiceTest {
             given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any()))
                 .willReturn(true)
 
-            given(oauthUserService.findByUsername(username, call))
+            given(oauthUserService.findById(userId, call))
                 .willReturn(user)
 
             given(sessionCustomizer.timeout).willReturn(3600)
@@ -217,7 +217,7 @@ class DefaultOauthAuthorizationProcessServiceTest {
             given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any()))
                 .willReturn(true)
 
-            given(oauthUserService.findByUsername(username, call))
+            given(oauthUserService.findById(userId, call))
                 .willReturn(user)
 
             given(sessionCustomizer.timeout).willReturn(3600)
@@ -286,7 +286,7 @@ class DefaultOauthAuthorizationProcessServiceTest {
             given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any()))
                 .willReturn(true)
 
-            given(oauthUserService.findByUsername(username, call))
+            given(oauthUserService.findById(userId, call))
                 .willReturn(user)
 
             given(sessionCustomizer.timeout).willReturn(3600)
@@ -357,7 +357,7 @@ class DefaultOauthAuthorizationProcessServiceTest {
             given(oauthConsentService.getConsent(userId, clientIdentifier, call))
                 .willReturn(listOf("read", "write", "profile"))
 
-            given(oauthUserService.findByUsername(username, call))
+            given(oauthUserService.findById(userId, call))
                 .willReturn(user)
 
             given(sessionCustomizer.timeout).willReturn(3600)
@@ -423,7 +423,7 @@ class DefaultOauthAuthorizationProcessServiceTest {
             given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any()))
                 .willReturn(true)
 
-            given(oauthUserService.findByUsername(username, call))
+            given(oauthUserService.findById(userId, call))
                 .willReturn(user)
 
             given(sessionCustomizer.timeout).willReturn(3600)
@@ -488,7 +488,7 @@ class DefaultOauthAuthorizationProcessServiceTest {
             given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any()))
                 .willReturn(true)
 
-            given(oauthUserService.findByUsername(username, call))
+            given(oauthUserService.findById(userId, call))
                 .willReturn(user)
 
             val actual =
@@ -1164,7 +1164,7 @@ class DefaultOauthAuthorizationProcessServiceTest {
             given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any()))
                 .willReturn(true)
 
-            given(oauthUserService.findByUsername(username, call))
+            given(oauthUserService.findById(userId, call))
                 .willReturn(null)
 
             val actual =
