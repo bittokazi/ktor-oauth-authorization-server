@@ -1,5 +1,6 @@
 package services.token.providers
 
+import at.favre.lib.crypto.bcrypt.BCrypt
 import com.bittokazi.ktor.auth.domains.rest.Result
 import com.bittokazi.ktor.auth.services.providers.AccessTokenDTO
 import com.bittokazi.ktor.auth.services.providers.OAuthClientDTO
@@ -58,7 +59,7 @@ class DefaultTokenIntrospectServiceTest {
                     id = clientUUID,
                     clientName = "Test Client",
                     clientId = clientId,
-                    clientSecret = clientSecret,
+                    clientSecret = BCrypt.withDefaults().hashToString(12, clientSecret.toCharArray()),
                     clientType = "confidential",
                     grantTypes = listOf("client_credentials"),
                     scopes = listOf("read", "write"),
@@ -103,7 +104,7 @@ class DefaultTokenIntrospectServiceTest {
                     id = clientUUID,
                     clientName = "Test Client",
                     clientId = clientId,
-                    clientSecret = clientSecret,
+                    clientSecret = BCrypt.withDefaults().hashToString(12, clientSecret.toCharArray()),
                     clientType = "confidential",
                     grantTypes = listOf("client_credentials"),
                     scopes = listOf("read", "write"),
@@ -134,7 +135,7 @@ class DefaultTokenIntrospectServiceTest {
                     id = clientUUID,
                     clientName = "Test Client",
                     clientId = clientId,
-                    clientSecret = clientSecret,
+                    clientSecret = BCrypt.withDefaults().hashToString(12, clientSecret.toCharArray()),
                     clientType = "confidential",
                     grantTypes = listOf("client_credentials"),
                     scopes = listOf("read", "write"),
@@ -176,7 +177,7 @@ class DefaultTokenIntrospectServiceTest {
                     id = clientUUID,
                     clientName = "Test Client",
                     clientId = clientId,
-                    clientSecret = clientSecret,
+                    clientSecret = BCrypt.withDefaults().hashToString(12, clientSecret.toCharArray()),
                     clientType = "confidential",
                     grantTypes = listOf("client_credentials"),
                     scopes = listOf("read", "write"),
@@ -239,7 +240,7 @@ class DefaultTokenIntrospectServiceTest {
                     id = clientUUID,
                     clientName = "Test Client",
                     clientId = clientId,
-                    clientSecret = "correct_secret",
+                    clientSecret = BCrypt.withDefaults().hashToString(12, "correct_secret".toCharArray()),
                     clientType = "confidential",
                     grantTypes = listOf("client_credentials"),
                     scopes = listOf("read", "write"),
@@ -288,7 +289,7 @@ class DefaultTokenIntrospectServiceTest {
                     id = clientUUID,
                     clientName = "Test Client",
                     clientId = clientId,
-                    clientSecret = "correct_secret",
+                    clientSecret = BCrypt.withDefaults().hashToString(12, "correct_secret".toCharArray()),
                     clientType = "confidential",
                     grantTypes = listOf("client_credentials"),
                     scopes = listOf("read", "write"),
@@ -320,7 +321,7 @@ class DefaultTokenIntrospectServiceTest {
                     id = clientUUID,
                     clientName = "Test Client",
                     clientId = clientId,
-                    clientSecret = clientSecret,
+                    clientSecret = BCrypt.withDefaults().hashToString(12, clientSecret.toCharArray()),
                     clientType = "confidential",
                     grantTypes = listOf("client_credentials"),
                     scopes = scopes,

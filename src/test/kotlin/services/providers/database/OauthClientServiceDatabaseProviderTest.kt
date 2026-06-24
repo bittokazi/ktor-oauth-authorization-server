@@ -1,5 +1,6 @@
 package services.providers.database
 
+import at.favre.lib.crypto.bcrypt.BCrypt
 import com.bittokazi.ktor.auth.services.providers.database.OAuthClients
 import com.bittokazi.ktor.auth.services.providers.database.OauthClientServiceDatabaseProvider
 import config.TestOauthDatabaseConfiguration
@@ -163,7 +164,7 @@ class OauthClientServiceDatabaseProviderTest {
         assertTrue(updateResult)
 
         val updated = clientService.findByClientId("test_client_1", mockCall)
-        assertEquals("new_secret", updated?.clientSecret)
+        assertTrue(BCrypt.verifyer().verify("new_secret".toCharArray(), updated?.clientSecret).verified)
     }
 
     @Test
@@ -203,7 +204,7 @@ class OauthClientServiceDatabaseProviderTest {
         assertEquals(2, result?.redirectUris?.size)
         assertEquals(3, result?.scopes?.size)
         assertEquals(3, result?.grantTypes?.size)
-        assertEquals("secret_value", result?.clientSecret)
+        assertTrue(BCrypt.verifyer().verify("secret_value".toCharArray(), result?.clientSecret).verified)
         // Check token validity values are returned as Long not Int
         if (result != null) {
             assertEquals(7200L, result.accessTokenValidity)
@@ -214,7 +215,7 @@ class OauthClientServiceDatabaseProviderTest {
 
     @Test
     fun `createClient with null clientSecret throws error`() {
-        assertThrows(ExposedSQLException::class.java) {
+        assertThrows(NullPointerException::class.java) {
             clientService.createClient(
                 clientId = "public_client",
                 clientSecret = null,
@@ -273,7 +274,7 @@ class OauthClientServiceDatabaseProviderTest {
             val client = clientService.findByClientId("client_$i", mockCall)
             assertNotNull(client)
             assertEquals("Client $i", client?.clientName)
-            assertEquals("secret_$i", client?.clientSecret)
+            assertTrue(BCrypt.verifyer().verify("secret_$i".toCharArray(), client?.clientSecret).verified)
         }
     }
 
