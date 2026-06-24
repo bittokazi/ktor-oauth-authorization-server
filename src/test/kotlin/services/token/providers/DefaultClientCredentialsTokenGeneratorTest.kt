@@ -1,5 +1,6 @@
 package services.token.providers
 
+import at.favre.lib.crypto.bcrypt.BCrypt
 import com.bittokazi.ktor.auth.domains.rest.Result
 import com.bittokazi.ktor.auth.domains.token.TokenType
 import com.bittokazi.ktor.auth.services.JwksProvider
@@ -68,7 +69,7 @@ class DefaultClientCredentialsTokenGeneratorTest {
                     id = clientIdentifier,
                     clientName = "Test Client",
                     clientId = clientId.toString(),
-                    clientSecret = "valid_client_secret",
+                    clientSecret = BCrypt.withDefaults().hashToString(12, "valid_client_secret".toCharArray()),
                     clientType = "confidential",
                     grantTypes = listOf("client_credentials"),
                     scopes = listOf("read", "write"),
@@ -128,7 +129,7 @@ class DefaultClientCredentialsTokenGeneratorTest {
                         id = clientIdentifier,
                         clientName = "Test Client",
                         clientId = clientId.toString(),
-                        clientSecret = "valid_client_secret",
+                        clientSecret = BCrypt.withDefaults().hashToString(12, "valid_client_secret".toCharArray()),
                         clientType = "public",
                         grantTypes = listOf("client_credentials"),
                         scopes = listOf("read", "write"),
@@ -226,7 +227,7 @@ class DefaultClientCredentialsTokenGeneratorTest {
                         id = clientIdentifier,
                         clientName = "Test Client",
                         clientId = clientId.toString(),
-                        clientSecret = "valid_client_secret",
+                        clientSecret = BCrypt.withDefaults().hashToString(12, "valid_client_secret".toCharArray()),
                         clientType = "confidential",
                         grantTypes = listOf("client_credentials"),
                         scopes = listOf("read", "write"),
@@ -263,7 +264,7 @@ class DefaultClientCredentialsTokenGeneratorTest {
                         id = clientIdentifier,
                         clientName = "Test Client",
                         clientId = clientId.toString(),
-                        clientSecret = "valid_client_secret",
+                        clientSecret = BCrypt.withDefaults().hashToString(12, "valid_client_secret".toCharArray()),
                         clientType = "confidential",
                         grantTypes = listOf("authorization_code"),
                         scopes = listOf("read", "write"),

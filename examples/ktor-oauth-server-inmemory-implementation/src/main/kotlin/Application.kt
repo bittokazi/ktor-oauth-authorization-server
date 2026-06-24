@@ -58,7 +58,7 @@ fun Application.module() {
                     OAuthClientDTO(
                         id = UUID.randomUUID(),
                         clientId = "default-client",
-                        clientSecret = "password",
+                        clientSecret = BCrypt.withDefaults().hashToString(12, "password".toCharArray()),
                         clientName = "backend",
                         clientType = "confidential",
                         scopes = listOf("openid", "profile", "email"),

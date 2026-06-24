@@ -1,5 +1,6 @@
 package com.bittokazi.ktor.auth.services.providers.database
 
+import at.favre.lib.crypto.bcrypt.BCrypt
 import com.bittokazi.ktor.auth.database.OauthDatabaseConfiguration
 import com.bittokazi.ktor.auth.services.providers.OAuthClientDTO
 import com.bittokazi.ktor.auth.services.providers.OauthClientService
@@ -55,7 +56,7 @@ class OauthClientServiceDatabaseProvider(
             OAuthClients.insert {
                 it[OAuthClients.id] = id.toKotlinUuid()
                 it[OAuthClients.clientId] = clientId
-                it[OAuthClients.clientSecret] = clientSecret
+                it[OAuthClients.clientSecret] = BCrypt.withDefaults().hashToString(12, clientSecret!!.toCharArray())
                 it[OAuthClients.clientName] = name
                 it[OAuthClients.clientType] = type
                 it[OAuthClients.redirectUris] = redirectUris.joinToString(",")
@@ -148,7 +149,7 @@ class OauthClientServiceDatabaseProvider(
     ): Boolean =
         oauthDatabaseConfiguration.dbQuery(call) {
             OAuthClients.update({ OAuthClients.clientId eq clientId }) {
-                it[OAuthClients.clientSecret] = clientSecret
+                it[OAuthClients.clientSecret] = BCrypt.withDefaults().hashToString(12, clientSecret!!.toCharArray())
             } > 0
         }
 

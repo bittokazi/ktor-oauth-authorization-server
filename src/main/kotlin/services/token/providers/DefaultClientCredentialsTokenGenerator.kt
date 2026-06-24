@@ -1,5 +1,6 @@
 package com.bittokazi.ktor.auth.services.token.providers
 
+import at.favre.lib.crypto.bcrypt.BCrypt
 import com.bittokazi.ktor.auth.domains.rest.Result
 import com.bittokazi.ktor.auth.domains.token.TokenType
 import com.bittokazi.ktor.auth.services.JwksProvider
@@ -57,7 +58,7 @@ class DefaultClientCredentialsTokenGenerator(
             )
         }
 
-        if (client.clientSecret != clientSecret) {
+        if (!BCrypt.verifyer().verify(clientSecret.toCharArray(), client.clientSecret).verified) {
             return Result.Failure(
                 mapOf(
                     "error" to "Unauthorized",
