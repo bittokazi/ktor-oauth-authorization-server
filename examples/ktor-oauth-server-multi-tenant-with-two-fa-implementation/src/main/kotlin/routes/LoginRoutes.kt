@@ -46,7 +46,7 @@ fun Application.loginRoutes() {
                     append("code", code)
                     append("redirect_uri", "${call.getBaseUrl()}/oauth/callback")
                     append("client_id", client?.clientId ?: "")
-                    append("client_secret", client?.clientSecret ?: "")
+                    append("client_secret", "password")
                 }
             )
 
