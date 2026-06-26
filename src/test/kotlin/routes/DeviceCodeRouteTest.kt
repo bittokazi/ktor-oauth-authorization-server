@@ -287,7 +287,7 @@ class DeviceCodeRouteTest {
 
             Assertions.assertEquals(HttpStatusCode.OK, response.status)
             Assertions.assertTrue(
-                response.bodyAsText().contains("Authorization successful! You may return to your device.")
+                response.bodyAsText().contains("Authorization successful! You may return to your device."),
             )
         }
 
@@ -343,10 +343,11 @@ class DeviceCodeRouteTest {
                 Result.Failure(
                     errorBody =
                         VerificationFailure.Template(
-                            data = mapOf(
-                                "result" to true,
-                                "isInvalid" to "invalid_code"
-                            ),
+                            data =
+                                mapOf(
+                                    "result" to true,
+                                    "isInvalid" to "invalid_code",
+                                ),
                         ),
                 ),
             )
