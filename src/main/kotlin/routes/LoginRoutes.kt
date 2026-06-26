@@ -4,17 +4,17 @@ import at.favre.lib.crypto.bcrypt.BCrypt
 import com.bittokazi.ktor.auth.OauthUserSession
 import com.bittokazi.ktor.auth.services.SessionCustomizer
 import com.bittokazi.ktor.auth.services.TemplateCustomizer
+import com.bittokazi.ktor.auth.services.TemplateCustomizerFactory
 import com.bittokazi.ktor.auth.services.providers.OauthAuthorizationCodeService
 import com.bittokazi.ktor.auth.services.providers.OauthDeviceCodeService
 import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
 import com.bittokazi.ktor.auth.services.providers.OauthLogoutActionService
 import com.bittokazi.ktor.auth.services.providers.OauthTokenService
 import com.bittokazi.ktor.auth.services.providers.OauthUserService
+import com.bittokazi.ktor.auth.utils.respondMustache
 import io.ktor.server.application.Application
-import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.request.receiveParameters
-import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
@@ -32,6 +32,7 @@ fun Application.loginRoutes() {
     val oauthLoginOptionService: OauthLoginOptionService by dependencies
     val oauthDeviceCodeService: OauthDeviceCodeService by dependencies
     val templateCustomizer: TemplateCustomizer? by dependencies
+    val templateCustomizerFactory: TemplateCustomizerFactory by dependencies
 
     routing {
         route("/oauth") {
@@ -40,7 +41,7 @@ fun Application.loginRoutes() {
 
                 val session = call.sessions.get<OauthUserSession>()
                 if (session == null) {
-                    call.respond(MustacheContent("oauth_templates/login.hbs", templateData))
+                    call.respondMustache(templateCustomizerFactory, "oauth_templates/login.hbs", templateData)
                     return@get
                 }
 
@@ -74,14 +75,13 @@ fun Application.loginRoutes() {
 
                 if (user == null || !BCrypt.verifyer().verify(password.toCharArray(), user.passwordHash).verified) {
                     // Invalid login
-                    call.respond(
-                        MustacheContent(
-                            "oauth_templates/login.hbs",
-                            mutableMapOf<String, Any>(
-                                "error" to "invalidLogin",
-                                "errorMessage" to "Login credentials do not match",
-                            ).plus(templateData),
-                        ),
+                    call.respondMustache(
+                        templateCustomizerFactory,
+                        "oauth_templates/login.hbs",
+                        mutableMapOf<String, Any>(
+                            "error" to "invalidLogin",
+                            "errorMessage" to "Login credentials do not match",
+                        ).plus(templateData),
                     )
                     return@post
                 }

@@ -3,6 +3,8 @@ package routes
 import com.bittokazi.ktor.auth.configureSerialization
 import com.bittokazi.ktor.auth.domains.rest.Result
 import com.bittokazi.ktor.auth.routes.deviceCodeRoute
+import com.bittokazi.ktor.auth.services.DefaultTemplateCustomizerFactory
+import com.bittokazi.ktor.auth.services.TemplateCustomizerFactory
 import com.bittokazi.ktor.auth.services.device.code.DeviceCodeProcessService
 import com.bittokazi.ktor.auth.services.device.code.VerificationFailure
 import io.ktor.client.request.get
@@ -67,6 +69,7 @@ class DeviceCodeRouteTest {
 
                 dependencies {
                     provide { deviceCodeProcessService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 deviceCodeRoute()
@@ -114,6 +117,7 @@ class DeviceCodeRouteTest {
 
                 dependencies {
                     provide { deviceCodeProcessService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 deviceCodeRoute()
@@ -158,6 +162,7 @@ class DeviceCodeRouteTest {
 
                 dependencies {
                     provide { deviceCodeProcessService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 deviceCodeRoute()
@@ -166,7 +171,7 @@ class DeviceCodeRouteTest {
             val response = client.get("/oauth/device-verification?user_code=user_123")
 
             Assertions.assertEquals(HttpStatusCode.OK, response.status)
-            Assertions.assertTrue(response.bodyAsText().contains("userCode"))
+            Assertions.assertTrue(response.bodyAsText().contains("Device"))
         }
 
     @Test
@@ -190,6 +195,7 @@ class DeviceCodeRouteTest {
 
                 dependencies {
                     provide { deviceCodeProcessService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 deviceCodeRoute()
@@ -225,6 +231,7 @@ class DeviceCodeRouteTest {
 
                 dependencies {
                     provide { deviceCodeProcessService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 deviceCodeRoute()
@@ -233,7 +240,7 @@ class DeviceCodeRouteTest {
             val response = client.get("/oauth/device-verification?user_code=user_123")
 
             Assertions.assertEquals(HttpStatusCode.OK, response.status)
-            Assertions.assertTrue(response.bodyAsText().contains("template_error"))
+            Assertions.assertTrue(response.bodyAsText().contains("Device"))
         }
 
     // ==================== POST /oauth/device-verification ====================
@@ -266,6 +273,7 @@ class DeviceCodeRouteTest {
 
                 dependencies {
                     provide { deviceCodeProcessService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 deviceCodeRoute()
@@ -278,7 +286,9 @@ class DeviceCodeRouteTest {
                 }
 
             Assertions.assertEquals(HttpStatusCode.OK, response.status)
-            Assertions.assertTrue(response.bodyAsText().contains("isSuccess"))
+            Assertions.assertTrue(
+                response.bodyAsText().contains("Authorization successful! You may return to your device.")
+            )
         }
 
     @Test
@@ -305,6 +315,7 @@ class DeviceCodeRouteTest {
 
                 dependencies {
                     provide { deviceCodeProcessService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 deviceCodeRoute()
@@ -332,7 +343,10 @@ class DeviceCodeRouteTest {
                 Result.Failure(
                     errorBody =
                         VerificationFailure.Template(
-                            data = mapOf("error" to "invalid_code"),
+                            data = mapOf(
+                                "result" to true,
+                                "isInvalid" to "invalid_code"
+                            ),
                         ),
                 ),
             )
@@ -347,6 +361,7 @@ class DeviceCodeRouteTest {
 
                 dependencies {
                     provide { deviceCodeProcessService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 deviceCodeRoute()
@@ -359,6 +374,6 @@ class DeviceCodeRouteTest {
                 }
 
             Assertions.assertEquals(HttpStatusCode.OK, response.status)
-            Assertions.assertTrue(response.bodyAsText().contains("invalid_code"))
+            Assertions.assertTrue(response.bodyAsText().contains("Invalid or expired code. Please try again."))
         }
 }

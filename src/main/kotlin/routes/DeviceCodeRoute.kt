@@ -1,11 +1,12 @@
 package com.bittokazi.ktor.auth.routes
 
 import com.bittokazi.ktor.auth.domains.rest.Result
+import com.bittokazi.ktor.auth.services.TemplateCustomizerFactory
 import com.bittokazi.ktor.auth.services.device.code.DeviceCodeProcessService
 import com.bittokazi.ktor.auth.services.device.code.VerificationFailure
+import com.bittokazi.ktor.auth.utils.respondMustache
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
-import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
@@ -16,6 +17,7 @@ import io.ktor.server.routing.routing
 
 fun Application.deviceCodeRoute() {
     val deviceCodeProcessService: DeviceCodeProcessService by dependencies
+    val templateCustomizerFactory: TemplateCustomizerFactory by dependencies
 
     routing {
         post("/oauth/device_authorization") {
@@ -51,11 +53,10 @@ fun Application.deviceCodeRoute() {
                     deviceCodeProcessService.getDeviceVerificationPage(call)
             ) {
                 is Result.Success -> {
-                    call.respond(
-                        MustacheContent(
-                            "oauth_templates/device_verification.hbs",
-                            result.outcome,
-                        ),
+                    call.respondMustache(
+                        templateCustomizerFactory,
+                        "oauth_templates/device_verification.hbs",
+                        result.outcome,
                     )
                 }
 
@@ -66,11 +67,10 @@ fun Application.deviceCodeRoute() {
                         }
 
                         is VerificationFailure.Template -> {
-                            call.respond(
-                                MustacheContent(
-                                    "oauth_templates/device_verification.hbs",
-                                    failure.data,
-                                ),
+                            call.respondMustache(
+                                templateCustomizerFactory,
+                                "oauth_templates/device_verification.hbs",
+                                failure.data,
                             )
                         }
                     }
@@ -89,11 +89,10 @@ fun Application.deviceCodeRoute() {
                     )
             ) {
                 is Result.Success -> {
-                    call.respond(
-                        MustacheContent(
-                            "oauth_templates/device_verification.hbs",
-                            result.outcome,
-                        ),
+                    call.respondMustache(
+                        templateCustomizerFactory,
+                        "oauth_templates/device_verification.hbs",
+                        result.outcome,
                     )
                 }
 
@@ -104,11 +103,10 @@ fun Application.deviceCodeRoute() {
                         }
 
                         is VerificationFailure.Template -> {
-                            call.respond(
-                                MustacheContent(
-                                    "oauth_templates/device_verification.hbs",
-                                    failure.data,
-                                ),
+                            call.respondMustache(
+                                templateCustomizerFactory,
+                                "oauth_templates/device_verification.hbs",
+                                failure.data,
                             )
                         }
                     }

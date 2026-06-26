@@ -1,5 +1,7 @@
 package com.bittokazi.ktor.auth
 
+import com.bittokazi.ktor.auth.services.DefaultTemplateCustomizerFactory
+import com.bittokazi.ktor.auth.services.TemplateCustomizerFactory
 import com.bittokazi.ktor.auth.services.authorization.DefaultOauthAuthorizationProcessService
 import com.bittokazi.ktor.auth.services.authorization.OauthAuthorizationProcessService
 import com.bittokazi.ktor.auth.services.consent.ConsentProcessService
@@ -79,6 +81,13 @@ fun Application.configureOauth2AuthorizationServer(
         }
     }
 
+    val templateCustomizerFactory: TemplateCustomizerFactory? by dependencies
+    if (templateCustomizerFactory == null) {
+        dependencies {
+            provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
+        }
+    }
+
     dependencies {
         provide(DefaultClientCredentialsTokenGenerator::class)
         provide(DefaultAuthorizationCodeTokenGenerator::class)
@@ -113,7 +122,6 @@ fun Application.configureOauth2AuthorizationServer(
     if (configureForwardHeaderAndDefaultHeadersPlugin) {
         configureHTTP()
     }
-    configureTemplating()
     configureSecurity()
     configureRouting(
         defaultLoginRoutes = defaultLoginRoutes,

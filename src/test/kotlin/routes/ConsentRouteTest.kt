@@ -4,9 +4,12 @@ import com.bittokazi.ktor.auth.configureSecurity
 import com.bittokazi.ktor.auth.configureSerialization
 import com.bittokazi.ktor.auth.domains.rest.Result
 import com.bittokazi.ktor.auth.routes.consentRoute
+import com.bittokazi.ktor.auth.services.DefaultTemplateCustomizerFactory
 import com.bittokazi.ktor.auth.services.SessionCustomizer
+import com.bittokazi.ktor.auth.services.TemplateCustomizerFactory
 import com.bittokazi.ktor.auth.services.consent.ConsentFailure
 import com.bittokazi.ktor.auth.services.consent.ConsentProcessService
+import com.bittokazi.ktor.auth.services.consent.TemplateContent
 import com.bittokazi.ktor.auth.services.providers.DefaultOauthLoginOptionService
 import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
 import io.ktor.client.request.get
@@ -17,7 +20,6 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.testing.testApplication
 import org.junit.Test
@@ -53,7 +55,7 @@ class ConsentRouteTest {
             ).willReturn(
                 Result.Success(
                     outcome =
-                        MustacheContent(
+                        TemplateContent(
                             "oauth_templates/consent.hbs",
                             mapOf(
                                 "clientName" to "Test App",
@@ -75,6 +77,7 @@ class ConsentRouteTest {
                 dependencies {
                     provide { consentProcessService }
                     provide { oauthLoginOptionService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 consentRoute()
@@ -118,6 +121,7 @@ class ConsentRouteTest {
                 dependencies {
                     provide { consentProcessService }
                     provide<OauthLoginOptionService>(DefaultOauthLoginOptionService::class)
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 consentRoute()
@@ -153,6 +157,7 @@ class ConsentRouteTest {
                 dependencies {
                     provide { consentProcessService }
                     provide { oauthLoginOptionService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 consentRoute()
@@ -187,6 +192,7 @@ class ConsentRouteTest {
                 dependencies {
                     provide { consentProcessService }
                     provide { oauthLoginOptionService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 consentRoute()
@@ -221,6 +227,7 @@ class ConsentRouteTest {
                 dependencies {
                     provide { consentProcessService }
                     provide { oauthLoginOptionService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 consentRoute()
@@ -255,6 +262,7 @@ class ConsentRouteTest {
                 dependencies {
                     provide { consentProcessService }
                     provide { oauthLoginOptionService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 consentRoute()
@@ -292,6 +300,7 @@ class ConsentRouteTest {
                 dependencies {
                     provide { consentProcessService }
                     provide { oauthLoginOptionService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 consentRoute()
@@ -318,7 +327,7 @@ class ConsentRouteTest {
             ).willReturn(
                 Result.Success(
                     outcome =
-                        MustacheContent(
+                        TemplateContent(
                             "oauth_templates/consent.hbs",
                             mapOf("clientName" to "Test App"),
                         ),
@@ -336,6 +345,7 @@ class ConsentRouteTest {
                 dependencies {
                     provide { consentProcessService }
                     provide { oauthLoginOptionService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 consentRoute()
@@ -379,6 +389,7 @@ class ConsentRouteTest {
                 dependencies {
                     provide { consentProcessService }
                     provide<OauthLoginOptionService>(DefaultOauthLoginOptionService::class)
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 consentRoute()
@@ -417,6 +428,7 @@ class ConsentRouteTest {
                 dependencies {
                     provide { consentProcessService }
                     provide { oauthLoginOptionService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 consentRoute()
@@ -454,6 +466,7 @@ class ConsentRouteTest {
                 dependencies {
                     provide { consentProcessService }
                     provide { oauthLoginOptionService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 consentRoute()
@@ -491,6 +504,7 @@ class ConsentRouteTest {
                 dependencies {
                     provide { consentProcessService }
                     provide { oauthLoginOptionService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 consentRoute()
@@ -528,6 +542,7 @@ class ConsentRouteTest {
                 dependencies {
                     provide { consentProcessService }
                     provide { oauthLoginOptionService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 consentRoute()
@@ -568,6 +583,7 @@ class ConsentRouteTest {
                 dependencies {
                     provide { consentProcessService }
                     provide { oauthLoginOptionService }
+                    provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
                 consentRoute()
