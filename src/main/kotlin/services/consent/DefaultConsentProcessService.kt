@@ -8,7 +8,6 @@ import com.bittokazi.ktor.auth.services.providers.OauthConsentService
 import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
 import com.bittokazi.ktor.auth.services.session.SessionProvider
 import io.ktor.server.application.ApplicationCall
-import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.sessions.get
 
 class DefaultConsentProcessService(
@@ -21,7 +20,7 @@ class DefaultConsentProcessService(
     override suspend fun getConsentPage(
         clientId: String?,
         call: ApplicationCall,
-    ): Result<MustacheContent?, ConsentFailure> {
+    ): Result<TemplateContent?, ConsentFailure> {
         val session = sessionProvider.getSession(call).get<OauthUserSession>()
 
         if (session == null || session.expiresAt < System.currentTimeMillis()) {
@@ -57,7 +56,7 @@ class DefaultConsentProcessService(
 
         return if (consents == null || !consents.containsAll(client.scopes)) {
             Result.Success(
-                MustacheContent(
+                TemplateContent(
                     "oauth_templates/consent.hbs",
                     mapOf(
                         "clientName" to client.clientName,
@@ -76,7 +75,7 @@ class DefaultConsentProcessService(
         clientId: String?,
         action: String?,
         call: ApplicationCall,
-    ): Result<MustacheContent?, ConsentFailure> {
+    ): Result<TemplateContent?, ConsentFailure> {
         val session = sessionProvider.getSession(call).get<OauthUserSession>()
 
         if (session == null || session.expiresAt < System.currentTimeMillis()) {
@@ -110,7 +109,7 @@ class DefaultConsentProcessService(
                 sessionProvider.getSession(call).clear("OAUTH_ORIGINAL_URL")
 
                 return Result.Success(
-                    MustacheContent(
+                    TemplateContent(
                         "oauth_templates/consent_denied.hbs",
                         mapOf(
                             "error" to "access_denied",
@@ -126,3 +125,5 @@ class DefaultConsentProcessService(
         }
     }
 }
+
+data class TemplateContent(val template: String, val additionalData: Map<String, Any>)

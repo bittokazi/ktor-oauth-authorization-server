@@ -1,12 +1,14 @@
 package com.bittokazi.ktor.auth.routes
 
 import com.bittokazi.ktor.auth.domains.rest.Result
+import com.bittokazi.ktor.auth.services.TemplateCustomizerFactory
 import com.bittokazi.ktor.auth.services.consent.ConsentFailure
 import com.bittokazi.ktor.auth.services.consent.ConsentProcessService
+import com.bittokazi.ktor.auth.services.consent.TemplateContent
 import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
+import com.bittokazi.ktor.auth.utils.respondMustache
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
-import io.ktor.server.mustache.MustacheContent
 import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respond
@@ -18,6 +20,7 @@ import io.ktor.server.routing.routing
 fun Application.consentRoute() {
     val consentProcessService: ConsentProcessService by dependencies
     val oauthLoginOptionService: OauthLoginOptionService by dependencies
+    val templateCustomizerFactory: TemplateCustomizerFactory by dependencies
 
     routing {
         get("/oauth/consent") {
@@ -32,7 +35,11 @@ fun Application.consentRoute() {
             ) {
                 is Result.Success -> {
                     when (val outcome = result.outcome) {
-                        is MustacheContent -> call.respond(outcome)
+                        is TemplateContent -> call.respondMustache(
+                            templateCustomizerFactory,
+                            outcome.template,
+                            outcome.additionalData,
+                        )
                         else -> oauthLoginOptionService.completeLogin(call)
                     }
                 }
@@ -71,7 +78,11 @@ fun Application.consentRoute() {
             ) {
                 is Result.Success -> {
                     when (val outcome = result.outcome) {
-                        is MustacheContent -> call.respond(outcome)
+                        is TemplateContent -> call.respondMustache(
+                            templateCustomizerFactory,
+                            outcome.template,
+                            outcome.additionalData,
+                        )
                         else -> oauthLoginOptionService.completeLogin(call)
                     }
                 }

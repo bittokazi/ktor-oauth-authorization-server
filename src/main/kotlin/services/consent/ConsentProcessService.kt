@@ -2,19 +2,18 @@ package com.bittokazi.ktor.auth.services.consent
 
 import com.bittokazi.ktor.auth.domains.rest.Result
 import io.ktor.server.application.ApplicationCall
-import io.ktor.server.mustache.MustacheContent
 
 interface ConsentProcessService {
     suspend fun getConsentPage(
         clientId: String?,
         call: ApplicationCall,
-    ): Result<MustacheContent?, ConsentFailure>
+    ): Result<TemplateContent?, ConsentFailure>
 
     suspend fun processConsent(
         clientId: String?,
         action: String?,
         call: ApplicationCall,
-    ): Result<MustacheContent?, ConsentFailure>
+    ): Result<TemplateContent?, ConsentFailure>
 }
 
 sealed class ConsentFailure {
