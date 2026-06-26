@@ -32,15 +32,16 @@ fun ApplicationCall.getBaseUrl(): String =
 suspend fun ApplicationCall.respondMustache(
     templateCustomizerFactory: TemplateCustomizerFactory,
     template: String,
-    model: Any
+    model: Any,
 ) {
     val factory = templateCustomizerFactory.getFactory(this)
 
-    val html = StringWriter().also {
-        factory.compile(template)
-            .execute(it, model)
-            .flush()
-    }.toString()
+    val html =
+        StringWriter().also {
+            factory.compile(template)
+                .execute(it, model)
+                .flush()
+        }.toString()
 
     respondText(html, ContentType.Text.Html)
 }

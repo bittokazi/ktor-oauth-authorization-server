@@ -13,7 +13,6 @@ interface TemplateCustomizerFactory {
 }
 
 class DefaultTemplateCustomizerFactory : TemplateCustomizerFactory {
-
     override fun getFactory(call: ApplicationCall): MustacheFactory {
         return DefaultMustacheFactory("templates")
     }

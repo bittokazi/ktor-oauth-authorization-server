@@ -35,11 +35,12 @@ fun Application.consentRoute() {
             ) {
                 is Result.Success -> {
                     when (val outcome = result.outcome) {
-                        is TemplateContent -> call.respondMustache(
-                            templateCustomizerFactory,
-                            outcome.template,
-                            outcome.additionalData,
-                        )
+                        is TemplateContent ->
+                            call.respondMustache(
+                                templateCustomizerFactory,
+                                outcome.template,
+                                outcome.additionalData,
+                            )
                         else -> oauthLoginOptionService.completeLogin(call)
                     }
                 }
@@ -78,11 +79,12 @@ fun Application.consentRoute() {
             ) {
                 is Result.Success -> {
                     when (val outcome = result.outcome) {
-                        is TemplateContent -> call.respondMustache(
-                            templateCustomizerFactory,
-                            outcome.template,
-                            outcome.additionalData,
-                        )
+                        is TemplateContent ->
+                            call.respondMustache(
+                                templateCustomizerFactory,
+                                outcome.template,
+                                outcome.additionalData,
+                            )
                         else -> oauthLoginOptionService.completeLogin(call)
                     }
                 }
