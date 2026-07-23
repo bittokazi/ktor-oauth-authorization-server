@@ -10,10 +10,14 @@ suspend fun userSessionCheck(
     call: ApplicationCall,
     chain: suspend (call: ApplicationCall) -> Unit,
 ) {
-    val session = call.sessions.get<OauthUserSession>()
-    if (session == null) {
+    if (!isValidUserSession(call)) {
         call.respondRedirect("/oauth/login")
         return
     }
     return chain(call)
+}
+
+fun isValidUserSession(call: ApplicationCall): Boolean {
+    val session = call.sessions.get<OauthUserSession>()
+    return !(session == null || session.expiresAt < System.currentTimeMillis())
 }
