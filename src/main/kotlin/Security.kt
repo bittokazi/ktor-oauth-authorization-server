@@ -18,7 +18,6 @@ import io.ktor.server.sessions.cookie
 import io.ktor.util.hex
 import kotlinx.serialization.Serializable
 import java.net.URI
-import java.net.URL
 import kotlin.random.Random
 
 @Serializable
