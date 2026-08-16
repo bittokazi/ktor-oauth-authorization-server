@@ -11,6 +11,7 @@ jwk:
   public-key-path: certificates/default_public_key.pem
 
 oauth:
+  default-logout-redirect-url: "/"
   session:
     timeout: 3600 # session timeout in seconds
     encryption-key: dd78055a2c57f50a636efe0e034764f8 # has to be 32 character. set your own

@@ -59,9 +59,7 @@ fun Application.module() {
         provide<OauthLoginOptionService> {
             DefaultOauthLoginOptionService("/home")
         }
-        provide<OauthLogoutActionService> {
-            DefaultOauthLogoutActionService("/home")
-        }
+        provide<OauthLogoutActionService>(DefaultOauthLogoutActionService::class)
     }
 
     configureOauth2AuthorizationServer(

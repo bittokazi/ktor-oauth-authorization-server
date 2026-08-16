@@ -79,9 +79,7 @@ fun Application.module() {
         provide<OauthLoginOptionService> {
             DefaultOauthLoginOptionService("/home")
         }
-        provide<OauthLogoutActionService> {
-            DefaultOauthLogoutActionService("/hoome")
-        }
+        provide<OauthLogoutActionService>(DefaultOauthLogoutActionService::class)
     }
     configureOauth2AuthorizationServer(
         configureSerialization = true,

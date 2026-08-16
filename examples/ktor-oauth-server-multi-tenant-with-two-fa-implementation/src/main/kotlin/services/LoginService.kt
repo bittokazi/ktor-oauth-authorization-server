@@ -12,7 +12,8 @@ import io.ktor.server.response.respondRedirect
 import io.ktor.server.sessions.get
 import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.selectAll
 
 class LoginService(
     override val fallbackAfterLoginRedirectUrl: String,
@@ -71,7 +72,7 @@ class LoginService(
         call.sessions.clear("USER_TWO_FA_SESSION")
     }
 
-    override suspend fun afterLogoutAction(userId: String?, call: ApplicationCall) {
+    override suspend fun afterLogoutAction(userId: String?, clientId: String?, call: ApplicationCall) {
         call.sessions.clear("USER_TWO_FA_SESSION")
         call.respondRedirect("/home")
     }

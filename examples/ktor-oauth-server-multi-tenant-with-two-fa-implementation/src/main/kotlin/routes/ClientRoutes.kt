@@ -9,8 +9,11 @@ import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.toJavaUuid
 
+@OptIn(ExperimentalUuidApi::class)
 fun Application.clientRoutes() {
     val oauthClientServiceDatabaseProvider: OauthClientServiceDatabaseProvider by dependencies
 
@@ -21,7 +24,7 @@ fun Application.clientRoutes() {
                     oauthClientServiceDatabaseProvider.runQuery(call) { clients ->
                         clients.selectAll().map {
                             OAuthClientDTO(
-                                it[OAuthClients.id],
+                                it[OAuthClients.id].toJavaUuid(),
                                 it[OAuthClients.clientId],
                                 it[OAuthClients.clientName],
                                 it[OAuthClients.clientType],
