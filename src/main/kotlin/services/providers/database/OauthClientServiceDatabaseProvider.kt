@@ -32,6 +32,7 @@ object OAuthClients : Table("oauth_clients") {
     val refreshTokenValidity = long("refresh_token_validity")
     val isDefault = bool("is_default")
     val consentRequired = bool("consent_required")
+    val postLogoutRedirectUri = text("post_logout_redirect_uri").nullable()
 }
 
 @OptIn(ExperimentalUuidApi::class)
@@ -49,6 +50,7 @@ class OauthClientServiceDatabaseProvider(
         accessTokenValidity: Long = 300,
         refreshTokenValidity: Long = 7200,
         consentRequired: Boolean = true,
+        postLogoutRedirectUri: String? = null,
         call: ApplicationCall,
     ): OAuthClientDTO =
         oauthDatabaseConfiguration.dbQuery(call) {
@@ -67,8 +69,9 @@ class OauthClientServiceDatabaseProvider(
                 it[OAuthClients.refreshTokenValidity] = refreshTokenValidity
                 it[OAuthClients.isDefault] = false
                 it[OAuthClients.consentRequired] = consentRequired
+                it[OAuthClients.postLogoutRedirectUri] = postLogoutRedirectUri
             }
-            OAuthClientDTO(id, clientId, name, type, redirectUris, scopes, grantTypes)
+            OAuthClientDTO(id, clientId, name, type, redirectUris, scopes, grantTypes, postLogoutRedirectUri = postLogoutRedirectUri)
         }
 
     override fun findByClientId(
@@ -91,6 +94,7 @@ class OauthClientServiceDatabaseProvider(
                         refreshTokenValidity = it[OAuthClients.refreshTokenValidity],
                         isDefault = it[OAuthClients.isDefault],
                         consentRequired = it[OAuthClients.consentRequired],
+                        postLogoutRedirectUri = it[OAuthClients.postLogoutRedirectUri],
                     )
                 }.singleOrNull()
         }
@@ -112,6 +116,7 @@ class OauthClientServiceDatabaseProvider(
                         refreshTokenValidity = it[OAuthClients.refreshTokenValidity],
                         isDefault = it[OAuthClients.isDefault],
                         consentRequired = it[OAuthClients.consentRequired],
+                        postLogoutRedirectUri = it[OAuthClients.postLogoutRedirectUri],
                     )
                 }.singleOrNull()
         }
@@ -126,6 +131,7 @@ class OauthClientServiceDatabaseProvider(
         accessTokenValidity: Long = 300,
         refreshTokenValidity: Long = 7200,
         consentRequired: Boolean = true,
+        postLogoutRedirectUri: String? = null,
         call: ApplicationCall,
     ): Boolean =
         oauthDatabaseConfiguration.dbQuery(call) {
@@ -139,6 +145,7 @@ class OauthClientServiceDatabaseProvider(
                 it[OAuthClients.accessTokenValidity] = accessTokenValidity
                 it[OAuthClients.refreshTokenValidity] = refreshTokenValidity
                 it[OAuthClients.consentRequired] = consentRequired
+                it[OAuthClients.postLogoutRedirectUri] = postLogoutRedirectUri
             } > 0
         }
 

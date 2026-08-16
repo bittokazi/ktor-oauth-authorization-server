@@ -2,7 +2,9 @@ package com.bittokazi.ktor.auth.services
 
 import io.ktor.server.plugins.di.annotations.Property
 import io.ktor.server.sessions.SessionsConfig
+import kotlinx.serialization.Serializable
 
+@Serializable
 class SessionCustomizer(
     @Property("oauth.session.encryption-key") val encryptionKey: String? = null,
     @Property("oauth.session.signing-key") val signingKey: String? = null,
