@@ -8,8 +8,8 @@ import com.zaxxer.hikari.HikariDataSource
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.plugins.di.annotations.Property
 import org.flywaydb.core.Flyway
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import javax.sql.DataSource
 import kotlin.collections.set
 

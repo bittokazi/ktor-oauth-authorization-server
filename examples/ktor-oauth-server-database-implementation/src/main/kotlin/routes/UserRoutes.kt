@@ -11,7 +11,7 @@ import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.v1.jdbc.selectAll
 
 fun Application.userRoutes() {
     val oauthUserServiceDatabaseProvider: OauthUserServiceDatabaseProvider by dependencies

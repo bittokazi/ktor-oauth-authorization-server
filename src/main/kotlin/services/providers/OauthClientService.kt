@@ -16,6 +16,7 @@ data class OAuthClientDTO(
     var refreshTokenValidity: Long = 7200,
     var isDefault: Boolean = false,
     var consentRequired: Boolean = true,
+    var postLogoutRedirectUri: String? = null,
 )
 
 interface OauthClientService {

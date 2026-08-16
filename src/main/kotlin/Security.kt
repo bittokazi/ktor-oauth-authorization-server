@@ -17,7 +17,7 @@ import io.ktor.server.sessions.Sessions
 import io.ktor.server.sessions.cookie
 import io.ktor.util.hex
 import kotlinx.serialization.Serializable
-import java.net.URL
+import java.net.URI
 import kotlin.random.Random
 
 @Serializable
@@ -55,7 +55,7 @@ fun AuthenticationConfig.oauthAuthenticationConfig(issuerUrl: String) {
     jwt {
         realm = "ktor-oauth-server"
 
-        verifier(JwkProviderBuilder(URL("$issuerUrl/.well-known/jwks.json")).build())
+        verifier(JwkProviderBuilder(URI.create("$issuerUrl/.well-known/jwks.json").toURL()).build())
 
         validate { credential ->
             if (credential.payload.issuer != this.getBaseUrl()) {

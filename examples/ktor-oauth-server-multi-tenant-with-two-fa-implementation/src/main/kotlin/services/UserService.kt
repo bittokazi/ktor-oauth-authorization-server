@@ -6,7 +6,8 @@ import com.bittokazi.ktor.auth.database.OauthDatabaseConfiguration
 import com.bittokazi.ktor.auth.services.providers.OAuthUserDTO
 import com.bittokazi.ktor.auth.services.providers.OauthUserService
 import io.ktor.server.application.ApplicationCall
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.selectAll
 
 class UserService(
     val oauthDatabaseConfiguration: OauthDatabaseConfiguration

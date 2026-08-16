@@ -1,5 +1,6 @@
 package com.bittokazi.ktor.auth
 
+import com.bittokazi.ktor.auth.config.Oauth2Config
 import com.bittokazi.ktor.auth.services.DefaultTemplateCustomizerFactory
 import com.bittokazi.ktor.auth.services.TemplateCustomizerFactory
 import com.bittokazi.ktor.auth.services.authorization.DefaultOauthAuthorizationProcessService
@@ -38,6 +39,7 @@ fun Application.configureOauth2AuthorizationServer(
 ) {
     dependencies {
         provide<SessionProvider>(DefaultSessionProvider::class)
+        provide(Oauth2Config::class)
     }
     val oauthAuthorizationProcessService: OauthAuthorizationProcessService? by dependencies
     if (oauthAuthorizationProcessService == null) {
