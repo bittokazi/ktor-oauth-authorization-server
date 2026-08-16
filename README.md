@@ -77,7 +77,7 @@ Start by adding in `build.gradle.kts`:
 // =========================
 // ⭐ OAuth / OpenID Server Library
 // =========================
-implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.3.2")
+implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.3.3")
 ```
 
 Also make sure you have the following libraries as well. Below is a complete example of complete `build.gradle.kts`
@@ -127,7 +127,7 @@ implementation("com.nimbusds:nimbus-jose-jwt:10.6")
 // =========================
 // ⭐ OAuth / OpenID Server Library
 // =========================
-implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.3.2")
+implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.3.3")
 ```
 
 Replace `<...>` with concrete versions used in your project.
@@ -165,6 +165,7 @@ jwk:
   key-id: "my-key-id"
 
 oauth:
+  default-logout-redirect-url: "/"
   session:
     timeout: 3600
 ```
@@ -240,6 +241,7 @@ Ktor example (persistent keys loaded from env):
 
 ```yaml
 oauth:
+  default-logout-redirect-url: "/"
   session:
     timeout: 3600
     encryption-key: dd78055a2c57f50a636efe0e034764f7 # has to be 32 character. set your own. uncomment to set otherwise will be generated on application restart
@@ -607,9 +609,7 @@ fun Application.module() {
         provide<OauthLoginOptionService> {
             DefaultOauthLoginOptionService("/home")
         }
-        provide<OauthLogoutActionService> {
-            DefaultOauthLogoutActionService("/home")
-        }
+      provide<OauthLogoutActionService>(DefaultOauthLogoutActionService::class)
     }
 
     configureOauth2AuthorizationServer(
