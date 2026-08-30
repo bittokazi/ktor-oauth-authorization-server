@@ -116,7 +116,7 @@ class DefaultConsentProcessService(
                             "error_description" to "You have denied access to the application.",
                             "clientName" to client.clientName,
                             "clientId" to client.clientId,
-                            "postLogoutRedirectUri" to (client.postLogoutRedirectUri ?: "/" ),
+                            "postLogoutRedirectUri" to (client.postLogoutRedirectUri ?: "/"),
                         ).plus(templateData),
                     ),
                 )
