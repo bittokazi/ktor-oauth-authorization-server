@@ -68,6 +68,18 @@
             border-radius: 5px;
             font-weight: bold;
         }
+        a.button {
+            display: inline-block;
+            padding: 0.6rem 1.2rem;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+        a.button:hover {
+            background-color: #0069d9;
+        }
     </style>
 </head>
 <body>
@@ -98,6 +110,8 @@
                 <input type="hidden" name="user_code" value="{{userCode}}">
             {{/userCode}}
             <button type="submit">Verify</button>
+            <a href="{{postLogoutRedirectUri}}" class="button">Go Back</a>
+            <a href="/oauth/logout?client_id={{clientId}}" class="button">Logout</a>
         </form>
     {{/result}}
 
