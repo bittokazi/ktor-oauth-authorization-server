@@ -41,7 +41,6 @@ class DefaultConsentProcessService(
                 ?: return Result.Failure(ConsentFailure.InvalidClient)
 
         if (!client.consentRequired) {
-            oauthLoginOptionService.completeLogin(call)
             return Result.Success(null)
         }
 
@@ -66,7 +65,6 @@ class DefaultConsentProcessService(
                 ),
             )
         } else {
-            oauthLoginOptionService.completeLogin(call)
             Result.Success(null)
         }
     }
@@ -101,7 +99,6 @@ class DefaultConsentProcessService(
                     scopes = client.scopes,
                     call,
                 )
-                oauthLoginOptionService.completeLogin(call)
                 return Result.Success(null)
             }
 
