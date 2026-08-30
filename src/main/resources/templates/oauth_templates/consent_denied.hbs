@@ -56,7 +56,8 @@
     {{#error_description}}
         <div class="details">{{error_description}}</div>
     {{/error_description}}
-    <a href="/" class="button">Return Home</a>
+    <a href="{{postLogoutRedirectUri}}" class="button">Go Back</a>
+    <a href="/oauth/logout?client_id={{clientId}}" class="button">Logout</a>
 </div>
 </body>
 </html>
