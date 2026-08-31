@@ -110,8 +110,9 @@
                 <input type="hidden" name="user_code" value="{{userCode}}">
             {{/userCode}}
             <button type="submit">Verify</button>
-            <a href="{{postLogoutRedirectUri}}" class="button">Go Back</a>
-            <a href="/oauth/logout?client_id={{clientId}}" class="button">Logout</a>
+            <p style="text-align: center;">
+                <a href="/oauth/logout" class="button" style="text-align: center;">Logout</a>
+            </p>
         </form>
     {{/result}}
 
