@@ -16,7 +16,6 @@ import io.ktor.server.sessions.SessionTransportTransformerEncrypt
 import io.ktor.server.sessions.Sessions
 import io.ktor.server.sessions.cookie
 import io.ktor.server.testing.testApplication
-import io.ktor.util.hex
 import org.junit.Test
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.extension.ExtendWith
@@ -325,16 +324,8 @@ class AuthorizeRouteTest {
             application {
                 configureSerialization()
 
-                val secretEncryptKey =
-                    hex(
-                        Random.nextBytes(16)
-                            .joinToString("") { "%02x".format(it) },
-                    ) // 16 bytes = AES128
-                val secretSignKey =
-                    hex(
-                        Random.nextBytes(16)
-                            .joinToString("") { "%02x".format(it) },
-                    ) // 16 bytes
+                val secretEncryptKey = Random.nextBytes(16).joinToString("") { "%02x".format(it) }.hexToByteArray() // 16 bytes = AES128
+                val secretSignKey = Random.nextBytes(16).joinToString("") { "%02x".format(it) }.hexToByteArray() // 16 bytes
 
                 dependencies {
                     provide<SessionProvider>(DefaultSessionProvider::class)
@@ -406,16 +397,8 @@ class AuthorizeRouteTest {
             application {
                 configureSerialization()
 
-                val secretEncryptKey =
-                    hex(
-                        Random.nextBytes(16)
-                            .joinToString("") { "%02x".format(it) },
-                    ) // 16 bytes = AES128
-                val secretSignKey =
-                    hex(
-                        Random.nextBytes(16)
-                            .joinToString("") { "%02x".format(it) },
-                    ) // 16 bytes
+                val secretEncryptKey = Random.nextBytes(16).joinToString("") { "%02x".format(it) }.hexToByteArray() // 16 bytes = AES128
+                val secretSignKey = Random.nextBytes(16).joinToString("") { "%02x".format(it) }.hexToByteArray() // 16 bytes
 
                 dependencies {
                     provide<SessionProvider>(DefaultSessionProvider::class)
