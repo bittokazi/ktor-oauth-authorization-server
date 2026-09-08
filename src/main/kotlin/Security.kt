@@ -15,7 +15,6 @@ import io.ktor.server.response.respond
 import io.ktor.server.sessions.SessionTransportTransformerEncrypt
 import io.ktor.server.sessions.Sessions
 import io.ktor.server.sessions.cookie
-import io.ktor.util.hex
 import kotlinx.serialization.Serializable
 import java.net.URI
 import kotlin.random.Random
@@ -27,12 +26,12 @@ fun Application.configureSecurity() {
     val sessionCustomizer: SessionCustomizer by dependencies
     val sessionExtender: SessionExtender? by dependencies
 
-    var secretEncryptKey = hex(Random.nextBytes(16).joinToString("") { "%02x".format(it) }) // 16 bytes = AES128
-    var secretSignKey = hex(Random.nextBytes(16).joinToString("") { "%02x".format(it) }) // 16 bytes
+    var secretEncryptKey = Random.nextBytes(16).joinToString("") { "%02x".format(it) }.hexToByteArray() // 16 bytes = AES128
+    var secretSignKey = Random.nextBytes(16).joinToString("") { "%02x".format(it) }.hexToByteArray() // 16 bytes
 
     if (sessionCustomizer.encryptionKey != null || sessionCustomizer.signingKey != null) {
-        secretEncryptKey = hex(sessionCustomizer.encryptionKey!!)
-        secretSignKey = hex(sessionCustomizer.signingKey!!)
+        secretEncryptKey = sessionCustomizer.encryptionKey!!.hexToByteArray()
+        secretSignKey = sessionCustomizer.signingKey!!.hexToByteArray()
     }
 
     install(Sessions) {
