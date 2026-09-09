@@ -40,7 +40,11 @@ fun Application.loginRoutes() {
                 val templateData = templateCustomizer?.addExtraData(call) ?: mapOf()
 
                 val session = call.sessions.get<OauthUserSession>()
-                if (session == null) {
+                if (session == null || session.expiresAt < System.currentTimeMillis()) {
+                    if (session != null && session.expiresAt < System.currentTimeMillis()) {
+                        // Session expired
+                        call.sessions.clear("OAUTH_USER_SESSION")
+                    }
                     call.respondMustache(templateCustomizerFactory, "oauth_templates/login.hbs", templateData)
                     return@get
                 }

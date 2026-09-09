@@ -38,7 +38,7 @@ fun Application.configureSecurity() {
         cookie<OauthUserSession>("OAUTH_USER_SESSION") {
             cookie.httpOnly = true
             cookie.secure = false // set true in production (HTTPS only)
-            cookie.maxAgeInSeconds = 31536000
+            cookie.maxAgeInSeconds = 32536000
             transform(SessionTransportTransformerEncrypt(secretEncryptKey, secretSignKey))
         }
         cookie<String>("OAUTH_ORIGINAL_URL") {
