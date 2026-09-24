@@ -5,6 +5,7 @@ import com.bittokazi.ktor.auth.domains.token.TokenType
 import com.bittokazi.ktor.auth.services.JwksProvider
 import com.bittokazi.ktor.auth.services.JwtVerifier
 import com.bittokazi.ktor.auth.services.oidc.DefaultOidcService
+import com.bittokazi.ktor.auth.services.oidc.OidcUserInfoCustomizer
 import com.bittokazi.ktor.auth.services.providers.OAuthUserDTO
 import com.bittokazi.ktor.auth.services.providers.OauthUserService
 import com.nimbusds.jwt.JWTClaimsSet
@@ -19,6 +20,7 @@ import org.junit.runner.RunWith
 import org.mockito.BDDMockito.given
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 
 @RunWith(MockitoJUnitRunner::class)
@@ -168,6 +170,39 @@ class DefaultOidcServiceTest {
             assertEquals("john.doe@example.com", outcome["email"])
             assertEquals("John Doe", outcome["name"])
             assertEquals("johndoe", outcome["preferred_username"])
+        }
+
+    @Test
+    fun `should apply customizer to user info response when provided`() =
+        runTest {
+            val token = "valid.jwt.token"
+            val claimsSet =
+                JWTClaimsSet.Builder()
+                    .subject("user-123")
+                    .claim("token_type", TokenType.ACCESS_TOKEN.name)
+                    .claim("scope", "openid profile")
+                    .build()
+
+            val mockUser = mock<OAuthUserDTO>()
+            given(mockUser.firstName).willReturn("John")
+            given(mockUser.lastName).willReturn("Doe")
+            given(mockUser.username).willReturn("johndoe")
+
+            val customizer = mock<OidcUserInfoCustomizer>()
+            val customizedUserInfo: MutableMap<String, Any> = mutableMapOf("sub" to "user-123", "tenant" to "acme")
+            given(customizer.customize(any(), any(), any())).willReturn(customizedUserInfo)
+
+            given(jwtVerifier.verify(token)).willReturn(signedJWT)
+            given(signedJWT.jwtClaimsSet).willReturn(claimsSet)
+            given(oauthUserService.findById("user-123", call)).willReturn(mockUser)
+
+            val serviceWithCustomizer = DefaultOidcService(oauthUserService, jwksProvider, jwtVerifier, customizer)
+            val result = serviceWithCustomizer.getUserInfo("Bearer $token", call)
+
+            assertTrue(result is Result.Success)
+            val outcome = (result as Result.Success).outcome
+            assertEquals(customizedUserInfo, outcome)
+            assertEquals("acme", outcome["tenant"])
         }
 
     @Test

@@ -11,6 +11,7 @@ class DefaultOidcService(
     private val oauthUserService: OauthUserService,
     private val jwksProvider: JwksProvider,
     private val jwtVerifier: JwtVerifier,
+    private val userInfoCustomizer: OidcUserInfoCustomizer? = null,
 ) : OidcService {
     override suspend fun getUserInfo(
         authHeader: String?,
@@ -50,8 +51,9 @@ class DefaultOidcService(
                 response["preferred_username"] = user.username
             }
         }
-
-        return Result.Success(response)
+        return Result.Success(
+            outcome = userInfoCustomizer?.customize(response, claims, call) ?: response,
+        )
     }
 
     override fun getOpenIdConfiguration(
