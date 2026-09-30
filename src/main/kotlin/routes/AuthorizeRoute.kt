@@ -1,6 +1,7 @@
 package com.bittokazi.ktor.auth.routes
 
 import com.bittokazi.ktor.auth.domains.rest.Result
+import com.bittokazi.ktor.auth.services.authorization.AuthorizationCodeRedirectUriCustomizer
 import com.bittokazi.ktor.auth.services.authorization.OauthAuthorizationProcessService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
@@ -14,6 +15,7 @@ import io.ktor.server.sessions.sessions
 
 fun Application.authorizeRoute() {
     val oauthAuthorizationProcessService: OauthAuthorizationProcessService by dependencies
+    val authorizationCodeRedirectUriCustomizer: AuthorizationCodeRedirectUriCustomizer? by dependencies
 
     routing {
         get("/oauth/authorize") {
@@ -53,7 +55,10 @@ fun Application.authorizeRoute() {
                     val resultState = authorizationCode["state"]
 
                     val redirectUrl = "$redirectUri?code=$code${if (resultState != null) "&state=$resultState" else ""}"
-                    call.respondRedirect(redirectUrl)
+
+                    call.respondRedirect(
+                        authorizationCodeRedirectUriCustomizer?.customizeRedirectUri(redirectUrl, call) ?: redirectUrl,
+                    )
                 }
 
                 is Result.Failure -> {

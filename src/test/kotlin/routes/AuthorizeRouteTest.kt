@@ -4,12 +4,14 @@ import com.bittokazi.ktor.auth.OauthUserSession
 import com.bittokazi.ktor.auth.configureSerialization
 import com.bittokazi.ktor.auth.domains.rest.Result
 import com.bittokazi.ktor.auth.routes.authorizeRoute
+import com.bittokazi.ktor.auth.services.authorization.AuthorizationCodeRedirectUriCustomizer
 import com.bittokazi.ktor.auth.services.authorization.OauthAuthorizationProcessService
 import com.bittokazi.ktor.auth.services.session.DefaultSessionProvider
 import com.bittokazi.ktor.auth.services.session.SessionProvider
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
 import io.ktor.server.application.install
 import io.ktor.server.plugins.di.dependencies
 import io.ktor.server.sessions.SessionTransportTransformerEncrypt
@@ -156,6 +158,212 @@ class AuthorizeRouteTest {
                 "http://localhost:3000/callback?code=auth_code_456",
                 response.headers["Location"],
             )
+        }
+
+    @Test
+    fun `GET oauth authorize - customizes authorization code redirect URI`() =
+        testApplication {
+            given(
+                oauthAuthorizationProcessService.authorize(
+                    clientId = any(),
+                    redirectUri = any(),
+                    responseType = any(),
+                    scope = anyOrNull(),
+                    state = anyOrNull(),
+                    codeChallenge = anyOrNull(),
+                    codeChallengeMethod = anyOrNull(),
+                    call = any(),
+                ),
+            ).willReturn(
+                Result.Success(
+                    outcome =
+                        mapOf(
+                            "code" to "auth_code_789",
+                            "state" to "customizer-state",
+                            "redirectUri" to "http://localhost:3000/callback",
+                            "clientId" to "test_client",
+                        ),
+                ),
+            )
+
+            val client =
+                createClient {
+                    followRedirects = false
+                }
+
+            application {
+                configureSerialization()
+
+                dependencies {
+                    provide { oauthAuthorizationProcessService }
+                    provide<AuthorizationCodeRedirectUriCustomizer> {
+                        object : AuthorizationCodeRedirectUriCustomizer {
+                            override fun customizeRedirectUri(
+                                redirectUri: String,
+                                call: ApplicationCall,
+                            ): String {
+                                var redirectUri = redirectUri
+                                call.request.queryParameters["nonce"]?.let {
+                                    redirectUri += "&nonce=$it"
+                                }
+                                return redirectUri
+                            }
+                        }
+                    }
+                }
+
+                authorizeRoute()
+            }
+
+            val response =
+                client.get(
+                    "/oauth/authorize" +
+                        "?client_id=test_client" +
+                        "&redirect_uri=http://localhost:3000/callback" +
+                        "&response_type=code" +
+                        "&state=customizer-state&nonce=custom_nonce",
+                )
+
+            Assertions.assertEquals(HttpStatusCode.Found, response.status)
+            Assertions.assertEquals(
+                "http://localhost:3000/callback?code=auth_code_789&state=customizer-state&nonce=custom_nonce",
+                response.headers["Location"],
+            )
+        }
+
+    @Test
+    fun `GET oauth authorize - customizes authorization code redirect URI but no nonce`() =
+        testApplication {
+            given(
+                oauthAuthorizationProcessService.authorize(
+                    clientId = any(),
+                    redirectUri = any(),
+                    responseType = any(),
+                    scope = anyOrNull(),
+                    state = anyOrNull(),
+                    codeChallenge = anyOrNull(),
+                    codeChallengeMethod = anyOrNull(),
+                    call = any(),
+                ),
+            ).willReturn(
+                Result.Success(
+                    outcome =
+                        mapOf(
+                            "code" to "auth_code_789",
+                            "state" to "customizer-state",
+                            "redirectUri" to "http://localhost:3000/callback",
+                            "clientId" to "test_client",
+                        ),
+                ),
+            )
+
+            val client =
+                createClient {
+                    followRedirects = false
+                }
+
+            application {
+                configureSerialization()
+
+                dependencies {
+                    provide { oauthAuthorizationProcessService }
+                    provide<AuthorizationCodeRedirectUriCustomizer> {
+                        object : AuthorizationCodeRedirectUriCustomizer {
+                            override fun customizeRedirectUri(
+                                redirectUri: String,
+                                call: ApplicationCall,
+                            ): String {
+                                var redirectUri = redirectUri
+                                call.request.queryParameters["nonce"]?.let {
+                                    redirectUri += "&nonce=$it"
+                                }
+                                return redirectUri
+                            }
+                        }
+                    }
+                }
+
+                authorizeRoute()
+            }
+
+            val response =
+                client.get(
+                    "/oauth/authorize" +
+                        "?client_id=test_client" +
+                        "&redirect_uri=http://localhost:3000/callback" +
+                        "&response_type=code" +
+                        "&state=customizer-state",
+                )
+
+            Assertions.assertEquals(HttpStatusCode.Found, response.status)
+            Assertions.assertEquals(
+                "http://localhost:3000/callback?code=auth_code_789&state=customizer-state",
+                response.headers["Location"],
+            )
+        }
+
+    @Test
+    fun `GET oauth authorize - does not customize redirect on service failure`() =
+        testApplication {
+            given(
+                oauthAuthorizationProcessService.authorize(
+                    clientId = any(),
+                    redirectUri = any(),
+                    responseType = any(),
+                    scope = anyOrNull(),
+                    state = anyOrNull(),
+                    codeChallenge = anyOrNull(),
+                    codeChallengeMethod = anyOrNull(),
+                    call = any(),
+                ),
+            ).willReturn(
+                Result.Failure(
+                    errorBody =
+                        mapOf(
+                            "error" to "Invalid authorization request",
+                            "statusCode" to HttpStatusCode.BadRequest,
+                        ),
+                ),
+            )
+
+            var customizerInvoked = false
+            val client =
+                createClient {
+                    followRedirects = false
+                }
+
+            application {
+                configureSerialization()
+
+                dependencies {
+                    provide { oauthAuthorizationProcessService }
+                    provide<AuthorizationCodeRedirectUriCustomizer> {
+                        object : AuthorizationCodeRedirectUriCustomizer {
+                            override fun customizeRedirectUri(
+                                redirectUri: String,
+                                call: io.ktor.server.application.ApplicationCall,
+                            ): String {
+                                customizerInvoked = true
+                                return redirectUri
+                            }
+                        }
+                    }
+                }
+
+                authorizeRoute()
+            }
+
+            val response =
+                client.get(
+                    "/oauth/authorize" +
+                        "?client_id=test_client" +
+                        "&redirect_uri=http://localhost:3000/callback" +
+                        "&response_type=code",
+                )
+
+            Assertions.assertFalse(customizerInvoked)
+            Assertions.assertEquals(HttpStatusCode.BadRequest, response.status)
+            Assertions.assertTrue(response.bodyAsText().contains("Invalid authorization request"))
         }
 
     // ==================== Missing Required Parameters ====================
