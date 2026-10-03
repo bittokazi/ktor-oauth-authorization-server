@@ -15,7 +15,7 @@ import io.ktor.server.sessions.sessions
 
 fun Application.authorizeRoute() {
     val oauthAuthorizationProcessService: OauthAuthorizationProcessService by dependencies
-    val authorizationCodeRedirectUriCustomizer: AuthorizationCodeRedirectUriCustomizer? by dependencies
+    val authorizationCodeRedirectUriCustomizer: AuthorizationCodeRedirectUriCustomizer by dependencies
 
     routing {
         get("/oauth/authorize") {
@@ -56,9 +56,7 @@ fun Application.authorizeRoute() {
 
                     val redirectUrl = "$redirectUri?code=$code${if (resultState != null) "&state=$resultState" else ""}"
 
-                    call.respondRedirect(
-                        authorizationCodeRedirectUriCustomizer?.customizeRedirectUri(redirectUrl, call) ?: redirectUrl,
-                    )
+                    call.respondRedirect(authorizationCodeRedirectUriCustomizer.customizeRedirectUri(redirectUrl, call))
                 }
 
                 is Result.Failure -> {

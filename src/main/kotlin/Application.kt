@@ -3,6 +3,8 @@ package com.bittokazi.ktor.auth
 import com.bittokazi.ktor.auth.config.Oauth2Config
 import com.bittokazi.ktor.auth.services.DefaultTemplateCustomizerFactory
 import com.bittokazi.ktor.auth.services.TemplateCustomizerFactory
+import com.bittokazi.ktor.auth.services.authorization.AuthorizationCodeRedirectUriCustomizer
+import com.bittokazi.ktor.auth.services.authorization.DefaultAuthorizationCodeRedirectUriCustomizer
 import com.bittokazi.ktor.auth.services.authorization.DefaultOauthAuthorizationProcessService
 import com.bittokazi.ktor.auth.services.authorization.OauthAuthorizationProcessService
 import com.bittokazi.ktor.auth.services.consent.ConsentProcessService
@@ -87,6 +89,13 @@ fun Application.configureOauth2AuthorizationServer(
     if (templateCustomizerFactory == null) {
         dependencies {
             provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
+        }
+    }
+
+    val authorizationCodeRedirectUriCustomizer: AuthorizationCodeRedirectUriCustomizer? by dependencies
+    if (authorizationCodeRedirectUriCustomizer == null) {
+        dependencies {
+            provide<AuthorizationCodeRedirectUriCustomizer>(DefaultAuthorizationCodeRedirectUriCustomizer::class)
         }
     }
 

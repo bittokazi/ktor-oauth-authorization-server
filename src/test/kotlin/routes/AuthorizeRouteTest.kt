@@ -5,6 +5,7 @@ import com.bittokazi.ktor.auth.configureSerialization
 import com.bittokazi.ktor.auth.domains.rest.Result
 import com.bittokazi.ktor.auth.routes.authorizeRoute
 import com.bittokazi.ktor.auth.services.authorization.AuthorizationCodeRedirectUriCustomizer
+import com.bittokazi.ktor.auth.services.authorization.DefaultAuthorizationCodeRedirectUriCustomizer
 import com.bittokazi.ktor.auth.services.authorization.OauthAuthorizationProcessService
 import com.bittokazi.ktor.auth.services.session.DefaultSessionProvider
 import com.bittokazi.ktor.auth.services.session.SessionProvider
@@ -77,6 +78,7 @@ class AuthorizeRouteTest {
 
                 dependencies {
                     provide { oauthAuthorizationProcessService }
+                    provide<AuthorizationCodeRedirectUriCustomizer>(DefaultAuthorizationCodeRedirectUriCustomizer::class)
                 }
 
                 authorizeRoute()
@@ -137,6 +139,7 @@ class AuthorizeRouteTest {
 
                 dependencies {
                     provide { oauthAuthorizationProcessService }
+                    provide<AuthorizationCodeRedirectUriCustomizer>(DefaultAuthorizationCodeRedirectUriCustomizer::class)
                 }
 
                 authorizeRoute()
@@ -381,6 +384,7 @@ class AuthorizeRouteTest {
 
                 dependencies {
                     provide { oauthAuthorizationProcessService }
+                    provide<AuthorizationCodeRedirectUriCustomizer>(DefaultAuthorizationCodeRedirectUriCustomizer::class)
                 }
 
                 authorizeRoute()
@@ -409,6 +413,7 @@ class AuthorizeRouteTest {
 
                 dependencies {
                     provide { oauthAuthorizationProcessService }
+                    provide<AuthorizationCodeRedirectUriCustomizer>(DefaultAuthorizationCodeRedirectUriCustomizer::class)
                 }
 
                 authorizeRoute()
@@ -482,6 +487,7 @@ class AuthorizeRouteTest {
 
             dependencies {
                 provide { oauthAuthorizationProcessService }
+                provide<AuthorizationCodeRedirectUriCustomizer>(DefaultAuthorizationCodeRedirectUriCustomizer::class)
             }
 
             authorizeRoute()
@@ -537,6 +543,7 @@ class AuthorizeRouteTest {
 
                 dependencies {
                     provide<SessionProvider>(DefaultSessionProvider::class)
+                    provide<AuthorizationCodeRedirectUriCustomizer>(DefaultAuthorizationCodeRedirectUriCustomizer::class)
                 }
 
                 install(Sessions) {
@@ -610,6 +617,7 @@ class AuthorizeRouteTest {
 
                 dependencies {
                     provide<SessionProvider>(DefaultSessionProvider::class)
+                    provide<AuthorizationCodeRedirectUriCustomizer>(DefaultAuthorizationCodeRedirectUriCustomizer::class)
                 }
 
                 install(Sessions) {
@@ -680,6 +688,7 @@ class AuthorizeRouteTest {
 
                 dependencies {
                     provide { oauthAuthorizationProcessService }
+                    provide<AuthorizationCodeRedirectUriCustomizer>(DefaultAuthorizationCodeRedirectUriCustomizer::class)
                 }
 
                 authorizeRoute()
