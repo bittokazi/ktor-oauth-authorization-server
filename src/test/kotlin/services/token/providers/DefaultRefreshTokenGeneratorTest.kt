@@ -115,6 +115,7 @@ class DefaultRefreshTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = mapOf(),
                 ),
             ).willReturn(accessToken)
 
@@ -130,6 +131,7 @@ class DefaultRefreshTokenGeneratorTest {
                     tokenType = TokenType.REFRESH_TOKEN,
                     user = null,
                     call = call,
+                    params = mapOf(),
                 ),
             ).willReturn(refreshToken)
 
@@ -216,6 +218,7 @@ class DefaultRefreshTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = mapOf(),
                 ),
             ).willReturn(accessToken)
 
@@ -231,6 +234,7 @@ class DefaultRefreshTokenGeneratorTest {
                     tokenType = TokenType.REFRESH_TOKEN,
                     user = null,
                     call = call,
+                    params = mapOf(),
                 ),
             ).willReturn(refreshToken)
 
@@ -317,6 +321,7 @@ class DefaultRefreshTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = mapOf(),
                 ),
             ).willReturn(accessToken)
 
@@ -332,6 +337,7 @@ class DefaultRefreshTokenGeneratorTest {
                     tokenType = TokenType.ID_TOKEN,
                     user = null,
                     call = call,
+                    params = mapOf(),
                 ),
             ).willReturn(idToken)
 
@@ -347,6 +353,7 @@ class DefaultRefreshTokenGeneratorTest {
                     tokenType = TokenType.REFRESH_TOKEN,
                     user = null,
                     call = call,
+                    params = mapOf(),
                 ),
             ).willReturn(refreshToken)
 

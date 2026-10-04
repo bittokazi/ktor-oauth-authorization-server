@@ -439,6 +439,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = mapOf(),
                 ),
             ).willReturn(accessToken)
 
@@ -528,6 +529,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = mapOf(),
                 ),
             ).willReturn(accessToken)
 
@@ -542,6 +544,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.REFRESH_TOKEN,
                     call = call,
+                    params = mapOf(),
                 ),
             ).willReturn(refreshToken)
 
@@ -634,6 +637,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = mapOf(),
                 ),
             ).willReturn(accessToken)
 
@@ -649,6 +653,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
                     tokenType = TokenType.ID_TOKEN,
                     user = null,
                     call = call,
+                    params = mapOf(),
                 ),
             ).willReturn(idToken)
 
@@ -741,6 +746,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = mapOf(),
                 ),
             ).willReturn(accessToken)
 
@@ -755,6 +761,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.REFRESH_TOKEN,
                     call = call,
+                    params = mapOf(),
                 ),
             ).willReturn(refreshToken)
 
@@ -770,6 +777,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
                     tokenType = TokenType.ID_TOKEN,
                     user = null,
                     call = call,
+                    params = mapOf(),
                 ),
             ).willReturn(idToken)
 

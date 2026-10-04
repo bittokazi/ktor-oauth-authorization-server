@@ -90,6 +90,7 @@ class DefaultClientCredentialsTokenGenerator(
                 client = client,
                 tokenType = TokenType.ACCESS_TOKEN,
                 call = call,
+                params = params,
             )
 
         val expiry = Instant.now().plusSeconds(client.accessTokenValidity)

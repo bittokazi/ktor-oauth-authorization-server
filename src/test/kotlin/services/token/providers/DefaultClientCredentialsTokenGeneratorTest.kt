@@ -90,6 +90,7 @@ class DefaultClientCredentialsTokenGeneratorTest {
                     client = client,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = mapOf(),
                 ),
             ).willReturn(accessToken)
 

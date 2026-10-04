@@ -136,6 +136,7 @@ class DefaultDeviceCodeTokenGenerator(
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = params,
                 )
 
             val idToken =
@@ -151,6 +152,7 @@ class DefaultDeviceCodeTokenGenerator(
                         tokenType = TokenType.ID_TOKEN,
                         user = oauthUserService.findById(userId, call),
                         call = call,
+                        params = params,
                     )
                 } else {
                     null
@@ -168,6 +170,7 @@ class DefaultDeviceCodeTokenGenerator(
                         userId = userId,
                         tokenType = TokenType.REFRESH_TOKEN,
                         call = call,
+                        params = params,
                     )
                 } else {
                     null
