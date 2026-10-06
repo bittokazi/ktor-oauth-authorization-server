@@ -630,7 +630,8 @@ class JwtCustomizerImpl: JwtTokenCustomizer {
         user: String?,
         client: OAuthClientDTO?,
         claims: JWTClaimsSet.Builder,
-        call: ApplicationCall?
+        call: ApplicationCall?,
+        params: Map<String, String?>,
     ): Map<String, Any> {
         return mapOf(
             "extra-scope" to "test-value",

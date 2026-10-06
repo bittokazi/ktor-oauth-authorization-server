@@ -27,9 +27,10 @@ import java.util.UUID
 interface JwtTokenCustomizer {
     fun customize(
         user: String? = null,
-        client: OAuthClientDTO?,
+        client: OAuthClientDTO? = null,
         claims: JWTClaimsSet.Builder,
-        call: ApplicationCall?,
+        call: ApplicationCall? = null,
+        params: Map<String, String?>,
     ): Map<String, Any>
 }
 
@@ -90,6 +91,7 @@ class JwksProvider(
         tokenType: TokenType,
         user: OAuthUserDTO? = null,
         call: ApplicationCall,
+        params: Map<String, String?>,
     ): String {
         val now = Instant.now()
         val claims =
@@ -101,7 +103,7 @@ class JwksProvider(
                 .expirationTime(Date.from(now.plusSeconds(expiresInSeconds)))
                 .claim("scope", scopes.joinToString(" "))
 
-        jwtTokenCustomizer?.customize(userId, client, claims, call)?.forEach {
+        jwtTokenCustomizer?.customize(userId, client, claims, call, params)?.forEach {
             claims.claim(it.key, it.value)
         }
 

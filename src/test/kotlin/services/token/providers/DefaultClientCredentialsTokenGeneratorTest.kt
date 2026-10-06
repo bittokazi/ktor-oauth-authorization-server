@@ -59,6 +59,15 @@ class DefaultClientCredentialsTokenGeneratorTest {
             )
     }
 
+    private fun generateTokenParams(
+        clientId: String,
+        clientSecret: String? = null,
+    ): Map<String, String?> =
+        buildMap {
+            put("client_id", clientId)
+            clientSecret?.let { put("client_secret", it) }
+        }
+
     @Test
     fun `generateTokens() returns generated code successfully`() =
         runTest {
@@ -76,6 +85,7 @@ class DefaultClientCredentialsTokenGeneratorTest {
                     redirectUris = listOf("https://example.com/callback"),
                 )
             val accessToken = "generated_access_token"
+            val tokenParams = generateTokenParams(clientId.toString(), "valid_client_secret")
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
@@ -90,6 +100,7 @@ class DefaultClientCredentialsTokenGeneratorTest {
                     client = client,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -103,11 +114,7 @@ class DefaultClientCredentialsTokenGeneratorTest {
 
             val actual =
                 clientCredentialsTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "client_id" to clientId.toString(),
-                            "client_secret" to "valid_client_secret",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
@@ -122,6 +129,7 @@ class DefaultClientCredentialsTokenGeneratorTest {
         runTest {
             val clientIdentifier = UUID.randomUUID()
             val clientId = UUID.randomUUID()
+            val tokenParams = generateTokenParams(clientId.toString(), "valid_client_secret")
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(
@@ -139,11 +147,7 @@ class DefaultClientCredentialsTokenGeneratorTest {
 
             val actual =
                 clientCredentialsTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "client_id" to clientId.toString(),
-                            "client_secret" to "valid_client_secret",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
@@ -220,6 +224,7 @@ class DefaultClientCredentialsTokenGeneratorTest {
         runTest {
             val clientIdentifier = UUID.randomUUID()
             val clientId = UUID.randomUUID()
+            val tokenParams = generateTokenParams(clientId.toString(), "valid_client_secret")
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(
@@ -257,6 +262,7 @@ class DefaultClientCredentialsTokenGeneratorTest {
         runTest {
             val clientIdentifier = UUID.randomUUID()
             val clientId = UUID.randomUUID()
+            val tokenParams = generateTokenParams(clientId.toString(), "valid_client_secret")
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(
@@ -274,11 +280,7 @@ class DefaultClientCredentialsTokenGeneratorTest {
 
             val actual =
                 clientCredentialsTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "client_id" to clientId.toString(),
-                            "client_secret" to "valid_client_secret",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 

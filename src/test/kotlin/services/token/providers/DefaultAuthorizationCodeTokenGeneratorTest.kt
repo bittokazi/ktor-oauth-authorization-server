@@ -72,6 +72,20 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
             )
     }
 
+    private fun generateTokenParams(
+        code: String,
+        clientId: String,
+        clientSecret: String? = null,
+        codeVerifier: String? = null,
+    ): Map<String, String?> =
+        buildMap {
+            put("code", code)
+            put("redirect_uri", "https://example.com/callback")
+            put("client_id", clientId)
+            clientSecret?.let { put("client_secret", it) }
+            codeVerifier?.let { put("code_verifier", it) }
+        }
+
     @Test
     fun `generateTokens() returns generated code successfully for confidential client`() =
         runTest {
@@ -90,6 +104,12 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                 )
             val userId = "user_1"
             val accessToken = "generated_access_token"
+            val tokenParams =
+                generateTokenParams(
+                    code = "unconsumed_code",
+                    clientId = clientId.toString(),
+                    clientSecret = "valid_client_secret",
+                )
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
@@ -120,6 +140,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -133,13 +154,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
 
             val actual =
                 authorizationCodeTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "code" to "unconsumed_code",
-                            "redirect_uri" to "https://example.com/callback",
-                            "client_id" to clientId.toString(),
-                            "client_secret" to "valid_client_secret",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
@@ -175,6 +190,12 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                 )
             val userId = "user_1"
             val accessToken = "generated_access_token"
+            val tokenParams =
+                generateTokenParams(
+                    code = "pkce_code",
+                    clientId = clientId.toString(),
+                    codeVerifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+                )
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
@@ -205,6 +226,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -218,13 +240,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
 
             val actual =
                 authorizationCodeTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "code" to "pkce_code",
-                            "redirect_uri" to "https://example.com/callback",
-                            "client_id" to clientId.toString(),
-                            "code_verifier" to "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
@@ -260,6 +276,12 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                 )
             val userId = "user_1"
             val accessToken = "generated_access_token"
+            val tokenParams =
+                generateTokenParams(
+                    code = "plain_pkce_code",
+                    clientId = clientId.toString(),
+                    codeVerifier = "simple_challenge",
+                )
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
@@ -290,6 +312,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -303,13 +326,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
 
             val actual =
                 authorizationCodeTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "code" to "plain_pkce_code",
-                            "redirect_uri" to "https://example.com/callback",
-                            "client_id" to clientId.toString(),
-                            "code_verifier" to "simple_challenge",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
@@ -778,6 +795,12 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
             val userId = "user_1"
             val accessToken = "generated_access_token"
             val idToken = "generated_id_token"
+            val tokenParams =
+                generateTokenParams(
+                    code = "unconsumed_code",
+                    clientId = clientId.toString(),
+                    clientSecret = "valid_client_secret",
+                )
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
@@ -808,6 +831,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -823,6 +847,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     tokenType = TokenType.ID_TOKEN,
                     user = null,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(idToken)
 
@@ -836,13 +861,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
 
             val actual =
                 authorizationCodeTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "code" to "unconsumed_code",
-                            "redirect_uri" to "https://example.com/callback",
-                            "client_id" to clientId.toString(),
-                            "client_secret" to "valid_client_secret",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
@@ -880,6 +899,12 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
             val userId = "user_1"
             val accessToken = "generated_access_token"
             val refreshToken = "generated_refresh_token"
+            val tokenParams =
+                generateTokenParams(
+                    code = "unconsumed_code",
+                    clientId = clientId.toString(),
+                    clientSecret = "valid_client_secret",
+                )
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
@@ -910,6 +935,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -924,6 +950,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.REFRESH_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(refreshToken)
 
@@ -937,13 +964,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
 
             val actual =
                 authorizationCodeTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "code" to "unconsumed_code",
-                            "redirect_uri" to "https://example.com/callback",
-                            "client_id" to clientId.toString(),
-                            "client_secret" to "valid_client_secret",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
@@ -982,6 +1003,12 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
             val accessToken = "generated_access_token"
             val idToken = "generated_id_token"
             val refreshToken = "generated_refresh_token"
+            val tokenParams =
+                generateTokenParams(
+                    code = "unconsumed_code",
+                    clientId = clientId.toString(),
+                    clientSecret = "valid_client_secret",
+                )
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
@@ -1012,6 +1039,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -1027,6 +1055,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     tokenType = TokenType.ID_TOKEN,
                     user = null,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(idToken)
 
@@ -1041,6 +1070,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.REFRESH_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(refreshToken)
 
@@ -1054,13 +1084,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
 
             val actual =
                 authorizationCodeTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "code" to "unconsumed_code",
-                            "redirect_uri" to "https://example.com/callback",
-                            "client_id" to clientId.toString(),
-                            "client_secret" to "valid_client_secret",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
@@ -1099,6 +1123,12 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
             val userId = "user_1"
             val accessToken = "generated_access_token"
             val idToken = "generated_id_token"
+            val tokenParams =
+                generateTokenParams(
+                    code = "pkce_code",
+                    clientId = clientId.toString(),
+                    codeVerifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+                )
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
@@ -1129,6 +1159,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -1144,6 +1175,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     tokenType = TokenType.ID_TOKEN,
                     user = null,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(idToken)
 
@@ -1157,13 +1189,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
 
             val actual =
                 authorizationCodeTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "code" to "pkce_code",
-                            "redirect_uri" to "https://example.com/callback",
-                            "client_id" to clientId.toString(),
-                            "code_verifier" to "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
@@ -1201,6 +1227,12 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
             val userId = "user_1"
             val accessToken = "generated_access_token"
             val refreshToken = "generated_refresh_token"
+            val tokenParams =
+                generateTokenParams(
+                    code = "pkce_code",
+                    clientId = clientId.toString(),
+                    codeVerifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
+                )
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
@@ -1231,6 +1263,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -1245,6 +1278,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.REFRESH_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(refreshToken)
 
@@ -1258,13 +1292,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
 
             val actual =
                 authorizationCodeTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "code" to "pkce_code",
-                            "redirect_uri" to "https://example.com/callback",
-                            "client_id" to clientId.toString(),
-                            "code_verifier" to "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
@@ -1303,6 +1331,12 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
             val accessToken = "generated_access_token"
             val idToken = "generated_id_token"
             val refreshToken = "generated_refresh_token"
+            val tokenParams =
+                generateTokenParams(
+                    code = "unconsumed_code",
+                    clientId = clientId.toString(),
+                    clientSecret = "valid_client_secret",
+                )
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
@@ -1333,6 +1367,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -1348,6 +1383,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     tokenType = TokenType.ID_TOKEN,
                     user = null,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(idToken)
 
@@ -1362,6 +1398,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.REFRESH_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(refreshToken)
 
@@ -1375,13 +1412,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
 
             val actual =
                 authorizationCodeTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "code" to "unconsumed_code",
-                            "redirect_uri" to "https://example.com/callback",
-                            "client_id" to clientId.toString(),
-                            "client_secret" to "valid_client_secret",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
@@ -1420,6 +1451,12 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
             val userId = "user_1"
             val accessToken = "generated_access_token"
             val idToken = "generated_id_token"
+            val tokenParams =
+                generateTokenParams(
+                    code = "plain_pkce_code",
+                    clientId = clientId.toString(),
+                    codeVerifier = "simple_challenge",
+                )
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
@@ -1450,6 +1487,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -1465,6 +1503,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     tokenType = TokenType.ID_TOKEN,
                     user = null,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(idToken)
 
@@ -1478,13 +1517,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
 
             val actual =
                 authorizationCodeTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "code" to "plain_pkce_code",
-                            "redirect_uri" to "https://example.com/callback",
-                            "client_id" to clientId.toString(),
-                            "code_verifier" to "simple_challenge",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
@@ -1522,6 +1555,12 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
             val userId = "user_1"
             val accessToken = "generated_access_token"
             val refreshToken = "generated_refresh_token"
+            val tokenParams =
+                generateTokenParams(
+                    code = "plain_pkce_code",
+                    clientId = clientId.toString(),
+                    codeVerifier = "simple_challenge",
+                )
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
@@ -1552,6 +1591,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -1566,6 +1606,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.REFRESH_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(refreshToken)
 
@@ -1579,13 +1620,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
 
             val actual =
                 authorizationCodeTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "code" to "plain_pkce_code",
-                            "redirect_uri" to "https://example.com/callback",
-                            "client_id" to clientId.toString(),
-                            "code_verifier" to "simple_challenge",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
@@ -1624,6 +1659,12 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
             val accessToken = "generated_access_token"
             val idToken = "generated_id_token"
             val refreshToken = "generated_refresh_token"
+            val tokenParams =
+                generateTokenParams(
+                    code = "plain_pkce_code",
+                    clientId = clientId.toString(),
+                    codeVerifier = "simple_challenge",
+                )
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
@@ -1654,6 +1695,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -1669,6 +1711,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     tokenType = TokenType.ID_TOKEN,
                     user = null,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(idToken)
 
@@ -1683,6 +1726,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.REFRESH_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(refreshToken)
 
@@ -1696,13 +1740,7 @@ class DefaultAuthorizationCodeTokenGeneratorTest {
 
             val actual =
                 authorizationCodeTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "code" to "plain_pkce_code",
-                            "redirect_uri" to "https://example.com/callback",
-                            "client_id" to clientId.toString(),
-                            "code_verifier" to "simple_challenge",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 

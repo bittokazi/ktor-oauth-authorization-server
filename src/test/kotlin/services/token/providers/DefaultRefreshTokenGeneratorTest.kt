@@ -67,6 +67,17 @@ class DefaultRefreshTokenGeneratorTest {
             )
     }
 
+    private fun generateTokenParams(
+        refreshToken: String,
+        clientId: String,
+        clientSecret: String? = null,
+    ): Map<String, String?> =
+        buildMap {
+            put("refresh_token", refreshToken)
+            put("client_id", clientId)
+            clientSecret?.let { put("client_secret", it) }
+        }
+
     @Test
     fun `generateTokens() returns token successfully`() =
         runTest {
@@ -86,6 +97,12 @@ class DefaultRefreshTokenGeneratorTest {
             val accessToken = "generated_access_token"
             val refreshToken = "generated_refresh_token"
             val userId = "user_1"
+            val tokenParams =
+                generateTokenParams(
+                    refreshToken = "valid_refresh_token",
+                    clientId = clientId.toString(),
+                    clientSecret = "valid_client_secret",
+                )
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
@@ -115,6 +132,7 @@ class DefaultRefreshTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -130,6 +148,7 @@ class DefaultRefreshTokenGeneratorTest {
                     tokenType = TokenType.REFRESH_TOKEN,
                     user = null,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(refreshToken)
 
@@ -143,12 +162,7 @@ class DefaultRefreshTokenGeneratorTest {
 
             val actual =
                 refreshTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "refresh_token" to "valid_refresh_token",
-                            "client_id" to clientId.toString(),
-                            "client_secret" to "valid_client_secret",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
@@ -187,6 +201,11 @@ class DefaultRefreshTokenGeneratorTest {
                     scopes = listOf("read", "write"),
                     redirectUris = listOf("https://example.com/callback"),
                 )
+            val tokenParams =
+                generateTokenParams(
+                    refreshToken = "valid_refresh_token",
+                    clientId = clientId.toString(),
+                )
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
@@ -216,6 +235,7 @@ class DefaultRefreshTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -231,6 +251,7 @@ class DefaultRefreshTokenGeneratorTest {
                     tokenType = TokenType.REFRESH_TOKEN,
                     user = null,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(refreshToken)
 
@@ -244,11 +265,7 @@ class DefaultRefreshTokenGeneratorTest {
 
             val actual =
                 refreshTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "refresh_token" to "valid_refresh_token",
-                            "client_id" to clientId.toString(),
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
@@ -288,6 +305,12 @@ class DefaultRefreshTokenGeneratorTest {
             val refreshToken = "generated_refresh_token"
             val idToken = "generated_id_token"
             val userId = "user_1"
+            val tokenParams =
+                generateTokenParams(
+                    refreshToken = "valid_refresh_token",
+                    clientId = clientId.toString(),
+                    clientSecret = "valid_client_secret",
+                )
 
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
@@ -317,6 +340,7 @@ class DefaultRefreshTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -332,6 +356,7 @@ class DefaultRefreshTokenGeneratorTest {
                     tokenType = TokenType.ID_TOKEN,
                     user = null,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(idToken)
 
@@ -347,6 +372,7 @@ class DefaultRefreshTokenGeneratorTest {
                     tokenType = TokenType.REFRESH_TOKEN,
                     user = null,
                     call = call,
+                    params = tokenParams,
                 ),
             ).willReturn(refreshToken)
 
@@ -360,12 +386,7 @@ class DefaultRefreshTokenGeneratorTest {
 
             val actual =
                 refreshTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "refresh_token" to "valid_refresh_token",
-                            "client_id" to clientId.toString(),
-                            "client_secret" to "valid_client_secret",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
