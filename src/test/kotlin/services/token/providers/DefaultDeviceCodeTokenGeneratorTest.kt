@@ -73,6 +73,17 @@ class DefaultDeviceCodeTokenGeneratorTest {
             )
     }
 
+    private fun generateTokenParams(
+        clientId: String,
+        clientSecret: String,
+        deviceCode: String,
+    ): Map<String, String?> =
+        mapOf(
+            "client_id" to clientId,
+            "client_secret" to clientSecret,
+            "device_code" to deviceCode,
+        )
+
     @Test
     fun `generateTokens() returns failure when client_id is missing`() =
         runTest {
@@ -393,6 +404,12 @@ class DefaultDeviceCodeTokenGeneratorTest {
             val clientId = UUID.randomUUID()
             val userId = "user_1"
             val accessToken = "generated_access_token"
+            val tokenParams =
+                generateTokenParams(
+                    clientId = clientId.toString(),
+                    clientSecret = "valid_client_secret",
+                    deviceCode = "valid_code",
+                )
             val client =
                 OAuthClientDTO(
                     id = clientIdentifier,
@@ -439,7 +456,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
-                    params = mapOf(),
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -453,12 +470,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
 
             val actual =
                 deviceCodeTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "client_id" to clientId.toString(),
-                            "client_secret" to "valid_client_secret",
-                            "device_code" to "valid_code",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
@@ -483,6 +495,12 @@ class DefaultDeviceCodeTokenGeneratorTest {
             val userId = "user_1"
             val accessToken = "generated_access_token"
             val refreshToken = "generated_refresh_token"
+            val tokenParams =
+                generateTokenParams(
+                    clientId = clientId.toString(),
+                    clientSecret = "valid_client_secret",
+                    deviceCode = "valid_code",
+                )
             val client =
                 OAuthClientDTO(
                     id = clientIdentifier,
@@ -529,7 +547,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
-                    params = mapOf(),
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -544,7 +562,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.REFRESH_TOKEN,
                     call = call,
-                    params = mapOf(),
+                    params = tokenParams,
                 ),
             ).willReturn(refreshToken)
 
@@ -558,12 +576,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
 
             val actual =
                 deviceCodeTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "client_id" to clientId.toString(),
-                            "client_secret" to "valid_client_secret",
-                            "device_code" to "valid_code",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
@@ -590,6 +603,12 @@ class DefaultDeviceCodeTokenGeneratorTest {
             val userId = "user_1"
             val accessToken = "generated_access_token"
             val idToken = "generated_id_token"
+            val tokenParams =
+                generateTokenParams(
+                    clientId = clientId.toString(),
+                    clientSecret = "valid_client_secret",
+                    deviceCode = "valid_code",
+                )
 
             val oauthClientDto =
                 OAuthClientDTO(
@@ -637,7 +656,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
-                    params = mapOf(),
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -653,7 +672,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
                     tokenType = TokenType.ID_TOKEN,
                     user = null,
                     call = call,
-                    params = mapOf(),
+                    params = tokenParams,
                 ),
             ).willReturn(idToken)
 
@@ -667,12 +686,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
 
             val actual =
                 deviceCodeTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "client_id" to clientId.toString(),
-                            "client_secret" to "valid_client_secret",
-                            "device_code" to "valid_code",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
@@ -700,6 +714,12 @@ class DefaultDeviceCodeTokenGeneratorTest {
             val accessToken = "generated_access_token"
             val refreshToken = "generated_refresh_token"
             val idToken = "generated_id_token"
+            val tokenParams =
+                generateTokenParams(
+                    clientId = clientId.toString(),
+                    clientSecret = "valid_client_secret",
+                    deviceCode = "valid_code",
+                )
             val client =
                 OAuthClientDTO(
                     id = clientIdentifier,
@@ -746,7 +766,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.ACCESS_TOKEN,
                     call = call,
-                    params = mapOf(),
+                    params = tokenParams,
                 ),
             ).willReturn(accessToken)
 
@@ -761,7 +781,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
                     userId = userId,
                     tokenType = TokenType.REFRESH_TOKEN,
                     call = call,
-                    params = mapOf(),
+                    params = tokenParams,
                 ),
             ).willReturn(refreshToken)
 
@@ -777,7 +797,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
                     tokenType = TokenType.ID_TOKEN,
                     user = null,
                     call = call,
-                    params = mapOf(),
+                    params = tokenParams,
                 ),
             ).willReturn(idToken)
 
@@ -791,12 +811,7 @@ class DefaultDeviceCodeTokenGeneratorTest {
 
             val actual =
                 deviceCodeTokenGenerator.generateTokens(
-                    params =
-                        mapOf(
-                            "client_id" to clientId.toString(),
-                            "client_secret" to "valid_client_secret",
-                            "device_code" to "valid_code",
-                        ),
+                    params = tokenParams,
                     call = call,
                 )
 
