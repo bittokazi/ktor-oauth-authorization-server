@@ -4,6 +4,7 @@ import com.bittokazi.ktor.auth.OauthUserSession
 import com.bittokazi.ktor.auth.domains.rest.Result
 import com.bittokazi.ktor.auth.services.SessionCustomizer
 import com.bittokazi.ktor.auth.services.authorization.DefaultOauthAuthorizationProcessService
+import com.bittokazi.ktor.auth.services.providers.AuthenticatedUserSession
 import com.bittokazi.ktor.auth.services.providers.OAuthClientDTO
 import com.bittokazi.ktor.auth.services.providers.OAuthUserDTO
 import com.bittokazi.ktor.auth.services.providers.OauthAuthorizationCodeService
@@ -53,7 +54,7 @@ class DefaultOauthAuthorizationProcessServiceTest {
     lateinit var oauthConsentService: OauthConsentService
 
     @Mock
-    lateinit var oauthLoginOptionService: OauthLoginOptionService
+    lateinit var oauthLoginOptionService: OauthLoginOptionService<AuthenticatedUserSession>
 
     @Mock
     lateinit var call: ApplicationCall
@@ -69,6 +70,9 @@ class DefaultOauthAuthorizationProcessServiceTest {
 
     @Mock
     lateinit var sessionProvider: SessionProvider
+
+    @Mock
+    lateinit var authenticatedUserSession: AuthenticatedUserSession
 
     lateinit var defaultOauthAuthorizationService: DefaultOauthAuthorizationProcessService
 
@@ -147,8 +151,9 @@ class DefaultOauthAuthorizationProcessServiceTest {
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
 
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
             given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any()))
-                .willReturn(true)
+                .willReturn(authenticatedUserSession)
 
             given(oauthUserService.findById(userId, call))
                 .willReturn(user)
@@ -214,8 +219,9 @@ class DefaultOauthAuthorizationProcessServiceTest {
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
 
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
             given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any()))
-                .willReturn(true)
+                .willReturn(authenticatedUserSession)
 
             given(oauthUserService.findById(userId, call))
                 .willReturn(user)
@@ -283,8 +289,10 @@ class DefaultOauthAuthorizationProcessServiceTest {
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
 
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
+
             given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any()))
-                .willReturn(true)
+                .willReturn(authenticatedUserSession)
 
             given(oauthUserService.findById(userId, call))
                 .willReturn(user)
@@ -351,8 +359,10 @@ class DefaultOauthAuthorizationProcessServiceTest {
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
 
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
+
             given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any()))
-                .willReturn(true)
+                .willReturn(authenticatedUserSession)
 
             given(oauthConsentService.getConsent(userId, clientIdentifier, call))
                 .willReturn(listOf("read", "write", "profile"))
@@ -420,8 +430,10 @@ class DefaultOauthAuthorizationProcessServiceTest {
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
 
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
+
             given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any()))
-                .willReturn(true)
+                .willReturn(authenticatedUserSession)
 
             given(oauthUserService.findById(userId, call))
                 .willReturn(user)
@@ -485,8 +497,10 @@ class DefaultOauthAuthorizationProcessServiceTest {
             given(oauthClientService.findByClientId(clientId.toString(), call))
                 .willReturn(client)
 
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
+
             given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any()))
-                .willReturn(true)
+                .willReturn(authenticatedUserSession)
 
             given(oauthUserService.findById(userId, call))
                 .willReturn(user)
@@ -1000,8 +1014,10 @@ class DefaultOauthAuthorizationProcessServiceTest {
             given(oauthClientService.findByClientId(clientId, call))
                 .willReturn(client)
 
+            given(authenticatedUserSession.loginCompleted).willReturn(false)
+
             given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any()))
-                .willReturn(false)
+                .willReturn(authenticatedUserSession)
 
             val actual =
                 defaultOauthAuthorizationService.authorize(
@@ -1051,8 +1067,10 @@ class DefaultOauthAuthorizationProcessServiceTest {
             given(oauthClientService.findByClientId(clientId, call))
                 .willReturn(client)
 
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
+
             given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any()))
-                .willReturn(true)
+                .willReturn(authenticatedUserSession)
 
             given(oauthConsentService.getConsent(userId, clientIdentifier, call))
                 .willReturn(null)
@@ -1107,8 +1125,10 @@ class DefaultOauthAuthorizationProcessServiceTest {
             given(oauthClientService.findByClientId(clientId, call))
                 .willReturn(client)
 
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
+
             given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any()))
-                .willReturn(true)
+                .willReturn(authenticatedUserSession)
 
             given(oauthConsentService.getConsent(userId, clientIdentifier, call))
                 .willReturn(listOf("read"))
@@ -1161,8 +1181,10 @@ class DefaultOauthAuthorizationProcessServiceTest {
             given(oauthClientService.findByClientId(clientId, call))
                 .willReturn(client)
 
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
+
             given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any()))
-                .willReturn(true)
+                .willReturn(authenticatedUserSession)
 
             given(oauthUserService.findById(userId, call))
                 .willReturn(null)

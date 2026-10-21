@@ -1,7 +1,9 @@
 package com.bittokazi.ktor.auth
 
 import com.bittokazi.ktor.auth.config.Oauth2Config
+import com.bittokazi.ktor.auth.services.DefaultJwksProvider
 import com.bittokazi.ktor.auth.services.DefaultTemplateCustomizerFactory
+import com.bittokazi.ktor.auth.services.JwksProvider
 import com.bittokazi.ktor.auth.services.TemplateCustomizerFactory
 import com.bittokazi.ktor.auth.services.authorization.AuthorizationCodeRedirectUriCustomizer
 import com.bittokazi.ktor.auth.services.authorization.DefaultAuthorizationCodeRedirectUriCustomizer
@@ -39,6 +41,13 @@ fun Application.configureOauth2AuthorizationServer(
     defaultDeviceAuthorizationRoute: Boolean = true,
     configureForwardHeaderAndDefaultHeadersPlugin: Boolean = true,
 ) {
+    val jwksProvider: JwksProvider? by dependencies
+    if (jwksProvider == null) {
+        dependencies {
+            provide<JwksProvider>(DefaultJwksProvider::class)
+        }
+    }
+
     dependencies {
         provide<SessionProvider>(DefaultSessionProvider::class)
         provide(Oauth2Config::class)

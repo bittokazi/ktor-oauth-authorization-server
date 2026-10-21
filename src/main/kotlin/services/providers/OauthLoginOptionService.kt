@@ -5,13 +5,23 @@ import io.ktor.server.application.ApplicationCall
 import io.ktor.server.response.respondRedirect
 import io.ktor.server.sessions.sessions
 
-interface OauthLoginOptionService {
+interface AuthenticatedUserSession {
+    val loginCompleted: Boolean
+}
+
+interface OauthLoginOptionService<T : AuthenticatedUserSession> {
     val fallbackAfterLoginRedirectUrl: String
 
     suspend fun isAfterLoginCheckCompleted(
         oauthUserSession: OauthUserSession,
         call: ApplicationCall,
-    ): Boolean
+    ): T
+
+    suspend fun onGoingLogin(
+        oauthUserSession: OauthUserSession,
+        payload: T,
+        call: ApplicationCall,
+    )
 
     suspend fun onSuccessfulLogin(
         oauthUserSession: OauthUserSession,
@@ -29,13 +39,23 @@ interface OauthLoginOptionService {
     }
 }
 
+class AuthenticatedUserSessionImpl(
+    override val loginCompleted: Boolean,
+) : AuthenticatedUserSession
+
 class DefaultOauthLoginOptionService(
     override val fallbackAfterLoginRedirectUrl: String = "/",
-) : OauthLoginOptionService {
+) : OauthLoginOptionService<AuthenticatedUserSession> {
     override suspend fun isAfterLoginCheckCompleted(
         oauthUserSession: OauthUserSession,
         call: ApplicationCall,
-    ): Boolean = true
+    ): AuthenticatedUserSession = AuthenticatedUserSessionImpl(loginCompleted = true)
+
+    override suspend fun onGoingLogin(
+        oauthUserSession: OauthUserSession,
+        payload: AuthenticatedUserSession,
+        call: ApplicationCall,
+    ) {}
 
     override suspend fun onSuccessfulLogin(
         oauthUserSession: OauthUserSession,

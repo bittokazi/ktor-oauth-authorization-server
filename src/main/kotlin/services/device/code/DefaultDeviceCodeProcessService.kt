@@ -3,6 +3,7 @@ package com.bittokazi.ktor.auth.services.device.code
 import com.bittokazi.ktor.auth.OauthUserSession
 import com.bittokazi.ktor.auth.domains.rest.Result
 import com.bittokazi.ktor.auth.services.TemplateCustomizer
+import com.bittokazi.ktor.auth.services.providers.AuthenticatedUserSession
 import com.bittokazi.ktor.auth.services.providers.OauthClientService
 import com.bittokazi.ktor.auth.services.providers.OauthDeviceCodeService
 import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
@@ -17,7 +18,7 @@ import java.util.UUID
 
 class DefaultDeviceCodeProcessService(
     private val oauthClientService: OauthClientService,
-    private val oauthLoginOptionService: OauthLoginOptionService,
+    private val oauthLoginOptionService: OauthLoginOptionService<AuthenticatedUserSession>,
     private val oauthDeviceCodeService: OauthDeviceCodeService,
     private val templateCustomizer: TemplateCustomizer?,
     private val sessionProvider: SessionProvider,
@@ -111,7 +112,8 @@ class DefaultDeviceCodeProcessService(
             return Result.Failure(VerificationFailure.LoginRequired)
         }
 
-        if (!oauthLoginOptionService.isAfterLoginCheckCompleted(session, call)) {
+        val loginResult = oauthLoginOptionService.isAfterLoginCheckCompleted(session, call)
+        if (!loginResult.loginCompleted) {
             return Result.Failure(
                 VerificationFailure.Template(emptyMap()),
             )
@@ -142,7 +144,8 @@ class DefaultDeviceCodeProcessService(
             return Result.Failure(VerificationFailure.LoginRequired)
         }
 
-        if (!oauthLoginOptionService.isAfterLoginCheckCompleted(session, call)) {
+        val loginResult = oauthLoginOptionService.isAfterLoginCheckCompleted(session, call)
+        if (!loginResult.loginCompleted) {
             return Result.Failure(
                 VerificationFailure.Template(emptyMap()),
             )

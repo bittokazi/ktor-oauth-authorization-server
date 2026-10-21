@@ -5,6 +5,7 @@ import com.bittokazi.ktor.auth.OauthUserSession
 import com.bittokazi.ktor.auth.services.SessionCustomizer
 import com.bittokazi.ktor.auth.services.TemplateCustomizer
 import com.bittokazi.ktor.auth.services.TemplateCustomizerFactory
+import com.bittokazi.ktor.auth.services.providers.AuthenticatedUserSession
 import com.bittokazi.ktor.auth.services.providers.OauthAuthorizationCodeService
 import com.bittokazi.ktor.auth.services.providers.OauthDeviceCodeService
 import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
@@ -29,7 +30,7 @@ fun Application.loginRoutes() {
     val oauthTokenService: OauthTokenService by dependencies
     val oauthLogoutActionService: OauthLogoutActionService? by dependencies
     val sessionCustomizer: SessionCustomizer by dependencies
-    val oauthLoginOptionService: OauthLoginOptionService by dependencies
+    val oauthLoginOptionService: OauthLoginOptionService<AuthenticatedUserSession> by dependencies
     val oauthDeviceCodeService: OauthDeviceCodeService by dependencies
     val templateCustomizer: TemplateCustomizer? by dependencies
     val templateCustomizerFactory: TemplateCustomizerFactory by dependencies
@@ -60,9 +61,15 @@ fun Application.loginRoutes() {
                 }
 
                 // Retrieve saved original request URL
-                if (oauthLoginOptionService.isAfterLoginCheckCompleted(session, call)) {
+                val loginCheckResult = oauthLoginOptionService.isAfterLoginCheckCompleted(session, call)
+                if (loginCheckResult.loginCompleted) {
                     oauthLoginOptionService.completeLogin(call)
                 } else {
+                    oauthLoginOptionService.onGoingLogin(
+                        session,
+                        loginCheckResult,
+                        call,
+                    )
                     return@get
                 }
             }
@@ -102,9 +109,15 @@ fun Application.loginRoutes() {
 
                 // Retrieve saved original request URL
                 oauthLoginOptionService.onSuccessfulLogin(userSession, call)
-                if (oauthLoginOptionService.isAfterLoginCheckCompleted(userSession, call)) {
+                val loginCheckResult = oauthLoginOptionService.isAfterLoginCheckCompleted(userSession, call)
+                if (loginCheckResult.loginCompleted) {
                     oauthLoginOptionService.completeLogin(call)
                 } else {
+                    oauthLoginOptionService.onGoingLogin(
+                        userSession,
+                        loginCheckResult,
+                        call,
+                    )
                     return@post
                 }
             }

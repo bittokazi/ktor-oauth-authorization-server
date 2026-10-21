@@ -10,6 +10,7 @@ import com.bittokazi.ktor.auth.services.TemplateCustomizerFactory
 import com.bittokazi.ktor.auth.services.consent.ConsentFailure
 import com.bittokazi.ktor.auth.services.consent.ConsentProcessService
 import com.bittokazi.ktor.auth.services.consent.TemplateContent
+import com.bittokazi.ktor.auth.services.providers.AuthenticatedUserSession
 import com.bittokazi.ktor.auth.services.providers.DefaultOauthLoginOptionService
 import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
 import io.ktor.client.request.get
@@ -40,7 +41,7 @@ class ConsentRouteTest {
     lateinit var consentProcessService: ConsentProcessService
 
     @Mock
-    lateinit var oauthLoginOptionService: OauthLoginOptionService
+    lateinit var oauthLoginOptionService: OauthLoginOptionService<AuthenticatedUserSession>
 
     // ==================== GET /oauth/consent ====================
 
@@ -120,7 +121,7 @@ class ConsentRouteTest {
 
                 dependencies {
                     provide { consentProcessService }
-                    provide<OauthLoginOptionService>(DefaultOauthLoginOptionService::class)
+                    provide<OauthLoginOptionService<AuthenticatedUserSession>>(DefaultOauthLoginOptionService::class)
                     provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 
@@ -388,7 +389,7 @@ class ConsentRouteTest {
 
                 dependencies {
                     provide { consentProcessService }
-                    provide<OauthLoginOptionService>(DefaultOauthLoginOptionService::class)
+                    provide<OauthLoginOptionService<AuthenticatedUserSession>>(DefaultOauthLoginOptionService::class)
                     provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 

@@ -5,6 +5,7 @@ import com.bittokazi.ktor.auth.domains.rest.Result
 import com.bittokazi.ktor.auth.services.TemplateCustomizer
 import com.bittokazi.ktor.auth.services.device.code.DefaultDeviceCodeProcessService
 import com.bittokazi.ktor.auth.services.device.code.VerificationFailure
+import com.bittokazi.ktor.auth.services.providers.AuthenticatedUserSession
 import com.bittokazi.ktor.auth.services.providers.OAuthClientDTO
 import com.bittokazi.ktor.auth.services.providers.OauthClientService
 import com.bittokazi.ktor.auth.services.providers.OauthDeviceCodeDTO
@@ -37,7 +38,7 @@ import kotlin.test.assertTrue
 class DefaultDeviceCodeProcessServiceTest {
     @Mock lateinit var oauthClientService: OauthClientService
 
-    @Mock lateinit var oauthLoginOptionService: OauthLoginOptionService
+    @Mock lateinit var oauthLoginOptionService: OauthLoginOptionService<AuthenticatedUserSession>
 
     @Mock lateinit var oauthDeviceCodeService: OauthDeviceCodeService
 
@@ -52,6 +53,8 @@ class DefaultDeviceCodeProcessServiceTest {
     @Mock lateinit var origin: RequestConnectionPoint
 
     @Mock lateinit var sessionProvider: SessionProvider
+
+    @Mock lateinit var authenticatedUserSession: AuthenticatedUserSession
 
     private lateinit var service: DefaultDeviceCodeProcessService
 
@@ -222,7 +225,8 @@ class DefaultDeviceCodeProcessServiceTest {
         runTest {
             mockSession("user", "u", false)
 
-            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(false)
+            given(authenticatedUserSession.loginCompleted).willReturn(false)
+            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(authenticatedUserSession)
 
             given(request.queryParameters).willReturn(
                 parametersOf(
@@ -242,7 +246,8 @@ class DefaultDeviceCodeProcessServiceTest {
         runTest {
             mockSession("user", "u", false)
 
-            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(true)
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
+            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(authenticatedUserSession)
             given(templateCustomizer.addExtraData(call)).willReturn(mapOf("theme" to "dark"))
 
             given(request.queryParameters).willReturn(
@@ -283,7 +288,8 @@ class DefaultDeviceCodeProcessServiceTest {
         runTest {
             mockSession("user", "u", true)
 
-            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(false)
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
+            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(authenticatedUserSession)
 
             val result = service.verifyDeviceCode("code", call)
 
@@ -297,7 +303,8 @@ class DefaultDeviceCodeProcessServiceTest {
             mockSession("user", "u", true)
 
             given(templateCustomizer.addExtraData(call)).willReturn(emptyMap())
-            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(true)
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
+            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(authenticatedUserSession)
 
             val result = service.verifyDeviceCode(null, call)
 
@@ -311,7 +318,8 @@ class DefaultDeviceCodeProcessServiceTest {
         runTest {
             mockSession("user", "u", true)
 
-            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(true)
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
+            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(authenticatedUserSession)
             given(oauthDeviceCodeService.findByUserCode("code", call)).willReturn(null)
 
             val result = service.verifyDeviceCode("code", call)
@@ -329,7 +337,8 @@ class DefaultDeviceCodeProcessServiceTest {
             val device = mock<OauthDeviceCodeDTO>()
             given(device.deviceCode).willReturn("device")
 
-            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(true)
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
+            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(authenticatedUserSession)
             given(oauthDeviceCodeService.findByUserCode("code", call)).willReturn(device)
 
             val result = service.verifyDeviceCode("code", call)

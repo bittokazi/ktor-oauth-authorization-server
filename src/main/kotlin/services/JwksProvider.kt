@@ -31,16 +31,37 @@ interface JwtTokenCustomizer {
         claims: JWTClaimsSet.Builder,
         call: ApplicationCall? = null,
         params: Map<String, String?>,
+        tokenType: TokenType,
     ): Map<String, Any>
 }
 
-class JwksProvider(
+interface JwksProvider {
+    val rsaJwk: RSAKey
+
+    fun generateJwt(
+        subject: String,
+        audience: String,
+        scopes: List<String> = emptyList(),
+        issuer: String,
+        expiresInSeconds: Long = 3600,
+        userId: String? = null,
+        client: OAuthClientDTO? = null,
+        tokenType: TokenType,
+        user: OAuthUserDTO? = null,
+        call: ApplicationCall,
+        params: Map<String, String?>,
+    ): String
+
+    fun getPublicJwk(): Map<String, Any>
+}
+
+class DefaultJwksProvider(
     @Property("jwk.private-key-path") val privateKeyPath: String? = null,
     @Property("jwk.public-key-path") val publicKeyPath: String? = null,
     @Property("jwk.key-id") val keyId: String?,
     val jwtTokenCustomizer: JwtTokenCustomizer? = null,
-) {
-    val rsaJwk: RSAKey
+) : JwksProvider {
+    override val rsaJwk: RSAKey
 
     init {
         var rsaPrivateKey: RSAPrivateKey? = null
@@ -76,20 +97,20 @@ class JwksProvider(
         return keyGen.generateKeyPair()
     }
 
-    fun getPublicJwk(): Map<String, Any> {
+    override fun getPublicJwk(): Map<String, Any> {
         return rsaJwk.toPublicJWK().toJSONObject()
     }
 
-    fun generateJwt(
+    override fun generateJwt(
         subject: String,
         audience: String,
-        scopes: List<String> = emptyList(),
+        scopes: List<String>,
         issuer: String,
-        expiresInSeconds: Long = 3600,
-        userId: String? = null,
-        client: OAuthClientDTO? = null,
+        expiresInSeconds: Long,
+        userId: String?,
+        client: OAuthClientDTO?,
         tokenType: TokenType,
-        user: OAuthUserDTO? = null,
+        user: OAuthUserDTO?,
         call: ApplicationCall,
         params: Map<String, String?>,
     ): String {
@@ -103,7 +124,7 @@ class JwksProvider(
                 .expirationTime(Date.from(now.plusSeconds(expiresInSeconds)))
                 .claim("scope", scopes.joinToString(" "))
 
-        jwtTokenCustomizer?.customize(userId, client, claims, call, params)?.forEach {
+        jwtTokenCustomizer?.customize(userId, client, claims, call, params, tokenType)?.forEach {
             claims.claim(it.key, it.value)
         }
 
