@@ -3,6 +3,7 @@ package com.bittokazi.ktor.auth.services.consent
 import com.bittokazi.ktor.auth.OauthUserSession
 import com.bittokazi.ktor.auth.domains.rest.Result
 import com.bittokazi.ktor.auth.services.TemplateCustomizer
+import com.bittokazi.ktor.auth.services.providers.AuthenticatedUserSession
 import com.bittokazi.ktor.auth.services.providers.OauthClientService
 import com.bittokazi.ktor.auth.services.providers.OauthConsentService
 import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
@@ -13,7 +14,7 @@ import io.ktor.server.sessions.get
 class DefaultConsentProcessService(
     private val oauthClientService: OauthClientService,
     private val oauthConsentService: OauthConsentService,
-    private val oauthLoginOptionService: OauthLoginOptionService,
+    private val oauthLoginOptionService: OauthLoginOptionService<AuthenticatedUserSession>,
     private val templateCustomizer: TemplateCustomizer?,
     private val sessionProvider: SessionProvider,
 ) : ConsentProcessService {
@@ -28,7 +29,9 @@ class DefaultConsentProcessService(
             return Result.Failure(ConsentFailure.LoginRequired)
         }
 
-        if (!oauthLoginOptionService.isAfterLoginCheckCompleted(session, call)) {
+        val loginSession = oauthLoginOptionService.isAfterLoginCheckCompleted(session, call)
+
+        if (!loginSession.loginCompleted) {
             return Result.Failure(ConsentFailure.BadRequest)
         }
 

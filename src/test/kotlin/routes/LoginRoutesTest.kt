@@ -8,6 +8,7 @@ import com.bittokazi.ktor.auth.routes.loginRoutes
 import com.bittokazi.ktor.auth.services.DefaultTemplateCustomizerFactory
 import com.bittokazi.ktor.auth.services.SessionCustomizer
 import com.bittokazi.ktor.auth.services.TemplateCustomizerFactory
+import com.bittokazi.ktor.auth.services.providers.AuthenticatedUserSession
 import com.bittokazi.ktor.auth.services.providers.DefaultOauthLoginOptionService
 import com.bittokazi.ktor.auth.services.providers.OAuthUserDTO
 import com.bittokazi.ktor.auth.services.providers.OauthAuthorizationCodeService
@@ -52,7 +53,7 @@ class LoginRoutesTest {
     lateinit var oauthUserService: OauthUserService
 
     @Mock
-    lateinit var oauthLoginOptionService: OauthLoginOptionService
+    lateinit var oauthLoginOptionService: OauthLoginOptionService<AuthenticatedUserSession>
 
     @Mock
     lateinit var oauthTokenService: OauthTokenService
@@ -80,7 +81,7 @@ class LoginRoutesTest {
 
                 dependencies {
                     provide { oauthUserService }
-                    provide<OauthLoginOptionService>(DefaultOauthLoginOptionService::class)
+                    provide<OauthLoginOptionService<AuthenticatedUserSession>>(DefaultOauthLoginOptionService::class)
                     provide { oauthTokenService }
                     provide { oauthAuthorizationCodeService }
                     provide { oauthDeviceCodeService }
@@ -116,7 +117,7 @@ class LoginRoutesTest {
 
                 dependencies {
                     provide { oauthUserService }
-                    provide<OauthLoginOptionService>(DefaultOauthLoginOptionService::class)
+                    provide<OauthLoginOptionService<AuthenticatedUserSession>>(DefaultOauthLoginOptionService::class)
                     provide { oauthTokenService }
                     provide { oauthAuthorizationCodeService }
                     provide { oauthDeviceCodeService }
@@ -169,7 +170,7 @@ class LoginRoutesTest {
 
                 dependencies {
                     provide { oauthUserService }
-                    provide<OauthLoginOptionService>(DefaultOauthLoginOptionService::class)
+                    provide<OauthLoginOptionService<AuthenticatedUserSession>>(DefaultOauthLoginOptionService::class)
                     provide { oauthTokenService }
                     provide { oauthAuthorizationCodeService }
                     provide { oauthDeviceCodeService }
@@ -273,7 +274,7 @@ class LoginRoutesTest {
                     provide { oauthAuthorizationCodeService }
                     provide { oauthDeviceCodeService }
                     provide(SessionCustomizer::class)
-                    provide<OauthLoginOptionService>(DefaultOauthLoginOptionService::class)
+                    provide<OauthLoginOptionService<AuthenticatedUserSession>>(DefaultOauthLoginOptionService::class)
                     provide<TemplateCustomizerFactory>(DefaultTemplateCustomizerFactory::class)
                 }
 

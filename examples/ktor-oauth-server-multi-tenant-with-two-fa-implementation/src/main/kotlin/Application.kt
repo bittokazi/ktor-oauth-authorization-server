@@ -2,12 +2,14 @@ package com.bittokazi.example.ktor
 
 import com.bittokazi.example.ktor.databse.MultiTenantDatabaseConfiguration
 import com.bittokazi.example.ktor.interceptors.tenantInterceptorPlugin
+import com.bittokazi.example.ktor.services.AuthenticatedUserSessionImpl
 import com.bittokazi.example.ktor.services.LoginService
 import com.bittokazi.example.ktor.services.TwoFaService
 import com.bittokazi.example.ktor.services.UserService
 import com.bittokazi.example.ktor.tenant.TenantConfiguration
 import com.bittokazi.ktor.auth.configureOauth2AuthorizationServer
 import com.bittokazi.ktor.auth.database.OauthDatabaseConfiguration
+import com.bittokazi.ktor.auth.domains.token.TokenType
 import com.bittokazi.ktor.auth.services.JwksProvider
 import com.bittokazi.ktor.auth.services.JwtTokenCustomizer
 import com.bittokazi.ktor.auth.services.JwtVerifier
@@ -87,7 +89,7 @@ fun Application.module() {
             oauthDatabaseConfiguration
         )
 
-        provide<OauthLoginOptionService> {
+        provide<OauthLoginOptionService<AuthenticatedUserSessionImpl>> {
             loginService
         }
         provide<OauthLogoutActionService> {
@@ -121,6 +123,7 @@ class JwtCustomizerImpl: JwtTokenCustomizer {
         claims: JWTClaimsSet.Builder,
         call: ApplicationCall?,
         params: Map<String, String?>,
+        tokenType: TokenType
     ): Map<String, Any> {
 
         return mapOf<String, Any>(

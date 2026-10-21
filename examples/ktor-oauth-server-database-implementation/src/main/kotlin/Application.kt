@@ -3,11 +3,13 @@ package com.bittokazi.example.ktor
 import com.bittokazi.ktor.auth.configureOauth2AuthorizationServer
 import com.bittokazi.ktor.auth.database.DefaultOauthDatabaseConfiguration
 import com.bittokazi.ktor.auth.database.OauthDatabaseConfiguration
+import com.bittokazi.ktor.auth.domains.token.TokenType
 import com.bittokazi.ktor.auth.services.JwksProvider
 import com.bittokazi.ktor.auth.services.JwtTokenCustomizer
 import com.bittokazi.ktor.auth.services.JwtVerifier
 import com.bittokazi.ktor.auth.services.SessionCustomizer
 import com.bittokazi.ktor.auth.services.TemplateCustomizer
+import com.bittokazi.ktor.auth.services.providers.AuthenticatedUserSession
 import com.bittokazi.ktor.auth.services.providers.DefaultOauthLoginOptionService
 import com.bittokazi.ktor.auth.services.providers.DefaultOauthLogoutActionService
 import com.bittokazi.ktor.auth.services.providers.OAuthClientDTO
@@ -56,7 +58,7 @@ fun Application.module() {
         provide(JwksProvider::class)
         provide(JwtVerifier::class)
         provide(SessionCustomizer::class)
-        provide<OauthLoginOptionService> {
+        provide<OauthLoginOptionService<AuthenticatedUserSession>> {
             DefaultOauthLoginOptionService("/home")
         }
         provide<OauthLogoutActionService>(DefaultOauthLogoutActionService::class)
@@ -83,6 +85,7 @@ class JwtCustomizerImpl: JwtTokenCustomizer {
         claims: JWTClaimsSet.Builder,
         call: ApplicationCall?,
         params: Map<String, String?>,
+        tokenType: TokenType
     ): Map<String, Any> {
         return mapOf(
             "extra-scope" to "test-value",

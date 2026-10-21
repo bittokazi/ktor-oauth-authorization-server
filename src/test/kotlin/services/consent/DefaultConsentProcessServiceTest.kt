@@ -4,6 +4,7 @@ import com.bittokazi.ktor.auth.OauthUserSession
 import com.bittokazi.ktor.auth.domains.rest.Result
 import com.bittokazi.ktor.auth.services.TemplateCustomizer
 import com.bittokazi.ktor.auth.services.consent.DefaultConsentProcessService
+import com.bittokazi.ktor.auth.services.providers.AuthenticatedUserSession
 import com.bittokazi.ktor.auth.services.providers.OAuthClientDTO
 import com.bittokazi.ktor.auth.services.providers.OauthClientService
 import com.bittokazi.ktor.auth.services.providers.OauthConsentService
@@ -32,7 +33,7 @@ class DefaultConsentProcessServiceTest {
 
     @Mock lateinit var oauthConsentService: OauthConsentService
 
-    @Mock lateinit var oauthLoginOptionService: OauthLoginOptionService
+    @Mock lateinit var oauthLoginOptionService: OauthLoginOptionService<AuthenticatedUserSession>
 
     @Mock lateinit var templateCustomizer: TemplateCustomizer
 
@@ -41,6 +42,8 @@ class DefaultConsentProcessServiceTest {
     @Mock lateinit var call: ApplicationCall
 
     @Mock lateinit var request: ApplicationRequest
+
+    @Mock lateinit var authenticatedUserSession: AuthenticatedUserSession
 
     private lateinit var service: DefaultConsentProcessService
 
@@ -98,7 +101,9 @@ class DefaultConsentProcessServiceTest {
         runTest {
             mockSession("user", "u", System.currentTimeMillis() + 10000)
 
-            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(false)
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
+
+            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(authenticatedUserSession)
 
             val result = service.getConsentPage("client", call)
 
@@ -110,7 +115,8 @@ class DefaultConsentProcessServiceTest {
         runTest {
             mockSession("user", "u", System.currentTimeMillis() + 10000)
 
-            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(true)
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
+            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(authenticatedUserSession)
 
             val result = service.getConsentPage(null, call)
 
@@ -122,7 +128,8 @@ class DefaultConsentProcessServiceTest {
         runTest {
             mockSession("user", "u", System.currentTimeMillis() + 10000)
 
-            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(true)
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
+            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(authenticatedUserSession)
             given(oauthClientService.findByClientId("client", call)).willReturn(null)
 
             val result = service.getConsentPage("client", call)
@@ -142,7 +149,8 @@ class DefaultConsentProcessServiceTest {
             given(client.scopes).willReturn(listOf("openid", "profile"))
             given(client.consentRequired).willReturn(true)
 
-            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(true)
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
+            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(authenticatedUserSession)
             given(oauthClientService.findByClientId("client", call)).willReturn(client)
             given(oauthConsentService.getConsent(any(), any(), any())).willReturn(null)
             given(templateCustomizer.addExtraData(call)).willReturn(mapOf("theme" to "dark"))
@@ -158,7 +166,8 @@ class DefaultConsentProcessServiceTest {
             mockSession("user", "u", System.currentTimeMillis() + 10000)
 
             val client = mock<OAuthClientDTO>()
-            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(true)
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
+            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(authenticatedUserSession)
             given(oauthClientService.findByClientId("client", call)).willReturn(client)
 
             val result = service.getConsentPage("client", call)
@@ -172,7 +181,8 @@ class DefaultConsentProcessServiceTest {
             mockSession("user", "u", System.currentTimeMillis() + 10000)
 
             val client = mock<OAuthClientDTO>()
-            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(true)
+            given(authenticatedUserSession.loginCompleted).willReturn(true)
+            given(oauthLoginOptionService.isAfterLoginCheckCompleted(any(), any())).willReturn(authenticatedUserSession)
             given(oauthClientService.findByClientId("client", call)).willReturn(client)
 
             val result = service.getConsentPage("client", call)

@@ -3,6 +3,7 @@ package com.bittokazi.ktor.auth.services.authorization
 import com.bittokazi.ktor.auth.OauthUserSession
 import com.bittokazi.ktor.auth.domains.rest.Result
 import com.bittokazi.ktor.auth.services.SessionCustomizer
+import com.bittokazi.ktor.auth.services.providers.AuthenticatedUserSession
 import com.bittokazi.ktor.auth.services.providers.OauthAuthorizationCodeService
 import com.bittokazi.ktor.auth.services.providers.OauthClientService
 import com.bittokazi.ktor.auth.services.providers.OauthConsentService
@@ -27,7 +28,7 @@ class DefaultOauthAuthorizationProcessService(
     private val oauthAuthorizationCodeService: OauthAuthorizationCodeService,
     private val sessionCustomizer: SessionCustomizer,
     private val oauthConsentService: OauthConsentService,
-    private val oauthLoginOptionService: OauthLoginOptionService,
+    private val oauthLoginOptionService: OauthLoginOptionService<AuthenticatedUserSession>,
     private val sessionProvider: SessionProvider,
 ) : OauthAuthorizationProcessService {
     override suspend fun authorize(
@@ -140,7 +141,8 @@ class DefaultOauthAuthorizationProcessService(
         }
 
         // Check if user completed post-login checks
-        if (!oauthLoginOptionService.isAfterLoginCheckCompleted(session, call)) {
+        val loginResult = oauthLoginOptionService.isAfterLoginCheckCompleted(session, call)
+        if (!loginResult.loginCompleted) {
             return Result.Failure(
                 mapOf(
                     "error" to "Login checks not completed",

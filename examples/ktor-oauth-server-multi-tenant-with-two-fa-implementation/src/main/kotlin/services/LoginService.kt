@@ -5,6 +5,7 @@ import com.bittokazi.example.ktor.models.UserData
 import com.bittokazi.example.ktor.models.Users
 import com.bittokazi.ktor.auth.OauthUserSession
 import com.bittokazi.ktor.auth.database.OauthDatabaseConfiguration
+import com.bittokazi.ktor.auth.services.providers.AuthenticatedUserSession
 import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
 import com.bittokazi.ktor.auth.services.providers.OauthLogoutActionService
 import io.ktor.server.application.ApplicationCall
@@ -15,15 +16,20 @@ import io.ktor.server.sessions.set
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.selectAll
 
+data class AuthenticatedUserSessionImpl(
+    override val loginCompleted: Boolean,
+    val action: suspend () -> Unit
+) : AuthenticatedUserSession
+
 class LoginService(
     override val fallbackAfterLoginRedirectUrl: String,
     val oauthDatabaseConfiguration: OauthDatabaseConfiguration
-) : OauthLoginOptionService, OauthLogoutActionService {
+) : OauthLoginOptionService<AuthenticatedUserSessionImpl>, OauthLogoutActionService {
 
     override suspend fun isAfterLoginCheckCompleted(
         oauthUserSession: OauthUserSession,
         call: ApplicationCall
-    ): Boolean {
+    ): AuthenticatedUserSessionImpl {
         val session = call.sessions.get<UserTwoFaSession>()
 
         return when (session) {
@@ -42,27 +48,40 @@ class LoginService(
 
                 when (user?.twoFaEnabled) {
                     true -> {
-                        call.respondRedirect("/otp-check")
-                        return false
+                        AuthenticatedUserSessionImpl(
+                            false
+                        ) {
+                            call.respondRedirect("/otp-check")
+                        }
                     }
                     else -> {
-                        val session = UserTwoFaSession(user?.id.toString(), user!!.email)
-                        call.sessions.set(session)
-                        return true
+                        AuthenticatedUserSessionImpl(true) {
+                            val session = UserTwoFaSession(user?.id.toString(), user!!.email)
+                            call.sessions.set(session)
+                        }
                     }
                 }
             }
             else -> {
                 when (session.userId == oauthUserSession.userId) {
-                    true -> true
+                    true -> AuthenticatedUserSessionImpl(true) {  }
                     else -> {
-                        call.sessions.clear("USER_TWO_FA_SESSION")
-                        call.respondRedirect("/otp-check")
-                        return false
+                        AuthenticatedUserSessionImpl(false) {
+                            call.sessions.clear("USER_TWO_FA_SESSION")
+                            call.respondRedirect("/otp-check")
+                        }
                     }
                 }
             }
         }
+    }
+
+    override suspend fun onGoingLogin(
+        oauthUserSession: OauthUserSession,
+        payload: AuthenticatedUserSessionImpl,
+        call: ApplicationCall
+    ) {
+        payload.action()
     }
 
     override suspend fun onSuccessfulLogin(

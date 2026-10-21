@@ -5,6 +5,7 @@ import com.bittokazi.ktor.auth.services.TemplateCustomizerFactory
 import com.bittokazi.ktor.auth.services.consent.ConsentFailure
 import com.bittokazi.ktor.auth.services.consent.ConsentProcessService
 import com.bittokazi.ktor.auth.services.consent.TemplateContent
+import com.bittokazi.ktor.auth.services.providers.AuthenticatedUserSession
 import com.bittokazi.ktor.auth.services.providers.OauthLoginOptionService
 import com.bittokazi.ktor.auth.utils.respondMustache
 import io.ktor.http.HttpStatusCode
@@ -19,7 +20,7 @@ import io.ktor.server.routing.routing
 
 fun Application.consentRoute() {
     val consentProcessService: ConsentProcessService by dependencies
-    val oauthLoginOptionService: OauthLoginOptionService by dependencies
+    val oauthLoginOptionService: OauthLoginOptionService<AuthenticatedUserSession> by dependencies
     val templateCustomizerFactory: TemplateCustomizerFactory by dependencies
 
     routing {
