@@ -77,7 +77,7 @@ Start by adding in `build.gradle.kts`:
 // =========================
 // ⭐ OAuth / OpenID Server Library
 // =========================
-implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.4.1")
+implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.4.2")
 ```
 
 Also make sure you have the following libraries as well. Below is a complete example of complete `build.gradle.kts`
@@ -127,7 +127,7 @@ implementation("com.nimbusds:nimbus-jose-jwt:10.6")
 // =========================
 // ⭐ OAuth / OpenID Server Library
 // =========================
-implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.4.1")
+implementation("com.bittokazi.sonartype:ktor-oauth-authorization-server:1.4.2")
 ```
 
 Replace `<...>` with concrete versions used in your project.
@@ -450,13 +450,13 @@ These providers manage signing keys, token customization, and JWT verification.
 | Provider | Implementation | Purpose |
 |----------|----------------|---------|
 | `JwtTokenCustomizer` | `JwtCustomizerImpl` | Allows adding custom claims before tokens are issued. |
-| `JwksProvider` | `JwksProvider` | Exposes JWKS for public key discovery by clients. |
+| `JwksProvider` | `DefaultJwksProvider` | Exposes JWKS for public key discovery by clients. |
 | `JwtVerifier` | `JwtVerifier` | Verifies signed JWT access tokens. |
 
 ```kotlin
 dependencies {
     provide<JwtTokenCustomizer>(JwtCustomizerImpl::class)
-    provide(JwksProvider::class)
+    provide<JwksProvider>(DefaultJwksProvider::class)
     provide(JwtVerifier::class)
 }
 ```
@@ -478,9 +478,9 @@ These allow integration with your session and application login/logout flow.
 dependencies {
     provide(SessionCustomizer::class)
 
-    provide<OauthLoginOptionService> {
-        DefaultOauthLoginOptionService("/home")
-    }
+  provide<OauthLoginOptionService<AuthenticatedUserSession>> {
+    DefaultOauthLoginOptionService("/home")
+  }
 
     provide<OauthLogoutActionService> {
         DefaultOauthLogoutActionService("/home")
@@ -603,10 +603,10 @@ fun Application.module() {
         provide<OauthConsentService>(OauthConsentServiceDatabaseProvider::class)
         provide<OauthDeviceCodeService>(OauthDeviceCodeServiceDatabaseProvider::class)
         provide<JwtTokenCustomizer>(JwtCustomizerImpl::class)
-        provide(JwksProvider::class)
+        provide<JwksProvider>(DefaultJwksProvider::class)
         provide(JwtVerifier::class)
         provide(SessionCustomizer::class)
-        provide<OauthLoginOptionService> {
+        provide<OauthLoginOptionService<AuthenticatedUserSessionImpl>> {
             DefaultOauthLoginOptionService("/home")
         }
       provide<OauthLogoutActionService>(DefaultOauthLogoutActionService::class)
